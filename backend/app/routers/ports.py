@@ -32,9 +32,8 @@ def port_report(
     """The destination ports one source address tried, from the firewall's packet log.
 
     `ports` lists the busiest ports first; `connections` lists single packets in
-    time order, for plotting when each port was tried. Both are capped;
-    `distinct_ports` and `total` are not, and `truncated` says whether
-    `connections` was cut.
+    time order, for plotting when each port was tried. Both are capped; the
+    totals are not, and `truncated` says whether `connections` was cut.
     """
     selected = [Event.src_ip == ip, Event.dst_port.is_not(None)]
     if start is not None:
@@ -42,11 +41,13 @@ def port_report(
     if end is not None:
         selected.append(Event.ts < as_utc(end))
 
-    total, distinct = session.execute(
-        select(func.count(), func.count(func.distinct(Event.dst_port))).where(*selected)
+    blocked = func.coalesce(func.sum(case((Event.action == Action.CONN_BLOCK, 1), else_=0)), 0)
+    allowed = func.coalesce(func.sum(case((Event.action == Action.CONN_ALLOW, 1), else_=0)), 0)
+    total, total_blocked, total_allowed, distinct = session.execute(
+        select(func.count(), blocked, allowed, func.count(func.distinct(Event.dst_port))).where(
+            *selected
+        )
     ).one()
-    blocked = func.sum(case((Event.action == Action.CONN_BLOCK, 1), else_=0))
-    allowed = func.sum(case((Event.action == Action.CONN_ALLOW, 1), else_=0))
     per_port = session.execute(
         select(
             Event.dst_port, func.count(), blocked, allowed, func.min(Event.ts), func.max(Event.ts)
@@ -66,6 +67,8 @@ def port_report(
     return PortReport(
         ip=ip,
         total=total,
+        blocked=total_blocked,
+        allowed=total_allowed,
         distinct_ports=distinct,
         ports=[
             PortStats(

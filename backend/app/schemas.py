@@ -159,6 +159,8 @@ class PortConnection(BaseModel):
 class PortReport(BaseModel):
     ip: str
     total: int = Field(description="Packets from this address that name a destination port.")
+    blocked: int
+    allowed: int
     distinct_ports: int
     ports: list[PortStats] = Field(description="The busiest ports first.")
     connections: list[PortConnection] = Field(description="Single packets, oldest first.")

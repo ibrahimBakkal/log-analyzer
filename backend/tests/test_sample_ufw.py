@@ -153,7 +153,8 @@ def test_port_report_of_the_scanner(loaded):
     )
     assert len(body["ports"]) == len(body["connections"]) == 120 and not body["truncated"]
     assert all(port["count"] == 1 for port in body["ports"])
-    assert sum(port["allowed"] for port in body["ports"]) == 3  # 22, 80 and 443 are open
+    assert (body["allowed"], body["blocked"]) == (3, 117)  # 22, 80 and 443 are open
+    assert sum(port["allowed"] for port in body["ports"]) == 3
     assert sum(port["blocked"] for port in body["ports"]) == 117
     stamps = [connection["ts"] for connection in body["connections"]]
     assert stamps == sorted(stamps)
@@ -182,12 +183,8 @@ def test_port_report_can_be_limited_to_a_time_range(loaded):
 
 def test_port_report_of_an_unknown_address_is_empty(loaded):
     body = loaded.get("/ports", params={"ip": "192.0.2.250"}).json()
-    assert (body["total"], body["distinct_ports"], body["ports"], body["connections"]) == (
-        0,
-        0,
-        [],
-        [],
-    )
+    assert (body["total"], body["blocked"], body["allowed"], body["distinct_ports"]) == (0, 0, 0, 0)
+    assert (body["ports"], body["connections"], body["truncated"]) == ([], [], False)
 
 
 def test_port_report_needs_an_address(loaded):
