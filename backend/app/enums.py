@@ -14,6 +14,15 @@ class Action(StrEnum):
     SUDO_DENIED = "sudo_denied"  # sudo refused to run a command
 
 
+class Severity(StrEnum):
+    """How urgent an alert is. Set per rule."""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
 class Level(StrEnum):
     """How noteworthy a single line is on its own (rules judge patterns of lines)."""
 

@@ -1,0 +1,15 @@
+# sudo ile çalıştırılan (ya da çalıştırılmak istenen) komutlarda parola ve
+# yetki dosyalarının adı geçiyor. Reddedilen denemeler de sayılır.
+id: KW-001
+name: sudo komutunda hassas dosya
+type: keyword
+severity: medium
+match:
+  action: [sudo_exec, sudo_denied]
+keywords:
+  - /etc/shadow
+  - /etc/sudoers
+  - authorized_keys
+group_by: user
+cooldown_seconds: 300
+summary: "{key} kullanıcısının sudo komutlarında hassas dosya ({count} satır)"

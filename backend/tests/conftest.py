@@ -4,11 +4,11 @@ from collections.abc import Iterator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app.db import Base, get_session
+from app.db import Base, get_session, make_engine
 from app.main import app
 
 
@@ -16,9 +16,7 @@ from app.main import app
 def engine() -> Iterator[Engine]:
     """An empty in-memory database with the current schema."""
     # StaticPool keeps the single in-memory database alive across threads.
-    engine = create_engine(
-        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
-    )
+    engine = make_engine("sqlite://", poolclass=StaticPool)
     Base.metadata.create_all(engine)
     yield engine
     engine.dispose()

@@ -3,8 +3,9 @@
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from functools import lru_cache
+from typing import Any
 
-from sqlalchemy import DateTime, Engine, MetaData, create_engine
+from sqlalchemy import DateTime, Engine, MetaData, create_engine, event
 from sqlalchemy.engine import Dialect
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.types import TypeDecorator
@@ -47,11 +48,22 @@ class UTCDateTime(TypeDecorator[datetime]):
         return None if value is None else value.replace(tzinfo=UTC)
 
 
-def make_engine(url: str) -> Engine:
+def make_engine(url: str, **options: Any) -> Engine:
+    if not url.startswith("sqlite"):
+        return create_engine(url, **options)
+
     # FastAPI runs request handlers in worker threads; SQLite connections refuse
     # to be used outside the thread that created them unless told otherwise.
-    connect_args = {"check_same_thread": False} if url.startswith("sqlite") else {}
-    return create_engine(url, connect_args=connect_args)
+    engine = create_engine(url, connect_args={"check_same_thread": False}, **options)
+
+    @event.listens_for(engine, "connect")
+    def enforce_foreign_keys(dbapi_connection: Any, _: Any) -> None:
+        # SQLite ignores foreign keys (and ON DELETE CASCADE) unless asked on every connection.
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+    return engine
 
 
 @lru_cache

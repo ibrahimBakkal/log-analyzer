@@ -1,0 +1,14 @@
+# Aynı adresten kısa sürede çok sayıda başarısız SSH girişi: kaba kuvvet ya da
+# kullanıcı adı taraması. Parolasını bir iki kez yanlış yazan kullanıcıyı ve
+# dakikada tek deneme yapan yavaş saldırganı yakalamaz.
+id: SSH-001
+name: SSH kaba kuvvet denemesi
+type: threshold
+severity: high
+match:
+  action: auth_fail
+group_by: src_ip
+threshold: 5
+window_seconds: 60
+cooldown_seconds: 300
+summary: "{key} adresinden {seconds} sn içinde {count} başarısız giriş"

@@ -14,6 +14,7 @@ dependencies = [
     "fastapi>=0.142",
     "pydantic>=2.7",
     "python-multipart>=0.0.9", # POST /ingest dosya yüklemesi için
+    "pyyaml>=6.0", # kural dosyaları
     "sqlalchemy>=2.0",
     "tzdata; sys_platform == 'win32'", # Windows'ta saat dilimi veritabanı yok
     "uvicorn[standard]>=0.30",
