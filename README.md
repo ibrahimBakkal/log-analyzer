@@ -57,6 +57,8 @@ flowchart LR
 
 ```text
 log-analyzer/
+├── .github/workflows/
+│   └── ci.yml            # her push'ta lint ve testler
 ├── backend/
 │   ├── app/              # FastAPI uygulaması (Aşama 1'den itibaren dolacak)
 │   ├── tests/
@@ -87,6 +89,8 @@ ruff check .             # lint
 ruff format --check .    # biçim
 pytest backend           # testler
 ```
+
+Aynı kontroller her push ve pull request'te GitHub Actions ile de çalışır (`.github/workflows/ci.yml`).
 
 ## Örnek veri
 

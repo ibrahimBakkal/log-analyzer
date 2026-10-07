@@ -20,7 +20,8 @@ dependencies = [
 dev = [
     "httpx>=0.27", # FastAPI TestClient bunu kullanır
     "pytest>=8.0",
-    "ruff>=0.6",
+    # Yeni bir ruff serisi biçim kurallarını değiştirip CI'ı kendiliğinden kırmasın
+    "ruff>=0.16,<0.17",
 ]
 
 [tool.hatch.build.targets.wheel]
