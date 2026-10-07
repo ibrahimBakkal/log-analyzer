@@ -12,6 +12,8 @@ jobs:
   backend:
     name: "Backend: lint ve testler"
     runs-on: ubuntu-latest
+    outputs:
+      coverage: ${{ steps.coverage.outputs.percent }}
     steps:
       - uses: actions/checkout@v7
 
@@ -30,8 +32,12 @@ jobs:
       - name: Biçim (ruff format)
         run: ruff format --check .
 
-      - name: Testler (pytest)
-        run: pytest backend
+      - name: Testler ve kapsam (pytest)
+        run: pytest backend --cov=app --cov-report=term-missing:skip-covered --cov-report=json:coverage.json
+
+      - name: Kapsam yüzdesi
+        id: coverage
+        run: python3 -c "import json; print('percent=' + json.load(open('coverage.json'))['totals']['percent_covered_display'])" >> "$GITHUB_OUTPUT"
 
   frontend:
     name: "Frontend: tip denetimi, testler, derleme"
@@ -88,3 +94,40 @@ jobs:
       - name: Kapat
         if: always()
         run: docker compose down --volumes
+
+  # README'deki kapsam rozeti bu dosyayı okur (shields.io "endpoint" rozeti).
+  # Dosya, kodla karışmasın diye ayrı bir dalda durur: badges.
+  badge:
+    name: "Kapsam rozetini güncelle"
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [backend, frontend, docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: badges dalına yaz
+        env:
+          PERCENT: ${{ needs.backend.outputs.coverage }}
+        run: |
+          case "$PERCENT" in ''|*[!0-9]*) echo "kapsam yüzdesi okunamadı: '$PERCENT'"; exit 1 ;; esac
+          if [ "$PERCENT" -ge 90 ]; then color=brightgreen; elif [ "$PERCENT" -ge 75 ]; then color=yellow; else color=orange; fi
+          badge="{\"schemaVersion\": 1, \"label\": \"test kapsamı (backend)\", \"message\": \"${PERCENT}%\", \"color\": \"${color}\"}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch origin badges; then
+            git switch --quiet --detach FETCH_HEAD
+            git switch --quiet -c badges
+          else
+            git switch --quiet --orphan badges
+          fi
+          echo "$badge" > coverage.json
+          git add coverage.json
+          if git diff --cached --quiet; then
+            echo "Kapsam değişmedi: ${PERCENT}%"
+          else
+            git commit --quiet -m "Kapsam: ${PERCENT}%"
+            git push origin badges
+          fi

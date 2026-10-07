@@ -24,6 +24,7 @@ dependencies = [
 dev = [
     "httpx2>=2.0", # FastAPI TestClient bunu kullanır
     "pytest>=8.0",
+    "pytest-cov>=5.0", # CI'daki kapsam ölçümü: pytest backend --cov=app
     # Yeni bir ruff serisi biçim kurallarını değiştirip CI'ı kendiliğinden kırmasın
     "ruff>=0.16,<0.17",
 ]

@@ -1,5 +1,8 @@
 # log-analyzer
 
+[![CI](https://github.com/ibrahimBakkal/log-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/ibrahimBakkal/log-analyzer/actions/workflows/ci.yml)
+[![Test kapsamı](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/ibrahimBakkal/log-analyzer/badges/coverage.json)](https://github.com/ibrahimBakkal/log-analyzer/actions/workflows/ci.yml)
+
 Sunucu loglarını (SSH `auth.log` ve güvenlik duvarı `ufw.log`) yapılandırılmış olaylara çevirip zaman çizelgesinde gösteren ve kural tabanlı uyarılar üreten bir log analiz aracı. Arka uç Python/FastAPI, arayüz React.
 
 > **Durum:** Aşama 5 tamam — loglar yüklenerek ya da dosya canlı izlenerek veritabanına alınıyor; eşik, sıralı olay ve port taraması kuralları uyarı üretiyor; web arayüzü zaman çizelgesini, log satırlarını, uyarıları ve bir adresin denediği portları birlikte gösteriyor ve yeni satırlar geldikçe kendiliğinden yenileniyor. Sıradaki adımlar için [Yol haritası](#yol-haritası) bölümüne bak.
@@ -153,6 +156,7 @@ Kontroller:
 ruff check .             # lint
 ruff format --check .    # biçim
 pytest backend           # testler
+pytest backend --cov=app # testler ve hangi satırların denenmediği
 
 cd frontend
 npm run typecheck        # TypeScript tip denetimi
