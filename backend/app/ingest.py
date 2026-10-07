@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session
 from app.models import Event, Source
 from app.parsers import BaseParser, ParsedLine
 
-DEFAULT_BATCH_SIZE = 1000
+DEFAULT_BATCH_SIZE = 5000  # rows per transaction: fewer, larger commits load a big file faster
 MAX_LINE_LENGTH = 8192  # rsyslog's default message size limit; longer lines are cut
 MAX_UNDATED_LINES = 1000  # how long to wait for a first timestamp before giving up
 
