@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Highlight, Severity } from "../api";
-import { splitByHighlights, topSeverity } from "./highlight";
+import { condense, splitByHighlights, topSeverity } from "./highlight";
 
 const MESSAGE = "Failed password for root from 203.0.113.45 port 52744 ssh2";
 
@@ -129,5 +129,60 @@ describe("topSeverity", () => {
     expect(topSeverity([mark(0, 1, "medium"), mark(0, 1, "critical"), mark(0, 1, "low")])).toBe("critical");
     expect(topSeverity([mark(0, 1, "low"), mark(0, 1, "high")])).toBe("high");
     expect(topSeverity([mark(null, null, "low")])).toBe("low");
+  });
+});
+
+describe("condense", () => {
+  const PACKET =
+    "[UFW BLOCK] IN=eth0 OUT= MAC=52:54:00:12:34:56:52:54:00:65:43:21:08:00 SRC=198.51.100.150 DST=192.0.2.5 " +
+    "LEN=44 TOS=0x00 PREC=0x00 TTL=241 ID=54321 PROTO=TCP SPT=43210 DPT=23 WINDOW=1024 RES=0x00 SYN URGP=0";
+  const source = PACKET.indexOf("198.51.100.150");
+  const port = PACKET.indexOf("DPT=23") + 4;
+
+  /** The text a reader sees, with the highlighted parts in [brackets]. */
+  function shown(message: string, highlights: Highlight[]): string {
+    return condense(splitByHighlights(message, highlights))
+      .map((segment) => (segment.marks.length ? `[${segment.text}]` : segment.text))
+      .join("");
+  }
+
+  it("brings the highlights of a long line close together", () => {
+    const marks = [mark(source, source + 14), mark(port, port + 2)];
+    expect(shown(PACKET, marks)).toBe("[UFW BLOCK] … SRC=[198.51.100.150] … DPT=[23] WINDOW=1024 RES=0x00 SYN URGP=0");
+  });
+
+  it("leaves short stretches of text as they are", () => {
+    expect(shown(MESSAGE, [mark(30, 42)])).toBe("Failed password for root from [203.0.113.45] port 52744 ssh2");
+  });
+
+  it("keeps the first words and the word leading up to the highlight", () => {
+    const message = "Failed password for invalid user administrator from 203.0.113.7 port 40022 ssh2";
+    const start = message.indexOf("203.0.113.7");
+    expect(shown(message, [mark(start, start + 11)])).toBe("Failed password … from [203.0.113.7] port 40022 ssh2");
+  });
+
+  it("leaves a line without highlights alone, however long", () => {
+    expect(condense(splitByHighlights(PACKET, []))).toEqual([{ text: PACKET, marks: [] }]);
+    expect(shown(PACKET, [mark(null, null)])).toBe(PACKET);
+  });
+
+  it("never shortens the text after the last highlight", () => {
+    const tail = " and then a very long explanation that goes on and on without end";
+    expect(shown(`key ${tail}`, [mark(0, 3)])).toBe(`[key] ${tail}`);
+  });
+
+  it("does not touch the highlighted text itself", () => {
+    const long = "x".repeat(80);
+    expect(shown(long, [mark(0, 80)])).toBe(`[${long}]`);
+  });
+
+  it("copes with a first word too long to keep and with a last word too long to keep whole", () => {
+    const message = `${"a".repeat(40)} ${"b".repeat(40)}=VALUE`;
+    expect(shown(message, [mark(82, 87)])).toBe(`… ${"b".repeat(11)}=[VALUE]`);
+  });
+
+  it("counts code points, not UTF-16 units", () => {
+    const message = `${"😀".repeat(20)} from 203.0.113.7`;
+    expect(shown(message, [mark(26, 37)])).toBe(`${"😀".repeat(20)} from [203.0.113.7]`);
   });
 });
