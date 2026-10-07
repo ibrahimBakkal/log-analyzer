@@ -2,7 +2,7 @@
 
 Sunucu loglarını (ilk hedef: SSH `auth.log`) yapılandırılmış olaylara çevirip zaman çizelgesinde gösteren ve kural tabanlı uyarılar üreten bir log analiz aracı. Arka uç Python/FastAPI, arayüz React.
 
-> **Durum:** Hazırlık aşaması tamam — depo iskeleti ve örnek veri hazır. Parser, API ve arayüz henüz yazılmadı; plan için [Yol haritası](#yol-haritası) bölümüne bak.
+> **Durum:** Aşama 1 tamam — loglar ayrıştırılıp veritabanına yükleniyor ve API üzerinden sorgulanabiliyor. Kurallar ve arayüz henüz yazılmadı; plan için [Yol haritası](#yol-haritası) bölümüne bak.
 
 ## Amaç
 
@@ -60,8 +60,15 @@ log-analyzer/
 ├── .github/workflows/
 │   └── ci.yml            # her push'ta lint ve testler
 ├── backend/
-│   ├── app/              # FastAPI uygulaması (Aşama 1'den itibaren dolacak)
+│   ├── app/
+│   │   ├── parsers/      # syslog başlığı, auth.log kalıpları, parser kayıt defteri
+│   │   ├── routers/      # /health, /ingest, /events
+│   │   ├── ingest.py     # satır satır okuma, toplu yazım
+│   │   ├── models.py     # Event tablosu
+│   │   └── main.py       # FastAPI uygulaması
+│   ├── migrations/       # Alembic migration'ları
 │   ├── tests/
+│   ├── alembic.ini
 │   └── pyproject.toml    # bağımlılıklar ve pytest ayarı
 ├── frontend/             # React arayüzü (Aşama 3'te kurulacak)
 ├── samples/
@@ -91,6 +98,40 @@ pytest backend           # testler
 ```
 
 Aynı kontroller her push ve pull request'te GitHub Actions ile de çalışır (`.github/workflows/ci.yml`).
+
+## Çalıştırma
+
+```bash
+cd backend
+alembic upgrade head             # veritabanını oluşturur: backend/log_analyzer.db
+uvicorn app.main:app --reload    # http://127.0.0.1:8000
+```
+
+Başka bir terminalde, depo kökünden örnek logu yükleyip sorgula:
+
+```bash
+curl -F "file=@samples/auth.log" -F "year=2026" http://127.0.0.1:8000/ingest
+# {"source_file":"auth.log","lines":1057,"parsed":605,"unparsed":452,"duplicates":0,"conflicts":0}
+
+curl "http://127.0.0.1:8000/events?action=auth_ok&limit=5"
+curl "http://127.0.0.1:8000/events?ip=203.0.113.99&start=2026-09-10T02:30:00Z"
+```
+
+Etkileşimli API dokümanı `http://127.0.0.1:8000/docs` adresindedir. Veritabanı adresi `LOG_ANALYZER_DATABASE_URL` ortam değişkeniyle değiştirilebilir.
+
+## API
+
+| Uç nokta | Ne yapar |
+|---|---|
+| `GET /health` | Veritabanı hazırsa `{"status": "ok"}` döner |
+| `POST /ingest` | Log dosyası yükler (multipart form). Alanlar: `file`, `parser` (varsayılan `auth`), `year`, `tz`, `source` |
+| `GET /events` | Olayları zaman sırasıyla listeler. Filtreler: `start`, `end`, `host`, `service`, `ip`, `level`, `action`, `parsed`. Sayfalama: `limit` (1–500), `cursor` |
+
+- **Zaman:** Syslog satırlarında yıl ve saat dilimi yoktur. `year` dosyanın ilk satırının yılıdır; verilmezse o satırı geleceğe düşürmeyen en yakın yıl kullanılır ve Aralık'tan Ocak'a geçişte yıl kendiliğinden ilerler. `tz` logu yazan makinenin saat dilimidir (ör. `Europe/Istanbul`, varsayılan `UTC`). Tüm zamanlar UTC olarak saklanır ve döner.
+- **Her satır saklanır:** Tanınan satırlar alanlarıyla birlikte (`action`: `auth_fail`, `auth_ok`, `invalid_user`, `disconnect`, `sudo_exec`, `sudo_denied`), tanınmayanlar `parsed=false` olarak. Yükleme yanıtında `lines = parsed + unparsed + duplicates + conflicts`.
+- **Tekrar yükleme:** Satırlar dosya adı ve satır numarasıyla tanınır. Aynı dosya tekrar yüklenirse kopya oluşmaz (`duplicates`); büyümüş bir dosyada yalnızca yeni satırlar eklenir. Aynı satır numarasında farklı bir metin varsa (`conflicts`) saklanan satıra dokunulmaz: rotasyon sonrası aynı adı taşıyan başka bir dosyayı `source` alanıyla farklı bir adla yükle.
+- **Sayfalama:** Yanıttaki `next_cursor` değeri sonraki isteğe `cursor` olarak verilir; son sayfada `null` olur.
+- **Zaman filtreleri:** `start` dahil, `end` hariçtir. Ofsetsiz zamanlar UTC sayılır. URL'de `+03:00` yazarken `+` işaretini `%2B` olarak kodla.
 
 ## Örnek veri
 
@@ -126,8 +167,8 @@ Gerçek loglar yanlışlıkla depoya girmesin diye `.gitignore` tüm `*.log` dos
 | Aşama | Kapsam | Durum |
 |---|---|---|
 | Hazırlık | Depo iskeleti, bağımlılıklar, örnek veri | ✅ |
-| 1 | Parser, veritabanı, `/ingest` ve `/events` | Sırada |
-| 2 | Anahtar kelime ve eşik kuralları, `/alerts` | |
+| 1 | Parser, veritabanı, `/ingest` ve `/events` | ✅ |
+| 2 | Anahtar kelime ve eşik kuralları, `/alerts` | Sırada |
 | 3 | React arayüzü: zaman çizelgesi, log tablosu, uyarı paneli | |
 | 4 | Davranış kuralları: sıralı olay, port taraması, nadir port | |
 | 5 | İkinci kaynak (UFW) ve canlı takip | |
