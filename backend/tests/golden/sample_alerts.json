@@ -1,0 +1,52 @@
+[
+  {
+    "rule_id": "SSH-001",
+    "severity": "high",
+    "group_by": "src_ip",
+    "group_key": "198.51.100.23",
+    "first_seen": "2026-09-09T01:47:51Z",
+    "last_seen": "2026-09-09T01:49:42Z",
+    "count": 30,
+    "summary": "198.51.100.23 adresinden 111 sn içinde 30 başarısız giriş"
+  },
+  {
+    "rule_id": "SSH-001",
+    "severity": "high",
+    "group_by": "src_ip",
+    "group_key": "203.0.113.45",
+    "first_seen": "2026-09-09T03:12:39Z",
+    "last_seen": "2026-09-09T03:14:04Z",
+    "count": 71,
+    "summary": "203.0.113.45 adresinden 85 sn içinde 71 başarısız giriş"
+  },
+  {
+    "rule_id": "SSH-001",
+    "severity": "high",
+    "group_by": "src_ip",
+    "group_key": "203.0.113.99",
+    "first_seen": "2026-09-10T02:31:40Z",
+    "last_seen": "2026-09-10T02:32:33Z",
+    "count": 24,
+    "summary": "203.0.113.99 adresinden 53 sn içinde 24 başarısız giriş"
+  },
+  {
+    "rule_id": "KW-001",
+    "severity": "medium",
+    "group_by": "user",
+    "group_key": "bob",
+    "first_seen": "2026-09-10T02:34:08Z",
+    "last_seen": "2026-09-10T02:34:08Z",
+    "count": 1,
+    "summary": "bob kullanıcısının sudo komutlarında hassas dosya (1 satır)"
+  },
+  {
+    "rule_id": "SSH-001",
+    "severity": "high",
+    "group_by": "src_ip",
+    "group_key": "203.0.113.45",
+    "first_seen": "2026-09-10T15:40:42Z",
+    "last_seen": "2026-09-10T15:41:24Z",
+    "count": 32,
+    "summary": "203.0.113.45 adresinden 42 sn içinde 32 başarısız giriş"
+  }
+]

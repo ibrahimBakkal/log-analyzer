@@ -1,14 +1,20 @@
 """POST /ingest: upload a log file."""
 
+from dataclasses import asdict
 from pathlib import PurePosixPath
 from typing import Annotated
 from zoneinfo import ZoneInfoNotFoundError
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from sqlalchemy import func, select
 
-from app.ingest import IngestResult, NoTimestampsError, ingest_lines, read_lines
+from app.ingest import NoTimestampsError, ingest_lines, read_lines
+from app.models import Alert
 from app.parsers import UnknownParserError, create_parser
 from app.routers import SessionDep
+from app.routers.rules import RulesDep
+from app.rules import evaluate
+from app.schemas import IngestReport
 
 router = APIRouter(tags=["ingest"])
 
@@ -22,6 +28,7 @@ def _source_name(name: str | None) -> str:
 @router.post("/ingest")
 def ingest_file(
     session: SessionDep,
+    rules: RulesDep,
     file: Annotated[UploadFile, File(description="The log file to load.")],
     parser: Annotated[str, Form(description="Format of the file.")] = "auth",
     year: Annotated[
@@ -41,8 +48,8 @@ def ingest_file(
         str | None,
         Form(description="Name to store the lines under. Default: the uploaded file's name."),
     ] = None,
-) -> IngestResult:
-    """Parse a log file and store every line as an event.
+) -> IngestReport:
+    """Parse a log file, store every line as an event and re-run the rules.
 
     Lines are identified by file name and line number, so uploading the same
     file again adds nothing (`duplicates`), and uploading a file that has grown
@@ -58,7 +65,7 @@ def ingest_file(
         raise HTTPException(status_code=422, detail=f"unknown time zone {tz!r}") from None
 
     try:
-        return ingest_lines(
+        result = ingest_lines(
             session,
             read_lines(file.file),
             source_file=_source_name(source or file.filename),
@@ -66,3 +73,8 @@ def ingest_file(
         )
     except NoTimestampsError as error:
         raise HTTPException(status_code=422, detail=str(error)) from None
+
+    if result.parsed or result.unparsed:  # new events: the alerts may have changed
+        evaluate(session, rules.enabled)
+    alerts = session.scalar(select(func.count()).select_from(Alert))
+    return IngestReport(**asdict(result), alerts=alerts or 0)

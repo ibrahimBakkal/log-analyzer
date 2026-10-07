@@ -127,7 +127,7 @@ def test_events_have_the_documented_fields(loaded):
 
     assert set(event) == {
         "id", "ts", "host", "service", "level", "src_ip", "dst_ip", "src_port", "dst_port",
-        "user", "action", "message", "raw", "source_file", "line_no", "parsed",
+        "user", "action", "message", "raw", "source_file", "line_no", "parsed", "highlights",
     }  # fmt: skip
     assert event["raw"] == LINES[event["line_no"] - 1]
     assert event["ts"].endswith("Z")

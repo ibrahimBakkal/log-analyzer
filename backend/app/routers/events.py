@@ -8,8 +8,9 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import and_, or_, select
 
 from app.enums import Action, Level
-from app.models import Event
+from app.models import Alert, AlertEvent, Event
 from app.routers import SessionDep
+from app.routers._present import present_events
 from app.schemas import EventPage
 
 router = APIRouter(tags=["events"])
@@ -56,6 +57,10 @@ def list_events(
     parsed: Annotated[
         bool | None, Query(description="false: only lines that no pattern recognized.")
     ] = None,
+    alert_id: Annotated[int | None, Query(description="Only the evidence of this alert.")] = None,
+    rule_id: Annotated[
+        str | None, Query(description="Only events that are evidence for alerts of this rule.")
+    ] = None,
     limit: Annotated[int, Query(ge=1, le=MAX_LIMIT)] = 100,
     cursor: Annotated[str | None, Query(description="`next_cursor` of the previous page.")] = None,
 ) -> EventPage:
@@ -63,6 +68,9 @@ def list_events(
 
     Pages are fetched with a cursor rather than an offset, so paging stays fast
     on large tables and no event is skipped or repeated while new ones arrive.
+
+    An event that is evidence for an alert carries `highlights`: the alert, its
+    rule and the part of the message that made it count.
     """
     query = select(Event).order_by(Event.ts, Event.id)
     if start is not None:
@@ -81,6 +89,16 @@ def list_events(
         query = query.where(Event.action == action)
     if parsed is not None:
         query = query.where(Event.parsed == parsed)
+    if alert_id is not None:
+        evidence = select(AlertEvent.event_id).where(AlertEvent.alert_id == alert_id)
+        query = query.where(Event.id.in_(evidence))
+    if rule_id is not None:
+        evidence = (
+            select(AlertEvent.event_id)
+            .join(Alert, Alert.id == AlertEvent.alert_id)
+            .where(Alert.rule_id == rule_id)
+        )
+        query = query.where(Event.id.in_(evidence))
     if cursor is not None:
         ts, event_id = _decode_cursor(cursor)
         query = query.where(or_(Event.ts > ts, and_(Event.ts == ts, Event.id > event_id)))
@@ -89,4 +107,7 @@ def list_events(
     events = session.scalars(query.limit(limit + 1)).all()
     page = events[:limit]
     more = len(events) > limit
-    return EventPage(items=page, next_cursor=_encode_cursor(page[-1]) if more else None)
+    return EventPage(
+        items=present_events(session, page),
+        next_cursor=_encode_cursor(page[-1]) if more else None,
+    )
