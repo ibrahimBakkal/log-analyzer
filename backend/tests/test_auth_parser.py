@@ -7,7 +7,7 @@ import pytest
 import generate  # samples/generate.py
 from app.enums import Action, Level
 from app.parsers import UnknownParserError, create_parser, parser_names
-from app.parsers.auth import AuthLogParser
+from app.parsers.auth import PATTERNS, AuthLogParser
 
 HEADER = "Sep  9 03:12:39 web-01 "
 KEY = "ED25519 SHA256:2R59DOGY2f7THFWpaVRAF6+d3bZ2RsUPYzLsfDe/Vjk"
@@ -217,7 +217,9 @@ REJECTED_CASES = [(action, line) for action, lines in REJECTED.items() for line 
 
 
 def test_every_pattern_has_at_least_three_positive_and_one_negative_example():
-    for action in Action:
+    recognized = {pattern.action for patterns in PATTERNS.values() for pattern in patterns}
+    assert set(ACCEPTED) == set(REJECTED) == recognized
+    for action in recognized:
         assert len(ACCEPTED[action]) >= 3, action
         assert len(REJECTED[action]) >= 1, action
 

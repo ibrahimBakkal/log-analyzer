@@ -12,6 +12,8 @@ class Action(StrEnum):
     DISCONNECT = "disconnect"  # an SSH connection ended
     SUDO_EXEC = "sudo_exec"  # a command was run through sudo
     SUDO_DENIED = "sudo_denied"  # sudo refused to run a command
+    CONN_BLOCK = "conn_block"  # the firewall dropped a packet
+    CONN_ALLOW = "conn_allow"  # the firewall let a connection through
 
 
 class Severity(StrEnum):
