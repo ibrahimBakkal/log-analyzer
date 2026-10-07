@@ -62,3 +62,29 @@ jobs:
 
       - name: Demo derlemesi (tek dosya)
         run: npm run build:demo
+
+  docker:
+    name: "Docker: derle, başlat, dene"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Derle ve başlat (docker compose up)
+        run: docker compose up --build --detach --wait --wait-timeout 300
+
+      - name: Örnek verilerle dene
+        run: python3 scripts/smoke.py http://localhost:8080
+
+      - name: Yeniden başlat; veri yerinde, kopya yok
+        run: |
+          docker compose restart
+          docker compose up --detach --wait --wait-timeout 120
+          python3 scripts/smoke.py http://localhost:8080
+
+      - name: Konteyner logları
+        if: always()
+        run: docker compose logs --no-color
+
+      - name: Kapat
+        if: always()
+        run: docker compose down --volumes
