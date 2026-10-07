@@ -1,0 +1,38 @@
+# The whole application with the sample logs loaded:
+#
+#     docker compose up --build        then open http://localhost:8080
+#
+# Another port: LOG_ANALYZER_PORT=9000 docker compose up
+# Start over with an empty database: docker compose down --volumes
+
+services:
+  api:
+    build: ./backend
+    environment:
+      # Loaded before the server starts. Remove both lines to start empty.
+      LOG_ANALYZER_LOAD: /samples/auth.log /samples/ufw.log
+      LOG_ANALYZER_LOAD_YEAR: "2026"
+      # The pages reach the API as /api/...; this lets its documentation
+      # (http://localhost:8080/api/docs) find its way too.
+      UVICORN_ROOT_PATH: /api
+      # To follow log files as they grow, mount their folder below and name them:
+      # LOG_ANALYZER_FOLLOW: /logs/auth.log,/logs/ufw.log
+      # LOG_ANALYZER_FOLLOW_TZ: Europe/Istanbul
+    volumes:
+      - data:/data                # the database
+      - ./rules:/rules:ro         # detection rules: edit, then "Kuralları yeniden yükle"
+      - ./samples:/samples:ro     # sample logs
+      # - /var/log:/logs:ro
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    ports:
+      - "${LOG_ANALYZER_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  data:

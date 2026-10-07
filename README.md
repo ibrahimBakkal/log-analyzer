@@ -13,6 +13,31 @@ Bir sunucunun loglarına bakıp "burada ne oldu, ne zaman, kim yaptı?" sorusunu
 - **Kurallar:** YAML ile yazılan anahtar kelime, eşik, sıralı olay ve port kuralları şüpheli davranışı işaretler.
 - **Kanıt:** her uyarı, onu tetikleyen log satırlarıyla birlikte gösterilir; satırlarda eşleşen kısımlar vurgulanır.
 
+## Hızlı başlangıç
+
+[Docker](https://docs.docker.com/get-docker/) kuruluysa başka hiçbir şey gerekmez:
+
+```bash
+git clone https://github.com/ibrahimBakkal/log-analyzer.git
+cd log-analyzer
+docker compose up --build
+```
+
+Birkaç dakikalık ilk derlemeden sonra arayüz `http://localhost:8080` adresinde açılır. İki örnek log yüklü gelir: 1.838 satır, sekiz uyarı. Ne anlattıkları [Örnek veri](#örnek-veri) bölümünde yazar.
+
+| Ne | Nasıl |
+|---|---|
+| Başka bir port | `LOG_ANALYZER_PORT=9000 docker compose up` |
+| Kendi logunu yüklemek | Özet sayfasındaki form, ya da `curl -F "file=@/var/log/auth.log" http://localhost:8080/api/ingest` |
+| Kural değiştirmek | `rules/` klasöründeki dosyayı düzenle, Kurallar sayfasında "Kuralları yeniden yükle" |
+| Bir logu canlı izlemek | `docker-compose.yml` içindeki `LOG_ANALYZER_FOLLOW` ve `/var/log` satırlarını aç |
+| Boş başlamak | `docker-compose.yml` içindeki iki `LOG_ANALYZER_LOAD` satırını sil |
+| Her şeyi silip baştan başlamak | `docker compose down --volumes` |
+| API dokümanı | `http://localhost:8080/api/docs` |
+| Kurulumu denemek | `python scripts/smoke.py` |
+
+İki konteyner çalışır: `api` (FastAPI; veritabanı `data` adlı birimde durur, yeniden başlatınca kaybolmaz) ve `web` (arayüzü sunan ve `/api/` altındaki istekleri API'ye geçiren nginx). Docker'sız kurulum [Kurulum](#kurulum) bölümünde.
+
 ## Mimari
 
 ```mermaid
@@ -66,7 +91,7 @@ flowchart LR
 ```text
 log-analyzer/
 ├── .github/workflows/
-│   └── ci.yml            # her push'ta lint ve testler
+│   └── ci.yml            # her push'ta lint, testler ve Docker kurulumunun denenmesi
 ├── backend/
 │   ├── app/
 │   │   ├── parsers/      # syslog başlığı, auth.log kalıpları, UFW paket logu, parser kayıt defteri
@@ -89,6 +114,9 @@ log-analyzer/
 │       ├── demo/         # sunucusuz demo: örnek logların kaydı ve tarayıcıda çalışan API karşılığı
 │       ├── api.ts        # API tipleri ve çağrıları
 │       └── queries.ts    # TanStack Query kancaları
+├── docker-compose.yml    # api + web, örnek loglar yüklü
+├── scripts/
+│   └── smoke.py          # çalışan bir kurulumun örnek verilerle doğru yanıt verdiğini dener
 ├── rules/                # tespit kuralları (YAML): KW-001, SSH-001, SSH-002, NET-001, NET-002
 │   └── sigma/            # SigmaHQ deposundan alınan 28 kural, lisansı ve nasıl çevrildiği
 ├── samples/
@@ -133,7 +161,7 @@ npm run build            # üretim derlemesi
 npm run build:demo       # sunucusuz demo derlemesi
 ```
 
-Aynı kontroller her push ve pull request'te GitHub Actions ile de çalışır (`.github/workflows/ci.yml`).
+Aynı kontroller her push ve pull request'te GitHub Actions ile de çalışır (`.github/workflows/ci.yml`); orada ayrıca Docker kurulumu derlenir, başlatılır ve `scripts/smoke.py` ile denenir.
 
 ## Çalıştırma
 
