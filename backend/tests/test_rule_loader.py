@@ -181,6 +181,29 @@ def test_rules_load_in_file_name_order_and_other_files_are_ignored(tmp_path):
     assert [rule.id for rule in rules.rules] == ["KW-900", "SSH-900"]
 
 
+def test_where_a_rule_comes_from_can_be_written_down(tmp_path):
+    rule, error = load_one(
+        tmp_path,
+        KEYWORD
+        + "author: Jane Doe\n"
+        + "source: https://example.org/rules/shadow.yml\n"
+        + "license: Detection Rule License 1.1\n"
+        + "references: [https://example.org/advisory]\n"
+        + "tags: [attack.credential-access, attack.t1003.008]\n"
+        + "false_positives: [Backup jobs]\n",
+    )
+    assert error is None
+    assert (rule.author, rule.license) == ("Jane Doe", "Detection Rule License 1.1")
+    assert rule.source == "https://example.org/rules/shadow.yml"
+    assert rule.references == ["https://example.org/advisory"]
+    assert rule.tags == ["attack.credential-access", "attack.t1003.008"]
+    assert rule.false_positives == ["Backup jobs"]
+
+    plain, _ = load_one(tmp_path, KEYWORD)
+    assert (plain.author, plain.source, plain.license) == ("", "", "")
+    assert (plain.references, plain.tags, plain.false_positives) == ([], [], [])
+
+
 def test_disabled_rules_are_loaded_but_not_enabled(tmp_path):
     write(tmp_path, a__yaml=KEYWORD, b__yaml=THRESHOLD + "enabled: false\n")
     rules = load_rules(tmp_path)

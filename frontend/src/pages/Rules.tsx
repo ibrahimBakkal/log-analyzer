@@ -1,7 +1,8 @@
-import { DEMO } from "../api";
+import type { ReactNode } from "react";
+import { DEMO, type Rule } from "../api";
 import { Notice, Panel } from "../components/Layout";
 import { SeverityBadge } from "../components/Severity";
-import { describeCondition, describeMatch } from "../lib/rules";
+import { describeCondition, describeMatch, shortLink, splitLinks } from "../lib/rules";
 import { formatCount } from "../lib/time";
 import { useReloadRules, useRules } from "../queries";
 
@@ -54,10 +55,11 @@ export function Rules() {
               <tbody>
                 {rules.data.rules.map((rule) => (
                   <tr key={rule.id} className="border-b border-rule align-top last:border-b-0">
-                    <td className="px-3 py-2 font-mono text-[12.5px] font-semibold">{rule.id}</td>
+                    <td className="px-3 py-2 font-mono text-[12.5px] font-semibold whitespace-nowrap">{rule.id}</td>
                     <td className="px-3 py-2">
                       <div className="font-semibold">{rule.name}</div>
                       {rule.description && <div className="max-w-[60ch] text-[12px] text-ink-2">{rule.description}</div>}
+                      <Origin rule={rule} />
                     </td>
                     <td className="px-3 py-2 text-[13px]">
                       <SeverityBadge severity={rule.severity} />
@@ -90,5 +92,58 @@ export function Rules() {
         </Panel>
       )}
     </div>
+  );
+}
+
+/** Who wrote a rule and under what terms, for rules that say so. */
+function Origin({ rule }: { rule: Rule }) {
+  const links = rule.source ? [rule.source, ...rule.references] : rule.references;
+  if (!rule.author && !rule.license && links.length === 0 && rule.tags.length === 0 && rule.false_positives.length === 0) {
+    return null;
+  }
+  return (
+    <dl className="mt-1.5 grid max-w-[60ch] grid-cols-[max-content_1fr] gap-x-2 text-[12px] text-ink-2">
+      {rule.author && <Fact name="Yazar">{rule.author}</Fact>}
+      {rule.license && (
+        <Fact name="Lisans">
+          {splitLinks(rule.license).map((piece, index) =>
+            piece.href ? <Outside key={index} href={piece.href} /> : <span key={index}>{piece.text}</span>,
+          )}
+        </Fact>
+      )}
+      {links.length > 0 && (
+        <Fact name={rule.source ? "Kaynak" : "Okuma"}>
+          {links.map((link) => (
+            <div key={link}>
+              <Outside href={link} />
+            </div>
+          ))}
+        </Fact>
+      )}
+      {rule.tags.length > 0 && (
+        <Fact name="Etiket">
+          <span className="font-mono text-[11.5px]">{rule.tags.join(" ")}</span>
+        </Fact>
+      )}
+      {rule.false_positives.length > 0 && <Fact name="Zararsız olabilir">{rule.false_positives.join("; ")}</Fact>}
+    </dl>
+  );
+}
+
+function Fact({ name, children }: { name: string; children: ReactNode }) {
+  return (
+    <>
+      <dt className="font-semibold">{name}</dt>
+      <dd className="m-0 min-w-0 break-words">{children}</dd>
+    </>
+  );
+}
+
+/** A link that leaves the application, shortened to where it leads. */
+function Outside({ href }: { href: string }) {
+  return (
+    <a href={href} title={href} target="_blank" rel="noreferrer" className="text-accent underline">
+      {shortLink(href)}
+    </a>
   );
 }

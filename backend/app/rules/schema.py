@@ -114,6 +114,17 @@ class RuleBase(BaseModel):
         description="Alert text. Placeholders: {key}, {count}, {seconds}, {rule_id}, {rule_name}.",
     )
 
+    # Where a rule comes from. None of this changes what the rule does; it is
+    # shown with the rule and with its alerts.
+    author: str = ""
+    source: str = Field(default="", description="Address of the rule this one was made from.")
+    license: str = ""
+    references: list[str] = Field(default=[], description="Further reading: articles, advisories.")
+    tags: list[str] = Field(default=[], description="For example MITRE ATT&CK: attack.t1110.")
+    false_positives: list[str] = Field(
+        default=[], description="Harmless things known to set the rule off."
+    )
+
     @model_validator(mode="after")
     def _summary_uses_known_placeholders(self) -> "RuleBase":
         allowed = {"key", "count", "seconds", "rule_id", "rule_name"} | self.summary_fields

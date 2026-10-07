@@ -1,17 +1,23 @@
 import { describe, expect, it } from "vitest";
 import type { EventFilter, Rule } from "../api";
-import { describeCondition, describeMatch } from "./rules";
+import { describeCondition, describeMatch, shortLink, splitLinks } from "./rules";
 
 const any: EventFilter = { action: [], service: [], host: [], user: [], level: [], dst_port: [] };
 const common = {
   name: "Kural",
   description: "",
-  severity: "high",
+  severity: "high" as const,
   enabled: true,
   group_by: "src_ip",
   cooldown_seconds: 300,
   match: any,
-} as const;
+  author: "",
+  source: "",
+  license: "",
+  references: [] as string[],
+  tags: [] as string[],
+  false_positives: [] as string[],
+};
 
 describe("describeMatch", () => {
   it("is empty for a filter that lets everything through", () => {
@@ -94,5 +100,43 @@ describe("describeCondition", () => {
   it("falls back to the field name for a group it has no word for", () => {
     const rule: Rule = { ...common, id: "X-1", type: "threshold", group_by: "dst_ip", threshold: 2, window_seconds: 10 };
     expect(describeCondition(rule)).toBe("Aynı dst_ip için 10 sn içinde 2 eşleşen olay");
+  });
+});
+
+describe("splitLinks", () => {
+  it("separates web addresses from the text around them", () => {
+    expect(splitLinks("Detection Rule License 1.1 (https://example.org/license), as is")).toEqual([
+      { text: "Detection Rule License 1.1 (" },
+      { text: "https://example.org/license", href: "https://example.org/license" },
+      { text: "), as is" },
+    ]);
+  });
+
+  it("keeps a full stop at the end of a sentence out of the address", () => {
+    expect(splitLinks("See http://example.org/a.b.")).toEqual([
+      { text: "See " },
+      { text: "http://example.org/a.b", href: "http://example.org/a.b" },
+      { text: "." },
+    ]);
+  });
+
+  it("returns plain text as one piece and nothing for nothing", () => {
+    expect(splitLinks("MIT")).toEqual([{ text: "MIT" }]);
+    expect(splitLinks("")).toEqual([]);
+  });
+});
+
+describe("shortLink", () => {
+  it("keeps the site and the last step of the path", () => {
+    expect(shortLink("https://github.com/SigmaHQ/sigma/blob/8a48134/rules/linux/builtin/sshd/lnx_sshd_susp_ssh.yml")).toBe(
+      "github.com/…/lnx_sshd_susp_ssh.yml",
+    );
+    expect(shortLink("https://www.example.org/advisory/")).toBe("example.org/advisory");
+    expect(shortLink("https://example.org/a%20b?page=2#top")).toBe("example.org/a b");
+  });
+
+  it("is the site alone when there is no path, and the text itself when it is no address", () => {
+    expect(shortLink("https://example.org")).toBe("example.org");
+    expect(shortLink("see the handbook")).toBe("see the handbook");
   });
 });

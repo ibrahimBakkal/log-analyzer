@@ -51,3 +51,37 @@ export function describeCondition(rule: Rule): string {
     }
   }
 }
+
+export interface TextPiece {
+  text: string;
+  href?: string;
+}
+
+/** A text cut where its web addresses begin and end, so that a page can make links of them. */
+export function splitLinks(text: string): TextPiece[] {
+  const pieces: TextPiece[] = [];
+  let rest = 0;
+  for (const match of text.matchAll(/https?:\/\/[^\s<>"']+/g)) {
+    // Punctuation that ends the sentence or closes a bracket is not part of the address.
+    const address = match[0].replace(/[.,;:!?)\]]+$/, "");
+    if (match.index > rest) pieces.push({ text: text.slice(rest, match.index) });
+    pieces.push({ text: address, href: address });
+    rest = match.index + address.length;
+  }
+  if (rest < text.length) pieces.push({ text: text.slice(rest) });
+  return pieces;
+}
+
+/** A web address short enough to read: where it leads and what it ends in. "github.com/…/SSH-001.yaml" */
+export function shortLink(href: string): string {
+  let url: URL;
+  try {
+    url = new URL(href);
+  } catch {
+    return href;
+  }
+  const host = url.host.replace(/^www\./, "");
+  const steps = url.pathname.split("/").filter(Boolean);
+  if (steps.length === 0) return host;
+  return `${host}/${steps.length > 1 ? "…/" : ""}${decodeURIComponent(steps[steps.length - 1])}`;
+}

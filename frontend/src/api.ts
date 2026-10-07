@@ -105,6 +105,13 @@ interface RuleCommon {
   group_by: string;
   cooldown_seconds: number;
   match: EventFilter;
+  // Where the rule comes from; empty for rules written for this project.
+  author: string;
+  source: string;
+  license: string;
+  references: string[];
+  tags: string[];
+  false_positives: string[];
 }
 
 export type Rule =
