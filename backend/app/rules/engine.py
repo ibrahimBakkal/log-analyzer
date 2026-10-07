@@ -121,7 +121,7 @@ def evaluate(session: Session, rules: Sequence[Rule], *, since: int | None = Non
             if groups is not None and not groups:
                 continue
             if groups is None:
-                events = session.execute(_events_for(rule)).yield_per(2000)
+                events = _stream(session, _events_for(rule))
             else:
                 events = _events_of_groups(session, rule, groups)
         counts = _reconcile(session, rule, groups, detect(rule, events))
@@ -286,6 +286,16 @@ _COLUMNS = (
 MAX_SORTED_HERE = 100_000
 
 
+def _stream(session: Session, query: Select) -> Iterable[Any]:
+    """The rows of *query*, handed over as they are read rather than all at once.
+
+    Asked of the connection, not of the session: every stored event may pass
+    through here, and the session spends on each row as long again as reading
+    it takes, preparing for objects that are not wanted here.
+    """
+    return session.connection().execution_options(stream_results=True).execute(query)
+
+
 def _events_for(rule: Rule) -> Select:
     """The events a rule has to look at, oldest first. The database discards the rest."""
     return select(*_COLUMNS).where(*_selection(rule)).order_by(Event.ts, Event.id)
@@ -304,7 +314,7 @@ def _events_of_groups(session: Session, rule: Rule, groups: Sequence[str]) -> It
     found = session.execute(wanted.limit(MAX_SORTED_HERE + 1)).all()
     if len(found) <= MAX_SORTED_HERE:
         return sorted(found, key=lambda event: (event.ts, event.id))
-    return session.execute(wanted.order_by(Event.ts, Event.id)).yield_per(2000)
+    return _stream(session, wanted.order_by(Event.ts, Event.id))
 
 
 def _groups_with_news(session: Session, rule: Rule, since: int) -> list[str] | None:
@@ -357,13 +367,9 @@ def _lines_with_keywords(session: Session, rules: Sequence[Rule], since: int | N
     lines = select(Event.id, Event.service, Event.message)
     if since is not None:
         lines = lines.where(Event.id > since)
-    # Asked of the connection rather than the session: a million rows pass
-    # through here, and the session spends twice as long on each as reading it takes.
-    connection = session.connection()
-    sample = connection.execute(lines.limit(_SAMPLE)).all()
+    sample = session.connection().execute(lines.limit(_SAMPLE)).all()
     scan = KeywordScan(keyword_rules, sample)
-    rows = connection.execution_options(stream_results=True).execute(lines)
-    for event_id, number in scan.candidates(rows):  # type: ignore[arg-type]
+    for event_id, number in scan.candidates(_stream(session, lines)):  # type: ignore[arg-type]
         ids = found[keyword_rules[number].id]
         if ids is not None:
             ids.append(event_id)
@@ -388,7 +394,7 @@ def _keyword_work(
     """
     if since is None:
         if candidates is None:
-            return None, session.execute(_events_for(rule)).yield_per(2000)
+            return None, _stream(session, _events_for(rule))
         return None, _events_by_id(session, rule, candidates)
 
     if candidates is not None and not candidates:
