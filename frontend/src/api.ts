@@ -47,6 +47,8 @@ export interface Alert {
   id: number;
   rule_id: string;
   rule_name: string;
+  /** Who wrote the rule; empty for the rules of this project. */
+  rule_author: string;
   severity: Severity;
   group_by: string;
   group_key: string;

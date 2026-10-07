@@ -11,6 +11,7 @@ from app.models import Alert, AlertEvent, Event
 from app.routers import SessionDep
 from app.routers._filters import as_utc
 from app.routers._present import present_events
+from app.routers.rules import RulesDep
 from app.schemas import AlertList, AlertOut
 
 router = APIRouter(tags=["alerts"])
@@ -22,6 +23,7 @@ EVIDENCE_PER_ALERT = 100
 @router.get("/alerts")
 def list_alerts(
     session: SessionDep,
+    rules: RulesDep,
     rule_id: str | None = None,
     severity: Severity | None = None,
     group_key: Annotated[
@@ -63,6 +65,11 @@ def list_alerts(
     ).all()
 
     items = [AlertOut.model_validate(alert) for alert in alerts]
+    # Rules taken from elsewhere are licensed on the condition that what they
+    # find is reported with their author's name.
+    authors = {rule.id: rule.author for rule in rules.rules}
+    for item in items:
+        item.rule_author = authors.get(item.rule_id, "")
     if include_events:
         for item in items:
             evidence = session.scalars(

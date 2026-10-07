@@ -39,6 +39,9 @@ export function AlertPanel({ alerts, error, selectedId, onSelect }: Props) {
                 {formatDateTime(alert.first_seen)}
                 {duration > 0 && `, ${formatDuration(duration)} sürdü`} · {formatCount(alert.count)} satır
               </span>
+              {alert.rule_author && (
+                <span className="mt-0.5 block text-[12px] text-ink-2">Kuralı yazan: {alert.rule_author}</span>
+              )}
             </button>
           </li>
         );

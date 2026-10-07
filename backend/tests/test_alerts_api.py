@@ -288,6 +288,18 @@ def test_reload_applies_an_edited_rule_to_the_stored_events(rules_dir, loaded):
     assert loaded.get("/rules").json()["rules"][3]["threshold"] == 33
 
 
+def test_alerts_name_the_author_of_their_rule(rules_dir, loaded):
+    """Rules taken from elsewhere ask for this; the rules of this project name nobody."""
+    assert {alert["rule_author"] for alert in alerts(loaded)} == {""}
+
+    path = rules_dir / "SSH-001.yaml"
+    path.write_text(path.read_text(encoding="utf-8") + "author: Jane Doe\n", encoding="utf-8")
+    loaded.post("/rules/reload")
+
+    assert {alert["rule_author"] for alert in alerts(loaded, rule_id="SSH-001")} == {"Jane Doe"}
+    assert {alert["rule_author"] for alert in alerts(loaded, rule_id="SSH-002")} == {""}
+
+
 def test_reload_picks_up_a_new_rule(rules_dir, loaded):
     (rules_dir / "SSH-003.yaml").write_text(
         "id: SSH-003\nname: User name sweep\ntype: threshold\nseverity: low\n"

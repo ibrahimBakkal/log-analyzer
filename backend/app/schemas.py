@@ -58,6 +58,9 @@ class AlertOut(BaseModel):
     id: int
     rule_id: str
     rule_name: str
+    rule_author: str = Field(
+        default="", description="Who wrote the rule, for rules that say so; they ask to be named."
+    )
     severity: Severity
     group_by: str = Field(description="The event field the rule groups on, e.g. src_ip.")
     group_key: str = Field(description="That field's value for this alert.")
