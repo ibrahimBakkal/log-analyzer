@@ -64,3 +64,27 @@ export function describeFile(file: FollowedFile, formatCount: (value: number) =>
 export function fileName(path: string): string {
   return path.split(/[\\/]/).filter(Boolean).pop() ?? path;
 }
+
+/**
+ * Wrap `action` so that it runs at once when called, but at most once per
+ * `gapMs`: calls that come sooner are answered by a single run when the gap
+ * is over. A server that reads a busy log announces changes every second; the
+ * page should not fetch everything again more often than it can show it.
+ */
+export function throttled(action: () => void, gapMs: number): { (): void; cancel(): void } {
+  let last = Number.NEGATIVE_INFINITY;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const run = () => {
+    timer = undefined;
+    last = Date.now();
+    action();
+  };
+  const call = () => {
+    if (timer !== undefined) return;
+    const wait = last + gapMs - Date.now();
+    if (wait <= 0) run();
+    else timer = setTimeout(run, wait);
+  };
+  call.cancel = () => clearTimeout(timer);
+  return call;
+}

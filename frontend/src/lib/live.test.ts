@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { type FollowedFile, INITIAL_LIVE, type LiveState, describeFile, fileName, liveReducer, liveSummary } from "./live";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { type FollowedFile, INITIAL_LIVE, type LiveState, describeFile, fileName, liveReducer, liveSummary, throttled } from "./live";
 
 function file(state: string, overrides: Partial<FollowedFile> = {}): FollowedFile {
   return { path: "/var/log/auth.log", state, detail: null, source: null, lines: 0, read_at: null, ...overrides };
@@ -88,5 +88,60 @@ describe("fileName", () => {
     expect(fileName("C:\\logs\\ufw.log")).toBe("ufw.log");
     expect(fileName("auth.log")).toBe("auth.log");
     expect(fileName("/var/log/")).toBe("log");
+  });
+});
+
+describe("throttled", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("runs at once the first time", () => {
+    const action = vi.fn();
+    throttled(action, 1000)();
+    expect(action).toHaveBeenCalledTimes(1);
+  });
+
+  it("answers a burst of calls with one more run when the gap is over", () => {
+    const action = vi.fn();
+    const call = throttled(action, 1000);
+    call();
+    call();
+    call();
+    vi.advanceTimersByTime(999);
+    expect(action).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(1);
+    expect(action).toHaveBeenCalledTimes(2);
+    vi.advanceTimersByTime(5000);
+    expect(action).toHaveBeenCalledTimes(2);
+  });
+
+  it("runs at once again after a quiet stretch", () => {
+    const action = vi.fn();
+    const call = throttled(action, 1000);
+    call();
+    vi.advanceTimersByTime(1500);
+    call();
+    expect(action).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the gap between runs however often it is called", () => {
+    const action = vi.fn();
+    const call = throttled(action, 1000);
+    for (let elapsed = 0; elapsed < 10_000; elapsed += 100) {
+      call();
+      vi.advanceTimersByTime(100);
+    }
+    expect(action.mock.calls.length).toBeGreaterThanOrEqual(10);
+    expect(action.mock.calls.length).toBeLessThanOrEqual(11);
+  });
+
+  it("can be cancelled before a pending run", () => {
+    const action = vi.fn();
+    const call = throttled(action, 1000);
+    call();
+    call();
+    call.cancel();
+    vi.advanceTimersByTime(5000);
+    expect(action).toHaveBeenCalledTimes(1);
   });
 });

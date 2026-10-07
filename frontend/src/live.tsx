@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useReducer } from "react";
 import { API_URL, DEMO } from "./api";
-import { INITIAL_LIVE, type LiveState, liveReducer } from "./lib/live";
+import { INITIAL_LIVE, type LiveState, liveReducer, throttled } from "./lib/live";
 
 const LiveContext = createContext<LiveState>(INITIAL_LIVE);
 
@@ -13,6 +13,7 @@ export function useLive(): LiveState {
 }
 
 const RECONNECT_MS = 5000;
+const REFRESH_GAP_MS = 1000;
 
 /**
  * Listens to the server for as long as the page is open. When the server says
@@ -28,12 +29,13 @@ export function LiveProvider({ children }: { children: React.ReactNode }) {
     let source: EventSource | null = null;
     let retry: ReturnType<typeof setTimeout> | undefined;
     let wasLost = false;
+    const refresh = throttled(() => void client.invalidateQueries(), REFRESH_GAP_MS);
 
     function connect() {
       source = new EventSource(`${API_URL}/stream`);
       source.onopen = () => {
         // Whatever happened while the stream was down went unannounced.
-        if (wasLost) void client.invalidateQueries();
+        if (wasLost) refresh();
         wasLost = false;
         dispatch({ type: "open" });
       };
@@ -52,13 +54,14 @@ export function LiveProvider({ children }: { children: React.ReactNode }) {
       source.addEventListener("update", (event) => {
         const update = JSON.parse((event as MessageEvent<string>).data) as { added: number };
         dispatch({ type: "update", added: update.added, at: Date.now() });
-        void client.invalidateQueries();
+        refresh();
       });
     }
 
     connect();
     return () => {
       clearTimeout(retry);
+      refresh.cancel();
       source?.close();
     };
   }, [client]);
