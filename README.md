@@ -2,7 +2,7 @@
 
 Sunucu loglarını (ilk hedef: SSH `auth.log`) yapılandırılmış olaylara çevirip zaman çizelgesinde gösteren ve kural tabanlı uyarılar üreten bir log analiz aracı. Arka uç Python/FastAPI, arayüz React.
 
-> **Durum:** Aşama 2 tamam — loglar ayrıştırılıp veritabanına yükleniyor, kurallar uyarı üretiyor ve hepsi API üzerinden sorgulanabiliyor. Arayüz henüz yazılmadı; plan için [Yol haritası](#yol-haritası) bölümüne bak.
+> **Durum:** Aşama 3 tamam — loglar ayrıştırılıp veritabanına yükleniyor, kurallar uyarı üretiyor ve web arayüzü zaman çizelgesini, log satırlarını ve uyarıları birlikte gösteriyor. Sıradaki adımlar için [Yol haritası](#yol-haritası) bölümüne bak.
 
 ## Amaç
 
@@ -63,7 +63,7 @@ log-analyzer/
 │   ├── app/
 │   │   ├── parsers/      # syslog başlığı, auth.log kalıpları, parser kayıt defteri
 │   │   ├── rules/        # kural şeması, YAML yükleyici, değerlendiriciler, uyarı motoru
-│   │   ├── routers/      # /health, /ingest, /events, /alerts, /rules
+│   │   ├── routers/      # /health, /ingest, /events, /alerts, /rules, /timeline, /stats
 │   │   ├── ingest.py     # satır satır okuma, toplu yazım
 │   │   ├── models.py     # Event, Alert ve AlertEvent tabloları
 │   │   └── main.py       # FastAPI uygulaması
@@ -71,7 +71,13 @@ log-analyzer/
 │   ├── tests/
 │   ├── alembic.ini
 │   └── pyproject.toml    # bağımlılıklar ve pytest ayarı
-├── frontend/             # React arayüzü (Aşama 3'te kurulacak)
+├── frontend/             # React arayüzü (Vite, TypeScript, Tailwind)
+│   └── src/
+│       ├── pages/        # Özet, İnceleme, Kurallar
+│       ├── components/   # Timeline, LogTable, AlertPanel, FilterBar, ...
+│       ├── lib/          # vurgu bölme, filtre ↔ adres, zaman yardımcıları (testleriyle)
+│       ├── api.ts        # API tipleri ve çağrıları
+│       └── queries.ts    # TanStack Query kancaları
 ├── rules/                # tespit kuralları (YAML): KW-001, SSH-001
 ├── samples/
 │   ├── generate.py       # örnek log üreteci
@@ -91,12 +97,24 @@ pip install -e "backend[dev]"
 
 Windows'ta sanal ortamı `py -3.11 -m venv .venv` ile oluşturabilirsin.
 
+Arayüz için Node.js 22 veya üstü gerekir:
+
+```bash
+cd frontend
+npm install
+```
+
 Kontroller:
 
 ```bash
 ruff check .             # lint
 ruff format --check .    # biçim
 pytest backend           # testler
+
+cd frontend
+npm run typecheck        # TypeScript tip denetimi
+npm test                 # Vitest
+npm run build            # üretim derlemesi
 ```
 
 Aynı kontroller her push ve pull request'te GitHub Actions ile de çalışır (`.github/workflows/ci.yml`).
@@ -120,7 +138,26 @@ curl "http://127.0.0.1:8000/events?action=auth_ok&limit=5"
 curl "http://127.0.0.1:8000/events?ip=203.0.113.99&start=2026-09-10T02:30:00Z"
 ```
 
+Arayüzü ayrı bir terminalde başlat:
+
+```bash
+cd frontend
+npm run dev                      # http://localhost:5173
+```
+
+Arayüz API'yi `http://127.0.0.1:8000` adresinde arar; başka bir adres için `VITE_API_URL` ortam değişkenini ayarla. API tarafında arayüzün adresi `LOG_ANALYZER_CORS_ORIGINS` ile izinli olmalıdır (varsayılan: Vite geliştirme sunucusu).
+
 Etkileşimli API dokümanı `http://127.0.0.1:8000/docs` adresindedir. Veritabanı adresi `LOG_ANALYZER_DATABASE_URL`, kural klasörü `LOG_ANALYZER_RULES_DIR` ortam değişkeniyle değiştirilebilir.
+
+## Arayüz
+
+Arayüzün fikri, üzeri işaretlenmiş bir log çıktısıdır: her şey log satırlarına geri döner, kanıt olan satırlar fosforlu kalemle çizilmiş gibi vurgulanır.
+
+- **Özet:** Yüklenen logun sayıları, tüm dönemin zaman çizelgesi, uyarılar, en çok başarısız giriş denemesi yapan adresler ve log yükleme formu.
+- **İnceleme:** Filtreler, zaman çizelgesi, log satırları ve uyarılar tek sayfada. Bir uyarıya tıklayınca çizelge o uyarının aralığına gider; tablo o aralıktaki tüm satırları gösterir, kanıt satırları kenar çizgisi ve vurgulu metinle ayrılır. Çizelgede sürükleyerek zaman aralığı seçilir. Filtreler sayfa adresinde tutulur, yani bir görünüm yer imine eklenebilir ve geri tuşu çalışır.
+- **Kurallar:** Yüklü kurallar, yüklenemeyen kural dosyaları ve kuralları yeniden yükleme düğmesi.
+
+Log tablosu yalnızca görünen satırları çizer (react-window) ve kaydırdıkça sonraki sayfaları getirir. Önem dereceleri renkle birlikte şekil ve yazıyla da gösterilir. Açık ve koyu tema vardır; zamanlar UTC olarak gösterilir.
 
 ## API
 
@@ -130,6 +167,8 @@ Etkileşimli API dokümanı `http://127.0.0.1:8000/docs` adresindedir. Veritaban
 | `POST /ingest` | Log dosyası yükler (multipart form) ve kuralları yeniden çalıştırır. Alanlar: `file`, `parser` (varsayılan `auth`), `year`, `tz`, `source` |
 | `GET /events` | Olayları zaman sırasıyla listeler. Filtreler: `start`, `end`, `host`, `service`, `ip`, `level`, `action`, `parsed`, `alert_id`, `rule_id`. Sayfalama: `limit` (1–500), `cursor` |
 | `GET /alerts` | Uyarıları yeniden eskiye listeler. Filtreler: `rule_id`, `severity`, `group_key`, `start`, `end`. `include_events=true` her uyarının ilk 100 kanıt satırını ekler |
+| `GET /timeline` | Seçilen olayları zaman kovalarına göre sayar (`bucket`: `1m`, `5m`, `1h`). `/events` ile aynı filtreleri alır |
+| `GET /stats` | Özet sayıları döner: olay, ayrıştırılan, eylem dağılımı, önem derecesine göre uyarı, en çok başarısız giriş yapan adresler |
 | `GET /rules` | Yüklü kuralları ve yüklenemeyen kural dosyalarını (nedeniyle) döner |
 | `POST /rules/reload` | Kural dosyalarını yeniden okur ve kuralları saklanan tüm olaylar üzerinde baştan çalıştırır |
 
@@ -210,8 +249,8 @@ Gerçek loglar yanlışlıkla depoya girmesin diye `.gitignore` tüm `*.log` dos
 | Hazırlık | Depo iskeleti, bağımlılıklar, örnek veri | ✅ |
 | 1 | Parser, veritabanı, `/ingest` ve `/events` | ✅ |
 | 2 | Anahtar kelime ve eşik kuralları, `/alerts` | ✅ |
-| 3 | React arayüzü: zaman çizelgesi, log tablosu, uyarı paneli | Sırada |
-| 4 | Davranış kuralları: sıralı olay, port taraması, nadir port | |
+| 3 | React arayüzü: zaman çizelgesi, log tablosu, uyarı paneli | ✅ |
+| 4 | Davranış kuralları: sıralı olay, port taraması, nadir port | Sırada |
 | 5 | İkinci kaynak (UFW) ve canlı takip | |
 | 6 | Yayına hazırlama: Docker, CI, dokümantasyon | |
 
