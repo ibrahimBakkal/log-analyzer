@@ -10,9 +10,12 @@ requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "İbrahim Bakkal" }]
 dependencies = [
+    "alembic>=1.13",
     "fastapi>=0.115",
     "pydantic>=2.7",
+    "python-multipart>=0.0.9", # POST /ingest dosya yüklemesi için
     "sqlalchemy>=2.0",
+    "tzdata; sys_platform == 'win32'", # Windows'ta saat dilimi veritabanı yok
     "uvicorn[standard]>=0.30",
 ]
 
