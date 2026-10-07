@@ -1,0 +1,24 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/syslog/lnx_syslog_security_tools_disabling_syslog.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-49f5dfc1
+name: Disabling Security Tools - Builtin
+description: Detects disabling security tools
+type: keyword
+severity: medium
+keywords:
+  - stopping iptables
+  - stopping ip6tables
+  - stopping firewalld
+  - stopping cbdaemon
+  - stopping falcon-sensor
+tags:
+  - attack.defense-impairment
+  - attack.t1686
+false_positives:
+  - Legitimate administration activities
+author: Ömer Günal, Alejandro Ortuno, oscd.community
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/syslog/lnx_syslog_security_tools_disabling_syslog.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1562.004/T1562.004.md

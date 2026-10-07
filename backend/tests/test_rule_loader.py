@@ -80,7 +80,15 @@ def load_one(tmp_path: Path, text: str):
 def test_shipped_rules_load_without_errors():
     rules = load_rules(SHIPPED_RULES)
     assert rules.errors == ()
-    assert [rule.id for rule in rules.rules] == [
+    # The rules written for this project, then those taken from SigmaHQ (rules/sigma).
+    assert [rule.id for rule in rules.rules if not rule.id.startswith("SIGMA-")] == [
+        "KW-001",
+        "NET-001",
+        "NET-002",
+        "SSH-001",
+        "SSH-002",
+    ]
+    assert [rule.id for rule in rules.rules][:5] == [
         "KW-001",
         "NET-001",
         "NET-002",

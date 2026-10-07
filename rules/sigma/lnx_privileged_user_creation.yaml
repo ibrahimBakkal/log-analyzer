@@ -1,0 +1,29 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/lnx_privileged_user_creation.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-0ac15ec3
+name: Privileged User Has Been Created
+description: Detects the addition of a new user to a privileged group such as "root" or "sudo"
+type: keyword
+severity: high
+keywords:
+  - new user
+require:
+  - - GID=0,
+    - UID=0,
+    - GID=10,
+    - GID=27,
+tags:
+  - attack.privilege-escalation
+  - attack.persistence
+  - attack.t1136.001
+  - attack.t1098
+false_positives:
+  - Administrative activity
+author: Pawel Mazur
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/lnx_privileged_user_creation.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://digital.nhs.uk/cyber-alerts/2018/cc-2825
+  - https://linux.die.net/man/8/useradd
+  - https://github.com/redcanaryco/atomic-red-team/blob/25acadc0b43a07125a8a5b599b28bbc1a91ffb06/atomics/T1136.001/T1136.001.md#atomic-test-5---create-a-new-user-in-linux-with-root-uid-and-gid

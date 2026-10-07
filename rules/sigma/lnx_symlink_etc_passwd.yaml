@@ -1,0 +1,19 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/lnx_symlink_etc_passwd.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-c67fc22a
+name: Symlink Etc Passwd
+description: Detects suspicious command lines that look as if they would create symbolic links to /etc/passwd
+type: keyword
+severity: high
+keywords:
+  - ln -s -f /etc/passwd
+  - ln -s /etc/passwd
+tags:
+  - attack.t1204.001
+  - attack.execution
+author: Florian Roth (Nextron Systems)
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/lnx_symlink_etc_passwd.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://www.qualys.com/2021/05/04/21nails/21nails.txt

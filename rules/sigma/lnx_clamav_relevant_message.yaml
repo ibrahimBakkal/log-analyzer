@@ -1,0 +1,22 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/clamav/lnx_clamav_relevant_message.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-36aa86ca
+name: Relevant ClamAV Message
+description: Detects relevant ClamAV messages
+type: keyword
+severity: high
+keywords:
+  - Trojan*FOUND
+  - VirTool*FOUND
+  - Webshell*FOUND
+  - Rootkit*FOUND
+  - Htran*FOUND
+tags:
+  - attack.resource-development
+  - attack.t1588.001
+author: Florian Roth (Nextron Systems)
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/clamav/lnx_clamav_relevant_message.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/clam_av_rules.xml

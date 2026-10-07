@@ -7,6 +7,7 @@ import pytest
 import build_demo  # samples/build_demo.py
 import generate
 import generate_ufw
+from app.config import get_settings
 
 HINT = "is out of date: run `python samples/build_demo.py` and commit the result"
 
@@ -45,12 +46,18 @@ def test_snapshot_holds_both_samples_with_their_alerts_and_rules(built):
         "SSH-001",
         "SSH-002",
     ]
-    assert (len(snapshot["rules"]["rules"]), snapshot["rules"]["errors"]) == (5, [])
+    shipped = len(list(get_settings().rules_dir.rglob("*.yaml")))
+    assert (len(snapshot["rules"]["rules"]), snapshot["rules"]["errors"]) == (shipped, [])
     assert sum(len(event["highlights"]) > 0 for event in snapshot["events"]) > 250
 
 
-def test_snapshot_contains_only_documentation_addresses(built):
-    assert generate.leaked_ips(built[0].splitlines()) == set()
+def test_what_the_snapshot_took_from_the_logs_contains_only_documentation_addresses(built):
+    snapshot = json.loads(built[0])
+    # The rules are public text and may name any address: one taken from Sigma
+    # looks for commands that mention 127.0.0.1.
+    from_logs = {name: part for name, part in snapshot.items() if name != "rules"}
+    assert set(from_logs) == {"events", "alerts"}
+    assert generate.leaked_ips([json.dumps(from_logs)]) == set()
 
 
 def test_cases_ask_about_every_endpoint_the_interface_uses(built):

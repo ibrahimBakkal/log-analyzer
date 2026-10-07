@@ -1,0 +1,52 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/lnx_shell_susp_commands.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-2aa1440c
+name: Suspicious Activity in Shell Commands
+description: Detects suspicious shell commands used in various exploit codes (see references)
+type: keyword
+severity: high
+keywords:
+  - wget * - http* | perl
+  - wget * - http* | sh
+  - wget * - http* | bash
+  - python -m SimpleHTTPServer
+  - -m http.server
+  - import pty; pty.spawn*
+  - socat exec:*
+  - socat -O /tmp/*
+  - socat tcp-connect*
+  - '*echo binary >>*'
+  - '*wget *; chmod +x*'
+  - '*wget *; chmod 777 *'
+  - '*cd /tmp || cd /var/run || cd /mnt*'
+  - '*stop;service iptables stop;*'
+  - '*stop;SuSEfirewall2 stop;*'
+  - chmod 777 2020*
+  - '*>>/etc/rc.local'
+  - '*base64 -d /tmp/*'
+  - '* | base64 -d *'
+  - '*/chmod u+s *'
+  - '*chmod +s /tmp/*'
+  - '*chmod u+s /tmp/*'
+  - '* /tmp/haxhax*'
+  - '* /tmp/ns_sploit*'
+  - nc -l -p *
+  - cp /bin/ksh *
+  - cp /bin/sh *
+  - '* /tmp/*.b64 *'
+  - '*/tmp/ysocereal.jar*'
+  - '*/tmp/x *'
+  - '*; chmod +x /tmp/*'
+  - '*;chmod +x /tmp/*'
+tags:
+  - attack.execution
+  - attack.t1059.004
+author: Florian Roth (Nextron Systems)
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/lnx_shell_susp_commands.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://web.archive.org/web/20170319121015/http://www.threatgeek.com/2017/03/widespread-exploitation-attempts-using-cve-2017-5638.html
+  - https://github.com/rapid7/metasploit-framework/blob/eb6535009f5fdafa954525687f09294918b5398d/modules/exploits/multi/http/struts_code_exec_exception_delegator.rb
+  - http://pastebin.com/FtygZ1cg
+  - https://artkond.com/2017/03/23/pivoting-guide/

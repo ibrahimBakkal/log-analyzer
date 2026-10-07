@@ -83,7 +83,8 @@ describe("the demo's own behaviour", () => {
   it("finds the same alerts when the rules are run again", async () => {
     const reloaded = await demoApi.reloadRules();
     expect(reloaded.alerts).toEqual({ total: 8, created: 0, updated: 0, removed: 0 });
-    expect(reloaded.rules).toHaveLength(5);
+    expect(reloaded.rules).toEqual((await demoApi.rules()).rules);
+    expect(reloaded.rules.length).toBeGreaterThan(5); // the five of this project and those taken from Sigma
   });
 
   it("rejects a question it cannot answer instead of throwing", async () => {

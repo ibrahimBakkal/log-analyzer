@@ -1,0 +1,28 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/cron/lnx_cron_crontab_file_modification.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-af202fd3
+name: Modifying Crontab
+description: Detects suspicious modification of crontab file.
+type: keyword
+severity: medium
+match:
+  service:
+    - cron
+    - CRON
+    - crond
+    - crontab
+keywords:
+  - REPLACE
+tags:
+  - attack.privilege-escalation
+  - attack.execution
+  - attack.persistence
+  - attack.t1053.003
+false_positives:
+  - Legitimate modification of crontab
+author: Pawel Mazur
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/cron/lnx_cron_crontab_file_modification.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://github.com/redcanaryco/atomic-red-team/blob/f339e7da7d05f6057fdfcdd3742bfcf365fee2a9/atomics/T1053.003/T1053.003.md

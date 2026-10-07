@@ -1,0 +1,32 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/sshd/lnx_sshd_susp_ssh.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-e76b413a
+name: Suspicious OpenSSH Daemon Error
+description: Detects suspicious SSH / SSHD error messages that indicate a fatal or suspicious error that could be caused by exploiting attempts
+type: keyword
+severity: medium
+match:
+  service:
+    - sshd
+keywords:
+  - unexpected internal error
+  - unknown or unsupported key type
+  - invalid certificate signing key
+  - invalid elliptic curve value
+  - incorrect signature
+  - error in libcrypto
+  - unexpected bytes remain after decoding
+  - 'fatal: buffer_get_string: bad string'
+  - 'Local: crc32 compensation attack'
+  - bad client public DH value
+  - Corrupted MAC on input
+tags:
+  - attack.initial-access
+  - attack.t1190
+author: Florian Roth (Nextron Systems)
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/sshd/lnx_sshd_susp_ssh.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://github.com/openssh/openssh-portable/blob/c483a5c0fb8e8b8915fad85c5f6113386a4341ca/ssherr.c
+  - https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/sshd_rules.xml

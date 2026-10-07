@@ -1,0 +1,19 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/lnx_potential_susp_ebpf_activity.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-0fadd880
+name: Potential Suspicious BPF Activity - Linux
+description: Detects the presence of "bpf_probe_write_user" BPF helper-generated warning messages. Which could be a sign of suspicious eBPF activity on the system.
+type: keyword
+severity: high
+keywords:
+  - bpf_probe_write_user
+tags:
+  - attack.persistence
+  - attack.stealth
+author: Red Canary (idea), Nasreddine Bencherchali
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/lnx_potential_susp_ebpf_activity.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://redcanary.com/blog/ebpf-malware/
+  - https://man7.org/linux/man-pages/man7/bpf-helpers.7.html

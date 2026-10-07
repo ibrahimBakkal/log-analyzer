@@ -1,0 +1,29 @@
+# SigmaHQ deposundaki bir kuraldan elle uyarlandı.
+# Özgün kural: rules/network/firewall/net_firewall_cleartext_protocols.yml
+#
+# Özgün kural güvenlik duvarı kayıtlarının alanlarına bakar (dst_port, action);
+# burada aynı koşul "rare_port" türüyle yazıldı: güvenlik duvarının geçirdiği,
+# şifresiz protokollerin portlarına giden bağlantılar.
+#
+# Kapalı gelir: liste 80 ve 8080'i de içerir, bir web sunucusunda bu olağan
+# trafiktir ve her ziyaretçi için uyarı üretir. Şifresiz hiçbir servisin
+# çalışmaması gereken bir makinede "enabled: true" yap.
+id: SIGMA-d7fb8f0e
+name: Cleartext Protocol Usage
+description: Ensure that all account usernames and authentication credentials are transmitted across networks using encrypted channels. Ensure that an encryption is used for all sensitive information in transit. Ensure that an encrypted channels is used for all administrative account access.
+type: rare_port
+severity: low
+enabled: false
+match:
+  action: conn_allow
+mode: watchlist
+ports: [8080, 21, 80, 23, 50000, 1521, 27017, 3306, 1433, 11211, 15672, 5900, 5901, 5902, 5903, 5904]
+tags:
+  - attack.credential-access
+author: Alexandr Yampolskyi, SOC Prime, Tim Shelton
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/network/firewall/net_firewall_cleartext_protocols.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://www.cisecurity.org/controls/cis-controls-list/
+  - https://www.pcisecuritystandards.org/documents/PCI_DSS_v3-2-1.pdf
+  - https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.04162018.pdf

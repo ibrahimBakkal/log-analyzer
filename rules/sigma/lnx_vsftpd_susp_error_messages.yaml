@@ -1,0 +1,34 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/vsftpd/lnx_vsftpd_susp_error_messages.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-377f33a1
+name: Suspicious VSFTPD Error Messages
+description: Detects suspicious VSFTPD error messages that indicate a fatal or suspicious error that could be caused by exploiting attempts
+type: keyword
+severity: medium
+keywords:
+  - 'Connection refused: too many sessions for this address.'
+  - 'Connection refused: tcp_wrappers denial.'
+  - Bad HTTP verb.
+  - port and pasv both active
+  - pasv and port both active
+  - Transfer done (but failed to open directory).
+  - Could not set file modification time.
+  - 'bug: pid active in ptrace_sandbox_free'
+  - PTRACE_SETOPTIONS failure
+  - 'weird status:'
+  - couldn't handle sandbox event
+  - syscall * out of bounds
+  - 'syscall not permitted:'
+  - 'syscall validate failed:'
+  - Input line too long.
+  - poor buffer accounting in str_netfd_alloc
+  - vsf_sysutil_read_loop
+tags:
+  - attack.initial-access
+  - attack.t1190
+author: Florian Roth (Nextron Systems)
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/vsftpd/lnx_vsftpd_susp_error_messages.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://github.com/dagwieers/vsftpd/

@@ -1,0 +1,20 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/syslog/lnx_syslog_susp_named.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-c8e35e96
+name: Suspicious Named Error
+description: Detects suspicious DNS error messages that indicate a fatal or suspicious error that could be caused by exploiting attempts
+type: keyword
+severity: high
+keywords:
+  - ' dropping source port zero packet from '
+  - ' denied AXFR from '
+  - ' exiting (due to fatal error)'
+tags:
+  - attack.initial-access
+  - attack.t1190
+author: Florian Roth (Nextron Systems)
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/syslog/lnx_syslog_susp_named.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://github.com/ossec/ossec-hids/blob/1ecffb1b884607cb12e619f9ab3c04f530801083/etc/rules/named_rules.xml

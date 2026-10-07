@@ -11,6 +11,7 @@ from app.config import get_settings
 
 GOLDEN = Path(__file__).with_name("golden") / "sample_alerts.json"
 SHIPPED_RULES = Path(__file__).resolve().parents[2] / "rules"
+SHIPPED_COUNT = len(list(SHIPPED_RULES.rglob("*.yaml")))
 YEAR = generate.DEFAULT_START.year
 LINES = generate.build_lines()
 ATTACKERS = {generate.SCANNER_IP, generate.BRUTE_IP, generate.INTRUDER_IP}
@@ -258,7 +259,9 @@ def test_evidence_filters_combine_with_the_others(loaded):
 def test_rules_endpoint_lists_the_loaded_rules(client):
     body = client.get("/rules").json()
     assert body["errors"] == []
-    assert [(rule["id"], rule["type"], rule["severity"]) for rule in body["rules"]] == [
+    # The rules written for this project come first, those in rules/sigma after them.
+    assert len(body["rules"]) == SHIPPED_COUNT
+    assert [(rule["id"], rule["type"], rule["severity"]) for rule in body["rules"][:5]] == [
         ("KW-001", "keyword", "medium"),
         ("NET-001", "port_scan", "high"),
         ("NET-002", "rare_port", "medium"),
@@ -308,7 +311,7 @@ def test_reload_picks_up_a_new_rule(rules_dir, loaded):
 
     body = loaded.post("/rules/reload").json()
 
-    assert [rule["id"] for rule in body["rules"]][-2:] == ["SSH-002", "SSH-003"]
+    assert [rule["id"] for rule in body["rules"]][3:6] == ["SSH-001", "SSH-002", "SSH-003"]
     assert body["alerts"] == {"total": 7, "created": 1, "updated": 0, "removed": 0}
     [sweep] = alerts(loaded, rule_id="SSH-003")
     assert (sweep["group_key"], sweep["count"], sweep["severity"]) == (
@@ -323,7 +326,7 @@ def test_reload_reports_a_broken_file_and_keeps_the_other_rules_working(rules_di
 
     body = loaded.post("/rules/reload").json()
 
-    assert len(body["rules"]) == 5
+    assert len(body["rules"]) == SHIPPED_COUNT
     assert body["errors"] == [
         {
             "file": "broken.yaml",
@@ -335,7 +338,7 @@ def test_reload_reports_a_broken_file_and_keeps_the_other_rules_working(rules_di
 
 
 def test_reload_without_rules_removes_all_alerts(rules_dir, loaded):
-    for path in rules_dir.iterdir():
+    for path in rules_dir.rglob("*.yaml"):
         path.unlink()
 
     body = loaded.post("/rules/reload").json()
@@ -351,5 +354,5 @@ def test_application_starts_even_if_a_rule_file_is_broken(rules_dir, request):
     client = request.getfixturevalue("client")  # started only now, with the broken file in place
     body = client.get("/rules").json()
 
-    assert len(body["rules"]) == 5
+    assert len(body["rules"]) == SHIPPED_COUNT
     assert [error["file"] for error in body["errors"]] == ["broken.yaml"]

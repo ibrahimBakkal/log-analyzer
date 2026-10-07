@@ -1,0 +1,18 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/guacamole/lnx_guacamole_susp_guacamole.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-1edd77db
+name: Guacamole Two Users Sharing Session Anomaly
+description: Detects suspicious session with two users present
+type: keyword
+severity: high
+keywords:
+  - (2 users now present)
+tags:
+  - attack.credential-access
+  - attack.t1212
+author: Florian Roth (Nextron Systems)
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/guacamole/lnx_guacamole_susp_guacamole.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://research.checkpoint.com/2020/apache-guacamole-rce/

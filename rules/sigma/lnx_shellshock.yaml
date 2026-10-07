@@ -1,0 +1,21 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/lnx_shellshock.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-c67e0c98
+name: Shellshock Expression
+description: Detects shellshock expressions in log files
+type: keyword
+severity: high
+keywords:
+  - (){:;};
+  - () {:;};
+  - () { :;};
+  - () { :; };
+tags:
+  - attack.persistence
+  - attack.t1505.003
+author: Florian Roth (Nextron Systems)
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/lnx_shellshock.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://owasp.org/www-pdf-archive/Shellshock_-_Tudor_Enache.pdf

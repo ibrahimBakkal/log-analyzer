@@ -289,7 +289,10 @@ def test_keeper_remembers_across_restarts_which_rules_the_alerts_were_made_with(
 def test_fingerprint_follows_the_rules_in_use():
     same = RuleSet(tuple(reversed(SHIPPED.rules)))
     switched_off = RuleSet(
-        tuple(rule.model_copy(update={"enabled": rule.id != "KW-001"}) for rule in SHIPPED.rules)
+        tuple(
+            rule.model_copy(update={"enabled": rule.enabled and rule.id != "KW-001"})
+            for rule in SHIPPED.rules
+        )
     )
     without = RuleSet(tuple(rule for rule in SHIPPED.rules if rule.id != "KW-001"))
 

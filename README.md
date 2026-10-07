@@ -90,6 +90,7 @@ log-analyzer/
 │       ├── api.ts        # API tipleri ve çağrıları
 │       └── queries.ts    # TanStack Query kancaları
 ├── rules/                # tespit kuralları (YAML): KW-001, SSH-001, SSH-002, NET-001, NET-002
+│   └── sigma/            # SigmaHQ deposundan alınan 28 kural, lisansı ve nasıl çevrildiği
 ├── samples/
 │   ├── generate.py       # örnek auth.log üreteci
 │   ├── generate_ufw.py   # aynı iki günün güvenlik duvarı logunu üretir
@@ -250,7 +251,7 @@ Log tablosu yalnızca görünen satırları çizer (react-window) ve kaydırdık
 
 ## Kurallar
 
-Kurallar `rules/` klasöründeki YAML dosyalarıdır; her dosyada bir kural bulunur. Uygulama açılırken hepsini yükler. `POST /rules/reload` dosyaları yeniden okur ve kuralları saklanan tüm olaylar üzerinde baştan çalıştırır. Hatalı bir dosya diğerlerinin yüklenmesini engellemez; neyin yanlış olduğu `GET /rules` yanıtındaki `errors` listesinde yazar.
+Kurallar `rules/` klasöründeki ve içindeki klasörlerdeki YAML dosyalarıdır; her dosyada bir kural bulunur. Uygulama açılırken hepsini yükler. `POST /rules/reload` dosyaları yeniden okur ve kuralları saklanan tüm olaylar üzerinde baştan çalıştırır. Hatalı bir dosya diğerlerinin yüklenmesini engellemez; neyin yanlış olduğu `GET /rules` yanıtındaki `errors` listesinde yazar.
 
 ```yaml
 # rules/SSH-001.yaml
@@ -324,6 +325,14 @@ Süreler hep aynı biçimde sayılır: ilk ve son olay arasındaki fark verilen 
 Uyarılar olaylardan ve kurallardan türetilir: her yüklemeden ve her `reload` çağrısından sonra yeniden hesaplanır. Aynı olay kümesinin uyarısı kimliğini korur; yeni olaylar geldikçe büyür.
 
 Örnek `auth.log` yüklendiğinde altı uyarı oluşur. `SSH-001` üç saldırganı yakalar (`203.0.113.45` için iki dalga, iki ayrı uyarı), `SSH-002` parolayı bulup içeri giren saldırganı, `KW-001` onun `sudo cat /etc/shadow` denemesini. 29 kez deneyen yavaş saldırgan, tek tük denemeler ve parolasını bir kez yanlış yazan `bob` uyarı üretmez. `ufw.log` da yüklenince iki uyarı eklenir: `NET-001` port taramasını, `NET-002` açık kalmış uzak masaüstü portuna gelen bağlantıları yakalar; olağan trafik ve yavaş tarama uyarı üretmez.
+
+### Sigma'dan alınan kurallar
+
+`rules/sigma/` klasöründe [SigmaHQ](https://github.com/SigmaHQ/sigma) deposundan alınmış 28 kural vardır: sshd'nin istismar denemelerine işaret eden hataları, bilinen yetki yükseltme açıkları (CVE-2019-14287, PwnKit, Nimbuspwn), ters kabuk ve indir-çalıştır komutları, komut geçmişini ve logları silme, güvenlik araçlarını durdurma gibi kalıpları ararlar. Sigma kurallarının çoğu bu aracın toplamadığı kayıtları (süreç başlatma, auditd, Windows olayları) ister; alınanlar, log satırlarında metin arayanlardır.
+
+Kuralları `python -m app.sigma` komutu çevirdi. Hangi kuralların alındığı, hangilerinin neden alınmadığı, lisans (Detection Rule License 1.1) ve Sigma alanlarının buradaki karşılıkları [`rules/sigma/README.md`](rules/sigma/README.md) dosyasında yazar. Her kural yazarını, özgün kuralın adresini ve lisansını taşır; arayüz bunları kuralın ve uyarılarının yanında gösterir.
+
+Örnek loglarda bu kurallar uyarı üretmez: örnek senaryolar giriş denemeleri ve port taramasıdır, bu kuralların aradığı komutları ve hata mesajlarını içermez.
 
 ## Örnek veri
 

@@ -1,0 +1,20 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/lnx_susp_jexboss.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-8ec2c8b4
+name: JexBoss Command Sequence
+description: Detects suspicious command sequence that JexBoss
+type: keyword
+severity: high
+keywords:
+  - bash -c /bin/bash
+require:
+  - '&/dev/tcp/'
+tags:
+  - attack.execution
+  - attack.t1059.004
+author: Florian Roth (Nextron Systems)
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/lnx_susp_jexboss.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://www.us-cert.gov/ncas/analysis-reports/AR18-312A

@@ -1,0 +1,20 @@
+# SigmaHQ deposundaki bir kuraldan çevrildi: python -m app.sigma
+# Özgün kural: rules/linux/builtin/lnx_shell_susp_log_entries.yml
+# Elle yapılan değişiklikler, kural yeniden çevrilirse kaybolur.
+id: SIGMA-f64b6e9a
+name: Suspicious Log Entries
+description: Detects suspicious log entries in Linux log files
+type: keyword
+severity: medium
+keywords:
+  - entered promiscuous mode
+  - Deactivating service
+  - Oversized packet received from
+  - imuxsock begins to drop messages
+tags:
+  - attack.impact
+author: Florian Roth (Nextron Systems)
+source: https://github.com/SigmaHQ/sigma/blob/8a4813404ea3074890e0cda9272d4d1a8b2941d6/rules/linux/builtin/lnx_shell_susp_log_entries.yml
+license: Detection Rule License 1.1 (https://github.com/SigmaHQ/Detection-Rule-License)
+references:
+  - https://github.com/ossec/ossec-hids/blob/f6502012b7380208db81f82311ad4a1994d39905/etc/rules/syslog_rules.xml
