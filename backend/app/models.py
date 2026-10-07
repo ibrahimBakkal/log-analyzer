@@ -38,6 +38,22 @@ class Event(Base):
     parsed: Mapped[bool]  # False: stored as-is because no pattern matched
 
 
+class Source(Base):
+    """A log file that has been loaded, known by its first line.
+
+    A log file keeps its first line for as long as it lives: while it grows,
+    and after rotation has renamed it to ``auth.log.1`` or packed it into
+    ``auth.log.2.gz``. Whatever name a file arrives under, its lines are stored
+    under the name it was first seen with, so no line is stored twice.
+    """
+
+    __tablename__ = "sources"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(unique=True)  # what events.source_file says
+    fingerprint: Mapped[str] = mapped_column(unique=True)  # SHA-256 of the first non-blank line
+
+
 class Alert(Base):
     """Something a rule found: one burst of related events."""
 

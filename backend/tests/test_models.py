@@ -8,7 +8,7 @@ from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.migration import MigrationContext
-from sqlalchemy import create_engine, inspect, select
+from sqlalchemy import create_engine, inspect, select, text
 from sqlalchemy.exc import IntegrityError, StatementError
 
 from app import models  # noqa: F401  (registers the tables)
@@ -65,6 +65,40 @@ def test_migrations_can_be_rolled_back(tmp_path):
 
     engine = create_engine(url)
     assert inspect(engine).get_table_names() == ["alembic_version"]
+    engine.dispose()
+
+
+def test_upgrade_registers_the_files_that_were_loaded_before_sources_existed(tmp_path):
+    import hashlib
+
+    url = f"sqlite:///{(tmp_path / 'old.db').as_posix()}"
+    command.upgrade(alembic_config(url), "0002")
+    engine = create_engine(url)
+    rows = [
+        # (source_file, line_no, raw); auth.log starts with a blank line, so its first line is 2
+        ("auth.log", 3, "Sep  9 00:00:09 web-01 sshd[1]: second"),
+        ("auth.log", 2, "Sep  9 00:00:07 web-01 sshd[1]: first"),
+        ("copy-of-auth.log", 1, "Sep  9 00:00:07 web-01 sshd[1]: first"),
+        ("ufw.log", 1, "Sep  9 00:00:08 web-01 kernel: [UFW BLOCK] IN=eth0"),
+    ]
+    with engine.begin() as connection:
+        for source_file, line_no, raw in rows:
+            connection.execute(
+                text(
+                    "INSERT INTO events (ts, level, message, raw, source_file, line_no, parsed) "
+                    "VALUES ('2026-09-09 00:00:07.000000', 'info', '', :raw, :source, :line, 0)"
+                ),
+                {"raw": raw, "source": source_file, "line": line_no},
+            )
+
+    command.upgrade(alembic_config(url), "head")
+
+    with engine.connect() as connection:
+        sources = dict(connection.execute(text("SELECT name, fingerprint FROM sources")).all())
+    assert sources == {
+        "auth.log": hashlib.sha256(rows[1][2].encode()).hexdigest(),
+        "ufw.log": hashlib.sha256(rows[3][2].encode()).hexdigest(),
+    }
     engine.dispose()
 
 

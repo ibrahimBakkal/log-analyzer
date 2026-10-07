@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfoNotFoundError
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from sqlalchemy import func, select
 
-from app.ingest import NoTimestampsError, ingest_lines, read_lines
+from app.ingest import DamagedFileError, NoTimestampsError, ingest_lines, open_log, read_lines
 from app.models import Alert
 from app.parsers import UnknownParserError, create_parser
 from app.routers import SessionDep
@@ -52,16 +52,24 @@ def ingest_file(
     ] = "UTC",
     source: Annotated[
         str | None,
-        Form(description="Name to store the lines under. Default: the uploaded file's name."),
+        Form(description="Name to store a new file under. Default: the uploaded file's name."),
     ] = None,
 ) -> IngestReport:
     """Parse a log file, store every line as an event and re-run the rules.
 
-    Lines are identified by file name and line number, so uploading the same
-    file again adds nothing (`duplicates`), and uploading a file that has grown
-    adds only the new lines. If a line number is already stored with different
-    text (`conflicts`) the stored line is kept: upload a rotated file under
-    another `source` name.
+    The file may be compressed (gzip, bzip2 or xz). Of a compressed file that is
+    damaged, the lines up to the damage are stored and the request fails with 422.
+
+    A file is known by its first line and each of its lines by its number, so
+    uploading the same file again adds nothing (`duplicates`), uploading a file
+    that has grown adds only the new lines, and a rotated copy (`auth.log.1`,
+    `auth.log.2.gz`) is recognized as the file it used to be. `source_file` in
+    the answer is the name the lines are stored under: the name the file was
+    first seen with, or, if another file already has that name, the name with
+    the date of the first line added.
+
+    `conflicts` counts lines whose number is already stored with different text
+    (a file that was edited); the stored lines are kept.
     """
     try:
         log_parser = create_parser(parser, year=year, tz=tz)
@@ -73,12 +81,16 @@ def ingest_file(
     try:
         result = ingest_lines(
             session,
-            read_lines(file.file),
+            read_lines(open_log(file.file)),
             source_file=_source_name(source or file.filename),
             parser=log_parser,
         )
     except NoTimestampsError as error:
         raise HTTPException(status_code=422, detail=str(error)) from None
+    except DamagedFileError as error:
+        evaluate(session, rules.enabled)
+        detail = f"{error}. The lines before that were stored."
+        raise HTTPException(status_code=422, detail=detail) from None
 
     if result.parsed or result.unparsed:  # new events: the alerts may have changed
         evaluate(session, rules.enabled)

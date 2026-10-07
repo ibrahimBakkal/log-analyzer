@@ -84,9 +84,79 @@ def test_time_zone_of_the_logging_machine_is_applied(client):
     assert first["ts"] == "2026-09-08T21:00:07Z"
 
 
-def test_lines_can_be_stored_under_another_source_name(client):
+def test_new_file_can_be_stored_under_a_chosen_name(client):
     assert upload(client, source="web-01/auth.log.1").json()["source_file"] == "auth.log.1"
-    assert upload(client).json()["duplicates"] == 0  # "auth.log" is a different file
+
+
+def test_file_is_recognized_whatever_name_it_comes_back_under(client):
+    upload(client)
+    for filename in ("auth.log.1", "copy-of-auth.log", "auth.log"):
+        report = upload(client, filename=filename).json()
+        assert (report["source_file"], report["duplicates"]) == ("auth.log", TOTAL)
+        assert report["parsed"] + report["unparsed"] == 0
+
+
+def test_rotation_is_followed_without_storing_a_line_twice(client):
+    """Monday's auth.log is Tuesday's auth.log.1; a new auth.log has taken its place."""
+    monday = "\n".join(LINES[:400]).encode()
+    rotated = "\n".join(LINES[:600]).encode()  # it grew before it was rotated
+    fresh = "\n".join(LINES[600:]).encode()
+
+    upload(client, monday)
+    old = upload(client, rotated, filename="auth.log.1").json()
+    new = upload(client, fresh).json()
+
+    assert (old["source_file"], old["duplicates"], old["parsed"] + old["unparsed"]) == (
+        "auth.log",
+        400,
+        200,
+    )
+    assert (new["source_file"], new["duplicates"], new["conflicts"]) == (
+        "auth.log (2026-09-09)",
+        0,
+        0,
+    )
+    assert new["parsed"] + new["unparsed"] == TOTAL - 600
+    assert len(all_events(client, limit=500)) == TOTAL
+
+
+@pytest.mark.parametrize("pack", ["gzip", "bz2", "lzma"])
+def test_compressed_file_is_unpacked(client, pack):
+    import importlib
+
+    packed = importlib.import_module(pack).compress(SAMPLE.read_bytes())
+    report = upload(client, packed, filename="auth.log.2.gz").json()
+    assert (report["lines"], report["parsed"], report["unparsed"]) == (TOTAL, 605, 452)
+
+    # ... and it is the same file as the plain one.
+    assert upload(client).json()["duplicates"] == TOTAL
+
+
+def test_compression_is_told_from_the_content_not_the_name(client):
+    report = upload(client, filename="auth.log.gz").json()  # plain text behind a .gz name
+    assert (report["lines"], report["source_file"]) == (TOTAL, "auth.log.gz")
+
+
+def test_damaged_compressed_file_is_refused_with_the_line_it_broke_at(client):
+    import gzip
+
+    packed = gzip.compress(SAMPLE.read_bytes())
+    response = upload(client, packed[: len(packed) // 2], filename="auth.log.1.gz")
+    assert response.status_code == 422
+    assert "compressed file is damaged after line" in response.json()["detail"]
+    assert "The lines before that were stored." in response.json()["detail"]
+
+    # What could be read was stored and the rules have seen it ...
+    salvaged = len(all_events(client, limit=500))
+    assert 100 < salvaged < TOTAL
+    assert client.get("/alerts").json()["total"] >= 1
+
+    # ... and the whole file fills in the rest.
+    report = upload(client).json()
+    assert (report["duplicates"], report["parsed"] + report["unparsed"]) == (
+        salvaged,
+        TOTAL - salvaged,
+    )
 
 
 def test_directories_are_stripped_from_the_uploaded_file_name(client):
