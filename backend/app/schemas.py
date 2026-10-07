@@ -139,3 +139,27 @@ class Stats(BaseModel):
     alerts: int
     alerts_by_severity: dict[Severity, int]
     top_sources: list[SourceStats] = Field(description="The addresses with most failed logins.")
+
+
+class PortStats(BaseModel):
+    port: int
+    count: int
+    blocked: int
+    allowed: int
+    first_seen: datetime
+    last_seen: datetime
+
+
+class PortConnection(BaseModel):
+    ts: datetime
+    port: int
+    action: Action | None
+
+
+class PortReport(BaseModel):
+    ip: str
+    total: int = Field(description="Packets from this address that name a destination port.")
+    distinct_ports: int
+    ports: list[PortStats] = Field(description="The busiest ports first.")
+    connections: list[PortConnection] = Field(description="Single packets, oldest first.")
+    truncated: bool = Field(description="True if `connections` does not hold all of them.")

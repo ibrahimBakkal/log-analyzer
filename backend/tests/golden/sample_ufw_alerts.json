@@ -1,0 +1,22 @@
+[
+  {
+    "rule_id": "NET-001",
+    "severity": "high",
+    "group_by": "src_ip",
+    "group_key": "198.51.100.150",
+    "first_seen": "2026-09-09T05:20:18Z",
+    "last_seen": "2026-09-09T05:20:57Z",
+    "count": 120,
+    "summary": "198.51.100.150 adresi 39 sn içinde 120 farklı portu denedi"
+  },
+  {
+    "rule_id": "NET-002",
+    "severity": "medium",
+    "group_by": "src_ip",
+    "group_key": "203.0.113.77",
+    "first_seen": "2026-09-10T13:05:55Z",
+    "last_seen": "2026-09-10T13:06:21Z",
+    "count": 3,
+    "summary": "203.0.113.77 adresinden açık olmaması gereken porta 3 bağlantı"
+  }
+]

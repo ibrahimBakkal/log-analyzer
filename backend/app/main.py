@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import alerts, events, health, ingest, rules, stats, timeline
+from app.routers import alerts, events, health, ingest, ports, rules, stats, timeline
 from app.rules import load_rules
 
 log = logging.getLogger(__name__)
@@ -43,3 +43,4 @@ app.include_router(alerts.router)
 app.include_router(rules.router)
 app.include_router(timeline.router)
 app.include_router(stats.router)
+app.include_router(ports.router)
