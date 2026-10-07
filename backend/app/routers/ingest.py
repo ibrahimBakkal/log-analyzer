@@ -13,8 +13,8 @@ from app.models import Alert
 from app.parsers import UnknownParserError, create_parser
 from app.routers import SessionDep
 from app.routers.live import HubDep
-from app.routers.rules import RulesDep
-from app.rules import evaluate
+from app.routers.rules import AlertKeeperDep, RulesDep
+from app.rules import latest_event_id
 from app.schemas import IngestReport
 
 router = APIRouter(tags=["ingest"])
@@ -30,6 +30,7 @@ def _source_name(name: str | None) -> str:
 def ingest_file(
     session: SessionDep,
     rules: RulesDep,
+    keeper: AlertKeeperDep,
     hub: HubDep,
     file: Annotated[UploadFile, File(description="The log file to load.")],
     parser: Annotated[
@@ -80,6 +81,7 @@ def ingest_file(
     except (ZoneInfoNotFoundError, ValueError, OSError):
         raise HTTPException(status_code=422, detail=f"unknown time zone {tz!r}") from None
 
+    before = latest_event_id(session)
     try:
         result = ingest_lines(
             session,
@@ -90,12 +92,12 @@ def ingest_file(
     except NoTimestampsError as error:
         raise HTTPException(status_code=422, detail=str(error)) from None
     except DamagedFileError as error:
-        evaluate(session, rules.enabled)
+        keeper.refresh(session, rules, since=before)
         detail = f"{error}. The lines before that were stored."
         raise HTTPException(status_code=422, detail=detail) from None
 
-    if result.added:  # new events: the alerts may have changed
-        evaluate(session, rules.enabled)
+    if result.added:  # new events: the alerts of the groups they belong to may have changed
+        keeper.refresh(session, rules, since=before)
     alerts = session.scalar(select(func.count()).select_from(Alert)) or 0
     if result.added:
         hub.publish("update", {"reason": "ingest", "added": result.added, "alerts": alerts})

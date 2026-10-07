@@ -5,11 +5,9 @@ import shutil
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
 
 import generate  # samples/generate.py
 from app.config import get_settings
-from app.main import app
 
 GOLDEN = Path(__file__).with_name("golden") / "sample_alerts.json"
 SHIPPED_RULES = Path(__file__).resolve().parents[2] / "rules"
@@ -335,11 +333,11 @@ def test_reload_without_rules_removes_all_alerts(rules_dir, loaded):
     assert all(event["highlights"] == [] for event in events(loaded, action="auth_fail"))
 
 
-def test_application_starts_even_if_a_rule_file_is_broken(rules_dir):
+def test_application_starts_even_if_a_rule_file_is_broken(rules_dir, request):
     (rules_dir / "broken.yaml").write_text("id: [unclosed\n")
 
-    with TestClient(app) as client:
-        body = client.get("/rules").json()
+    client = request.getfixturevalue("client")  # started only now, with the broken file in place
+    body = client.get("/rules").json()
 
     assert len(body["rules"]) == 5
     assert [error["file"] for error in body["errors"]] == ["broken.yaml"]

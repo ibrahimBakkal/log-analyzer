@@ -22,7 +22,7 @@ from app.ingest import _READ_BYTES, Ingestor, LineReader, NoTimestampsError
 from app.live import Hub
 from app.models import Alert
 from app.parsers import BaseParser, create_parser
-from app.rules import RuleSet, evaluate
+from app.rules import AlertKeeper, RuleSet, latest_event_id
 
 log = logging.getLogger(__name__)
 
@@ -194,17 +194,20 @@ class Follower:
         session_factory: Callable[[], Session],
         rules: Callable[[], RuleSet],
         hub: Hub,
+        alerts: AlertKeeper | None = None,
         tz: str = "UTC",
         interval: float = 1.0,
     ) -> None:
         self._session = session_factory()
+        self._alerts = alerts or AlertKeeper()
+        self._seen: int | None = None  # the newest event the rules have been run up to
         self._files = [
             FollowedFile(path, self._session, create_parser("auto", tz=tz)) for path in paths
         ]
         self._rules = rules
         self._hub = hub
         self._interval = interval
-        self._stale = False  # events were stored that the rules have not seen yet
+        self._stale = False  # events were stored that the rules have not been run on yet
         self._reported: list[tuple[Any, ...]] | None = None
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
@@ -213,6 +216,8 @@ class Follower:
         """Look at every file once. Returns the number of events added."""
         added = 0
         try:
+            if self._seen is None:
+                self._seen = latest_event_id(self._session)
             for file in self._files:
                 try:
                     added += file.poll()
@@ -225,7 +230,9 @@ class Follower:
             if added:
                 self._stale = True
             if self._stale and not self.behind:
-                evaluate(self._session, self._rules().enabled)
+                newest = latest_event_id(self._session)
+                self._alerts.refresh(self._session, self._rules(), since=self._seen)
+                self._seen = newest
                 self._stale = False
             if added:
                 alerts = self._session.scalar(select(func.count()).select_from(Alert)) or 0

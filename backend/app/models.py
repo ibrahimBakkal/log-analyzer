@@ -58,6 +58,15 @@ class Source(Base):
     fingerprint: Mapped[str] = mapped_column(unique=True)  # SHA-256 of the first non-blank line
 
 
+class State(Base):
+    """Small facts the application remembers between runs, by name."""
+
+    __tablename__ = "state"
+
+    key: Mapped[str] = mapped_column(primary_key=True)
+    value: Mapped[str] = mapped_column(Text)
+
+
 class Alert(Base):
     """Something a rule found: one burst of related events."""
 

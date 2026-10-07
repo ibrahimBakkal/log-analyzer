@@ -6,15 +6,18 @@ Running it twice changes nothing, and an alert keeps its id for as long as the
 burst of events behind it stays the same.
 """
 
+import hashlib
 import ipaddress
+import threading
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 
-from sqlalchemy import ColumnElement, Select, and_, delete, insert, or_, select
+from sqlalchemy import ColumnElement, Select, and_, delete, func, insert, or_, select
 from sqlalchemy.orm import Session
 
-from app.models import Alert, AlertEvent, Event
+from app.models import Alert, AlertEvent, Event, State
 from app.rules.evaluators import EventRow, Evidence, create_evaluator
+from app.rules.loader import RuleSet
 from app.rules.schema import (
     EventFilter,
     KeywordRule,
@@ -90,20 +93,65 @@ def detect(rule: Rule, events: Iterable[EventRow]) -> list[Detection]:
     return sorted(finished, key=lambda detection: (detection.first.ts, detection.first.event_id))
 
 
-def evaluate(session: Session, rules: Sequence[Rule]) -> Evaluation:
-    """Recompute all alerts from the stored events and the enabled *rules*."""
-    detections = [
-        detection
-        for rule in rules
-        if rule.enabled
-        for detection in detect(rule, session.execute(_events_for(rule)).yield_per(2000))
-    ]
+def evaluate(session: Session, rules: Sequence[Rule], *, since: int | None = None) -> Evaluation:
+    """Make the alerts table what the stored events and the enabled *rules* say it should be.
 
-    existing = {alert.key: alert for alert in session.scalars(select(Alert))}
+    Without *since*, every alert is worked out again from scratch.
+
+    With *since* (an event id), only what events with a larger id can have
+    changed is worked out again. Every rule looks at one group at a time (one
+    source address, one user) and groups do not influence each other, so it is
+    enough to redo the groups the new events belong to, each from its first
+    event on. The outcome is the same as that of a full run, provided the rules
+    are the ones the stored alerts were made with; :class:`AlertKeeper` sees to that.
+    """
+    enabled = [rule for rule in rules if rule.enabled]
+    created = updated = removed = 0
+    for rule in enabled:
+        groups = None if since is None else _groups_with_news(session, rule, since)
+        if groups is not None and not groups:
+            continue
+        if groups is None:
+            events = session.execute(_events_for(rule)).yield_per(2000)
+        else:
+            events = _events_of_groups(session, rule, groups)
+        counts = _reconcile(session, rule, groups, detect(rule, events))
+        created, updated, removed = (
+            created + counts[0],
+            updated + counts[1],
+            removed + counts[2],
+        )
+
+    if since is None:
+        # Alerts of rules that are gone or switched off.
+        in_use = [rule.id for rule in enabled]
+        orphans = session.scalars(select(Alert).where(Alert.rule_id.not_in(in_use))).all()
+        for orphan in orphans:
+            session.delete(orphan)
+        removed += len(orphans)
+    session.commit()
+    total = session.scalar(select(func.count()).select_from(Alert)) or 0
+    return Evaluation(total, created, updated, removed)
+
+
+def _reconcile(
+    session: Session, rule: Rule, groups: Sequence[str] | None, detections: list[Detection]
+) -> tuple[int, int, int]:
+    """Make the alerts of *rule* (of the given groups only, if any) match *detections*."""
+    in_scope = [Alert.rule_id == rule.id]
+    if groups is not None:
+        in_scope.append(Alert.group_key.in_(groups))
+    existing = {alert.key: alert for alert in session.scalars(select(Alert).where(*in_scope))}
+    # Evidence is rebuilt rather than compared: a changed rule can highlight the
+    # same events differently.
+    session.execute(
+        delete(AlertEvent).where(AlertEvent.alert_id.in_(select(Alert.id).where(*in_scope)))
+    )
+
     created = updated = 0
     evidence_rows = []
     for detection in detections:
-        key = f"{detection.rule.id}:{detection.key}:{detection.first.event_id}"
+        key = f"{rule.id}:{detection.key}:{detection.first.event_id}"
         fields = _alert_fields(detection)
         alert = existing.pop(key, None)
         if alert is None:
@@ -119,20 +167,62 @@ def evaluate(session: Session, rules: Sequence[Rule]) -> Evaluation:
             {
                 "alert_id": alert.id,
                 "event_id": item.event_id,
-                "spans": [list(s) for s in item.spans],
+                "spans": [list(span) for span in item.spans],
             }
             for item in detection.evidence
         ]
 
     for stale in existing.values():
         session.delete(stale)
-    # Evidence is rebuilt rather than compared: a changed rule can highlight the
-    # same events differently.
-    session.execute(delete(AlertEvent))
+    session.flush()
     if evidence_rows:
         session.execute(insert(AlertEvent.__table__), evidence_rows)
-    session.commit()
-    return Evaluation(len(detections), created, updated, len(existing))
+    return created, updated, len(existing)
+
+
+class AlertKeeper:
+    """Keeps the alerts in step with the events, doing as little as it may.
+
+    Redoing only the groups with new events is right as long as the rules have
+    not changed since the alerts were made. So the database remembers a
+    fingerprint of the rules its alerts were made with; whenever the rules in
+    use are different (a reload, or rule files edited while the server was
+    down), everything is redone.
+
+    One evaluation at a time: an upload and the file follower would otherwise
+    overwrite each other's work.
+    """
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+
+    def refresh(self, session: Session, rules: RuleSet, *, since: int | None) -> Evaluation:
+        """Bring the alerts up to date. *since*: the highest event id before the new events."""
+        with self._lock:
+            fingerprint = rules_fingerprint(rules)
+            current = session.get(State, _RULES_KEY)
+            everything = since is None or current is None or current.value != fingerprint
+            outcome = evaluate(session, rules.enabled, since=None if everything else since)
+            if current is None:
+                session.add(State(key=_RULES_KEY, value=fingerprint))
+            elif current.value != fingerprint:
+                current.value = fingerprint
+            session.commit()
+            return outcome
+
+
+_RULES_KEY = "rules"
+
+
+def rules_fingerprint(rules: RuleSet) -> str:
+    """Changes whenever a rule that is in use changes, appears or goes away."""
+    described = sorted(rule.model_dump_json() for rule in rules.enabled)
+    return hashlib.sha256("\n".join(described).encode()).hexdigest()
+
+
+def latest_event_id(session: Session) -> int:
+    """The id to pass as ``since`` later: taken before new events are stored."""
+    return session.scalar(select(func.max(Event.id))) or 0
 
 
 def _alert_fields(detection: Detection) -> dict[str, object]:
@@ -164,38 +254,79 @@ def _alert_fields(detection: Detection) -> dict[str, object]:
     }
 
 
+# A batch of new lines with more groups than this is not worth picking apart:
+# the rule is run over everything instead.
+MAX_GROUPS = 200
+
+_COLUMNS = (
+    Event.id,
+    Event.ts,
+    Event.host,
+    Event.service,
+    Event.level,
+    Event.action,
+    Event.user,
+    Event.src_ip,
+    Event.dst_port,
+    Event.message,
+)
+
+
+# Up to this many events of a few groups are put in time order here rather than
+# by the database.
+MAX_SORTED_HERE = 100_000
+
+
 def _events_for(rule: Rule) -> Select:
     """The events a rule has to look at, oldest first. The database discards the rest."""
-    query = select(
-        Event.id,
-        Event.ts,
-        Event.host,
-        Event.service,
-        Event.level,
-        Event.action,
-        Event.user,
-        Event.src_ip,
-        Event.dst_port,
-        Event.message,
-    ).order_by(Event.ts, Event.id)
-    query = query.where(*_conditions(rule.match))
+    return select(*_COLUMNS).where(*_selection(rule)).order_by(Event.ts, Event.id)
 
+
+def _events_of_groups(session: Session, rule: Rule, groups: Sequence[str]) -> Iterable[EventRow]:
+    """The events of *groups* that *rule* has to look at, oldest first.
+
+    Asked for them in time order, SQLite tends to walk the time index and throw
+    away what belongs to other groups: every event of the kind, to find a
+    handful. Asked for them in any order, it goes straight to the groups. So
+    they are fetched unordered and sorted here, unless there are so many that
+    holding them all at once would cost more memory than the detour saves time.
+    """
+    wanted = select(*_COLUMNS).where(*_selection(rule), getattr(Event, rule.group_by).in_(groups))
+    found = session.execute(wanted.limit(MAX_SORTED_HERE + 1)).all()
+    if len(found) <= MAX_SORTED_HERE:
+        return sorted(found, key=lambda event: (event.ts, event.id))
+    return session.execute(wanted.order_by(Event.ts, Event.id)).yield_per(2000)
+
+
+def _groups_with_news(session: Session, rule: Rule, since: int) -> list[str] | None:
+    """The groups that have events newer than *since* for *rule*; ``None`` if too many to list."""
+    group = getattr(Event, rule.group_by)
+    found = session.scalars(
+        select(group)
+        .where(Event.id > since, group.is_not(None), *_selection(rule))
+        .distinct()
+        .limit(MAX_GROUPS + 1)
+    ).all()
+    return None if len(found) > MAX_GROUPS else list(found)
+
+
+def _selection(rule: Rule) -> list[ColumnElement[bool]]:
+    """What the database can already tell about which events matter to a rule."""
+    conditions = _conditions(rule.match)
     if isinstance(rule, KeywordRule):
         # Not for non-ASCII keywords: SQLite only folds the case of ASCII letters,
         # the evaluator folds all of them.
         if rule.regex is None and all(map(str.isascii, rule.keywords)):
             contains = (Event.message.icontains(word, autoescape=True) for word in rule.keywords)
-            query = query.where(or_(*contains))
+            conditions.append(or_(*contains))
     elif isinstance(rule, SequenceRule):
-        query = query.where(or_(*(and_(*_conditions(step.match)) for step in rule.steps)))
+        conditions.append(or_(*(and_(*_conditions(step.match)) for step in rule.steps)))
     elif isinstance(rule, PortScanRule):
-        query = query.where(Event.dst_port.is_not(None))
+        conditions.append(Event.dst_port.is_not(None))
     elif isinstance(rule, RarePortRule):
         listed = Event.dst_port.in_(rule.ports)
-        query = query.where(
-            listed if rule.mode == "watchlist" else Event.dst_port.not_in(rule.ports)
-        )
-    return query
+        conditions.append(listed if rule.mode == "watchlist" else Event.dst_port.not_in(rule.ports))
+    return conditions
 
 
 def _conditions(wanted: EventFilter) -> list[ColumnElement[bool]]:

@@ -154,6 +154,26 @@ def test_new_lines_reach_the_rules_and_the_listeners(follower, log, session, hub
     assert len(hub.updates()) == 2  # nothing new, nothing said
 
 
+def test_rules_are_run_only_on_what_came_in_since_the_last_time(follower, log, monkeypatch):
+    asked: list[int | None] = []
+    refresh = follower._alerts.refresh
+
+    def recording(session, rules, *, since):
+        asked.append(since)
+        return refresh(session, rules, since=since)
+
+    monkeypatch.setattr(follower._alerts, "refresh", recording)
+    write(log, LINES[:10])
+    follower.run_once()
+    append(log, *LINES[10:15])
+    follower.run_once()
+    follower.run_once()  # nothing new: the rules are not run at all
+    append(log, LINES[15])
+    follower.run_once()
+
+    assert asked == [0, 10, 15]
+
+
 def test_listeners_hear_when_a_file_is_found(follower, log, hub):
     follower.run_once()
     follower.run_once()

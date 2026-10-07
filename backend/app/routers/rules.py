@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, Request
 from app.config import get_settings
 from app.live import Hub
 from app.routers import SessionDep
-from app.rules import RuleSet, evaluate, load_rules
+from app.rules import AlertKeeper, RuleSet, load_rules
 from app.schemas import EvaluationOut, RuleErrorOut, RuleList, RuleReload
 
 router = APIRouter(tags=["rules"])
@@ -19,7 +19,12 @@ def get_rules(request: Request) -> RuleSet:
     return request.app.state.rules
 
 
+def get_alert_keeper(request: Request) -> AlertKeeper:
+    return request.app.state.alerts
+
+
 RulesDep = Annotated[RuleSet, Depends(get_rules)]
+AlertKeeperDep = Annotated[AlertKeeper, Depends(get_alert_keeper)]
 
 
 def _errors(rules: RuleSet) -> list[RuleErrorOut]:
@@ -41,7 +46,7 @@ def reload_rules(request: Request, session: SessionDep) -> RuleReload:
     """
     rules = load_rules(get_settings().rules_dir)
     request.app.state.rules = rules
-    evaluation = evaluate(session, rules.enabled)
+    evaluation = get_alert_keeper(request).refresh(session, rules, since=None)
     hub: Hub = request.app.state.hub
     hub.publish("update", {"reason": "rules", "added": 0, "alerts": evaluation.total})
     return RuleReload(

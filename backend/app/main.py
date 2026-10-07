@@ -2,18 +2,19 @@
 
 import logging
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, contextmanager
 from importlib.metadata import version
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import get_settings
-from app.db import session_factory
+from app.db import get_session, session_factory
 from app.follow import Follower
 from app.live import Hub, on_exit_signal
 from app.routers import alerts, events, health, ingest, live, ports, rules, stats, timeline
-from app.rules import load_rules
+from app.rules import AlertKeeper, latest_event_id, load_rules
 
 log = logging.getLogger(__name__)
 
@@ -26,12 +27,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         log.warning("rule file %s was not loaded: %s", error.file, error.message)
 
     app.state.hub = Hub()
+    app.state.alerts = AlertKeeper()
+    _check_alerts(app)
     app.state.follower = None
     if settings.follow:
         app.state.follower = Follower(
             settings.follow,
             session_factory=session_factory(),
             rules=lambda: app.state.rules,
+            alerts=app.state.alerts,
             hub=app.state.hub,
             tz=settings.follow_tz,
             interval=settings.follow_interval,
@@ -47,6 +51,33 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         if app.state.follower is not None:
             app.state.follower.stop()
         app.state.hub.close()
+
+
+def _check_alerts(app: FastAPI) -> None:
+    """Redo the alerts if the rules are not the ones they were made with.
+
+    Someone who edits a rule file and restarts the server expects the alerts to
+    follow. If nothing changed this costs a few small queries.
+    """
+    # Through the same door requests use, so that whoever swaps the database
+    # (the tests do) swaps it for this as well.
+    open_session = contextmanager(app.dependency_overrides.get(get_session, get_session))
+    try:
+        with open_session() as session:
+            outcome = app.state.alerts.refresh(
+                session, app.state.rules, since=latest_event_id(session)
+            )
+    except SQLAlchemyError as error:
+        # Most likely a database without tables yet; /health says what to do about it.
+        log.warning("alerts were not checked against the rules: %s", str(error).splitlines()[0])
+        return
+    if outcome.created or outcome.updated or outcome.removed:
+        log.info(
+            "rules have changed since the alerts were made: %d created, %d updated, %d removed",
+            outcome.created,
+            outcome.updated,
+            outcome.removed,
+        )
 
 
 app = FastAPI(
