@@ -5,7 +5,7 @@
 
 Sunucu loglarını (SSH `auth.log` ve güvenlik duvarı `ufw.log`) yapılandırılmış olaylara çevirip zaman çizelgesinde gösteren ve kural tabanlı uyarılar üreten bir log analiz aracı. Arka uç Python/FastAPI, arayüz React.
 
-> **Durum:** Aşama 5 tamam — loglar yüklenerek ya da dosya canlı izlenerek veritabanına alınıyor; eşik, sıralı olay ve port taraması kuralları uyarı üretiyor; web arayüzü zaman çizelgesini, log satırlarını, uyarıları ve bir adresin denediği portları birlikte gösteriyor ve yeni satırlar geldikçe kendiliğinden yenileniyor. Sıradaki adımlar için [Yol haritası](#yol-haritası) bölümüne bak.
+![Arayüzde kısa bir tur: özet, bir uyarının kanıt satırları, port taraması, kurallar](docs/img/tur.gif)
 
 ## Amaç
 
@@ -13,8 +13,17 @@ Bir sunucunun loglarına bakıp "burada ne oldu, ne zaman, kim yaptı?" sorusunu
 
 - **Ayrıştırma:** ham satırlar zaman, kaynak IP, port, kullanıcı ve eylem (`auth_fail`, `auth_ok`, `conn_block`, …) alanlarına ayrılır. Tanınmayan satırlar atılmaz, `unparsed` olarak saklanır.
 - **Zaman çizelgesi:** olay yoğunluğu zaman ekseninde gösterilir; sıçramalar bir bakışta görülür.
-- **Kurallar:** YAML ile yazılan anahtar kelime, eşik, sıralı olay ve port kuralları şüpheli davranışı işaretler.
+- **Kurallar:** YAML ile yazılan anahtar kelime, eşik, sıralı olay ve port kuralları şüpheli davranışı işaretler. Depoda beş kendi kuralı ve [SigmaHQ](https://github.com/SigmaHQ/sigma)'dan alınmış 28 kural var.
 - **Kanıt:** her uyarı, onu tetikleyen log satırlarıyla birlikte gösterilir; satırlarda eşleşen kısımlar vurgulanır.
+- **Canlı takip:** sunucu bir log dosyasını büyüdükçe okuyabilir; yeni satırlar bir iki saniye içinde uyarıya dönüşür ve açık sayfalar kendiliğinden yenilenir.
+
+| Belge | İçeriği |
+|---|---|
+| [Vaka çalışması](docs/vaka-calismasi.md) | Örnek loglardaki en ciddi olayın araçla adım adım incelenmesi |
+| [Kural nasıl yazılır](docs/kural-yazma.md) | Kural türleri, alanlar, zamanın sayılması, kuralı deneme, Sigma ile karşılaştırma |
+| [Tespit ölçümü](docs/tespit-olcumu.md) | Kuralların neyi yakaladığı, neyi kaçırdığı, neye yanlış alarm verdiği |
+| [Performans](docs/performans.md) | Bir milyon satırla ölçümler, yapılan iyileştirmeler, hâlâ yavaş olanlar |
+| [Sigma'dan alınan kurallar](rules/sigma/README.md) | Hangi kuralların alındığı, nasıl çevrildiği, lisansı |
 
 ## Hızlı başlangıç
 
@@ -98,19 +107,24 @@ log-analyzer/
 ├── backend/
 │   ├── app/
 │   │   ├── parsers/      # syslog başlığı, auth.log kalıpları, UFW paket logu, parser kayıt defteri
-│   │   ├── rules/        # kural şeması, YAML yükleyici, değerlendiriciler, uyarı motoru
+│   │   ├── rules/        # kural şeması, YAML yükleyici, değerlendiriciler, uyarı motoru, anahtar kelime taraması
 │   │   ├── routers/      # /health, /ingest, /events, /alerts, /rules, /timeline, /stats, /ports, /stream, /follow
 │   │   ├── ingest.py     # satır satır okuma, sıkıştırılmış dosyalar, toplu yazım
 │   │   ├── follow.py     # büyüyen dosyaları izleme, rotasyon
 │   │   ├── live.py       # değişiklikleri dinleyenlere duyurma
+│   │   ├── load.py       # sunucu olmadan log yükleme: python -m app.load
+│   │   ├── sigma.py      # Sigma kurallarını çevirme: python -m app.sigma
 │   │   ├── models.py     # Event, Alert ve AlertEvent tabloları
 │   │   └── main.py       # FastAPI uygulaması
 │   ├── migrations/       # Alembic migration'ları
 │   ├── tests/
+│   ├── Dockerfile        # API imajı
 │   ├── alembic.ini
 │   └── pyproject.toml    # bağımlılıklar ve pytest ayarı
+├── docs/                 # vaka çalışması, kural yazma, tespit ölçümü, performans, ekran görüntüleri
 ├── frontend/             # React arayüzü (Vite, TypeScript, Tailwind)
 │   ├── e2e/              # arayüzü gerçek tarayıcıda baştan sona deneyen betik (Playwright)
+│   ├── Dockerfile        # arayüz imajı (nginx; /api isteklerini API'ye geçirir)
 │   └── src/
 │       ├── pages/        # Özet, İnceleme, Kurallar
 │       ├── components/   # Timeline, LogTable, AlertPanel, PortView, FilterBar, ...
@@ -127,6 +141,8 @@ log-analyzer/
 │   ├── generate.py       # örnek auth.log üreteci
 │   ├── generate_ufw.py   # aynı iki günün güvenlik duvarı logunu üretir
 │   ├── build_demo.py     # demo için API yanıtlarını kaydeder
+│   ├── benchmark.py      # büyük bir logla yükleme, kural ve API sürelerini ölçer
+│   ├── measure.py        # kuralların yakaladığını, kaçırdığını ve yanlış alarmlarını sayar
 │   ├── auth.log          # üretilmiş, anonim örnek loglar
 │   └── ufw.log
 └── ruff.toml             # lint ve biçim ayarı
@@ -193,6 +209,13 @@ curl "http://127.0.0.1:8000/events?ip=203.0.113.99&start=2026-09-10T02:30:00Z"
 curl "http://127.0.0.1:8000/ports?ip=198.51.100.150"
 ```
 
+Aynı yükleme sunucu çalışmıyorken komut satırından da yapılabilir:
+
+```bash
+cd backend
+python -m app.load ../samples/auth.log ../samples/ufw.log --year 2026
+```
+
 Arayüzü ayrı bir terminalde başlat:
 
 ```bash
@@ -236,11 +259,19 @@ head -n 300 ../samples/auth.log >> /tmp/deneme.log             # başka bir term
 
 Arayüzün fikri, üzeri işaretlenmiş bir log çıktısıdır: her şey log satırlarına geri döner, kanıt olan satırlar fosforlu kalemle çizilmiş gibi vurgulanır.
 
+| Özet | İnceleme: bir uyarının zamanı |
+|---|---|
+| [![Özet sayfası](docs/img/ozet.png)](docs/img/ozet.png) | [![İnceleme sayfası](docs/img/inceleme.png)](docs/img/inceleme.png) |
+| **Port taraması** | **Kurallar** |
+| [![Port görünümü](docs/img/port-taramasi.png)](docs/img/port-taramasi.png) | [![Kurallar sayfası](docs/img/kurallar.png)](docs/img/kurallar.png) |
+| **Koyu tema** | **Telefonda** |
+| [![Koyu tema](docs/img/inceleme-koyu.png)](docs/img/inceleme-koyu.png) | <a href="docs/img/telefon.png"><img src="docs/img/telefon.png" alt="Telefon genişliğinde özet sayfası" width="260"></a> |
+
 - **Özet:** Yüklenen logun sayıları, tüm dönemin zaman çizelgesi, uyarılar, en çok başarısız giriş denemesi yapan adresler ve log yükleme formu.
-- **İnceleme:** Filtreler, zaman çizelgesi, log satırları ve uyarılar tek sayfada. Bir uyarıya tıklayınca çizelge o uyarının aralığına gider; tablo o aralıktaki tüm satırları gösterir, kanıt satırları kenar çizgisi ve vurgulu metinle ayrılır. Çizelgede sürükleyerek zaman aralığı seçilir. Filtreler sayfa adresinde tutulur, yani bir görünüm yer imine eklenebilir ve geri tuşu çalışır.
+- **İnceleme:** Filtreler (zaman, adres, program, eylem, kural, düzey), zaman çizelgesi, log satırları ve uyarılar tek sayfada. Bir uyarıya tıklayınca çizelge o uyarının aralığına gider; tablo o aralıktaki tüm satırları gösterir, kanıt satırları kenar çizgisi ve vurgulu metinle ayrılır. Çizelgede sürükleyerek zaman aralığı seçilir. Filtreler sayfa adresinde tutulur, yani bir görünüm yer imine eklenebilir ve geri tuşu çalışır.
 - **Canlı gösterge:** Sunucu dosya izliyorsa üst çubukta "Canlı" yazar; yeni satırlar geldiğinde yanında kaç tane geldiği belirir. Tıklayınca izlenen dosyalar ve durumları listelenir. Bağlantı koparsa gösterge bunu söyler, geri gelince sayfa kendini yeniler. İnceleme sayfasındaki "En yeni satırlar üstte" seçeneğiyle yeni gelen satırlar tablonun başında görünür.
 - **Port görünümü:** İnceleme sayfasında bir adres öne çıktığında (IP filtresi ya da o adresle ilgili bir uyarı) ve güvenlik duvarı o adresi kaydetmişse, zaman çizelgesinin altında aynı zaman ekseniyle bir port grafiği belirir: her paket bir işaret, düşey eksen hedef port. Tarama, kısa sürede dikey dağılan bir işaret yığını olarak görünür; tek porta ısrar, yatay bir sıra olarak. Altında en çok paket alan portlar ve güvenlik duvarının geçirdiği portlar listelenir.
-- **Kurallar:** Yüklü kurallar (ne aradıkları cümleyle yazılır), yüklenemeyen kural dosyaları ve kuralları yeniden yükleme düğmesi.
+- **Kurallar:** Yüklü kurallar ve ne aradıkları: anahtar kelimeler, kuralın satırda işaretleyeceği gibi işaretlenmiş olarak; başka koleksiyonlardan alınan kurallar yazarı, kaynağı ve lisansıyla ayrı listelenir. Yüklenemeyen kural dosyaları nedeniyle birlikte görünür. Kuralları yeniden yükleme düğmesi buradadır.
 
 ### Demo: sunucusuz arayüz
 
@@ -248,7 +279,7 @@ Arayüzün, iki örnek logu içinde taşıyan ve hiçbir sunucuya bağlanmayan b
 
 ```bash
 cd frontend
-npm run build:demo               # frontend/dist-demo/index.html (yaklaşık 1,5 MB)
+npm run build:demo               # frontend/dist-demo/index.html (yaklaşık 1,6 MB)
 ```
 
 Demoda zaman çizelgesi, filtreler, uyarılar, kanıt satırları, port görünümü ve kurallar sayfası gerçek arayüzdekiyle aynıdır; log yükleme, kuralları yeniden yükleme ve canlı takip yoktur. Veriler `frontend/src/demo/snapshot.json` dosyasından gelir: gerçek API'nin örnek loglar için verdiği yanıtların kaydı. Sorgular tarayıcıda yanıtlanır (`frontend/src/demo/backend.ts`), ve bu yanıtların API'ninkilerle aynı olduğu testlerle denetlenir: `cases.json` gerçek API'ye sorulmuş soruları ve yanıtlarını tutar, Vitest aynı soruları demoya sorar.
@@ -268,8 +299,8 @@ Log tablosu yalnızca görünen satırları çizer (react-window) ve kaydırdık
 | `GET /health` | Veritabanı hazırsa `{"status": "ok"}` döner |
 | `POST /ingest` | Log dosyası yükler (multipart form) ve kuralları yeniden çalıştırır. Dosya gzip, bzip2 ya da xz ile sıkıştırılmış olabilir. Alanlar: `file`, `parser` (`auto`, `auth`, `ufw`; varsayılan `auto`), `year`, `tz`, `source` |
 | `GET /events` | Olayları zaman sırasıyla listeler; `order=desc` ile en yeniden eskiye. Filtreler: `start`, `end`, `host`, `service`, `ip`, `level`, `action`, `parsed`, `alert_id`, `rule_id`. Sayfalama: `limit` (1–500), `cursor` |
-| `GET /alerts` | Uyarıları yeniden eskiye listeler. Filtreler: `rule_id`, `severity`, `group_key`, `start`, `end`. `include_events=true` her uyarının ilk 100 kanıt satırını ekler |
-| `GET /timeline` | Seçilen olayları zaman kovalarına göre sayar (`bucket`: `1m`, `5m`, `1h`). `/events` ile aynı filtreleri alır |
+| `GET /alerts` | Uyarıları yeniden eskiye listeler. Filtreler: `rule_id`, `severity`, `group_key`, `start`, `end`. `include_events=true` her uyarının ilk 100 kanıt satırını ekler. Kuralı bir yazar adı taşıyorsa uyarı da taşır (`rule_author`) |
+| `GET /timeline` | Seçilen olayları zaman kovalarına göre sayar (`bucket`: `1m`, `5m`, `1h`, `1d`). `/events` ile aynı filtreleri alır |
 | `GET /stats` | Özet sayıları döner: olay, ayrıştırılan, eylem dağılımı, önem derecesine göre uyarı, en çok başarısız giriş yapan adresler |
 | `GET /ports` | Bir kaynak adresin (`ip`) denediği hedef portlar: port başına engellenen ve geçirilen paket sayısı, zaman sırasıyla tek tek paketler. `start` ve `end` ile aralık seçilir |
 | `GET /rules` | Yüklü kuralları ve yüklenemeyen kural dosyalarını (nedeniyle) döner |
@@ -377,6 +408,51 @@ python samples/generate_ufw.py                  # samples/ufw.log dosyasını ye
 
 Gerçek loglar yanlışlıkla depoya girmesin diye `.gitignore` tüm `*.log` dosyalarını dışarıda tutar; yalnızca bu iki örnek dosya izlenir.
 
+## Bilinen sınırlamalar
+
+**Güvenlik**
+
+- **Kimlik doğrulama yok.** API ve arayüz, erişebilen herkese her şeyi gösterir ve log yüklemesine izin verir. Araç tek kişinin kendi makinesinde ya da kapalı bir ağda kullanması için yazıldı; internete açılmamalıdır.
+- Loglar olduğu gibi saklanır: kullanıcı adları, adresler ve sudo komutları veritabanındadır. Veritabanı dosyası logların kendisi kadar korunmalıdır.
+
+**Loglar**
+
+- Yalnızca syslog başlıklı satırlar okunur (klasik `Sep  9 03:12:39` ve ISO 8601 zaman damgalı). İçeriği tanınan programlar `sshd`, `sudo` ve çekirdeğin UFW/iptables paket kayıtlarıdır; öbür programların satırları saklanır ve anahtar kelime kurallarıyla aranabilir, ama alanlarına ayrılmaz.
+- Web sunucusu erişim logları, journald dışa aktarımı, auditd ve Windows olay kayıtları okunmaz. Bu yüzden bir oturumda sudo dışında çalıştırılan komutlar görünmez.
+- Klasik syslog damgasında yıl ve saat dilimi yoktur: yıl tahmin edilir ya da yüklerken verilir, saat dilimi dosya başına tektir.
+- Saklanan olaylar silinemez; saklama süresi ayarı yoktur.
+
+**Tespit**
+
+- Kurallar eşik tabanlıdır: eşiğin altında kalan saldırıyı (dakikada bir deneme, yarım dakikada bir port) görmezler. Hangi sınırda neyin kaçtığı [ölçüldü](docs/tespit-olcumu.md).
+- Bir kural olayları tek alana göre gruplar. "Aynı adres ve aynı kullanıcı" denemez; aynı çıkış adresini paylaşan kullanıcılar tek kaynak sayılır.
+- Adresin ülkesi, daha önce görülüp görülmediği ya da kullanıcının olağan saatleri gibi bağlam yoktur. Az denemeyle bulunan bir parola, parolasını yanlış yazan kullanıcıdan ayırt edilemez.
+- Sigma kurallarından yalnızca log satırında metin arayanlar çevrilebilir; Sigma'nın "correlation" kuralları çevrilmez.
+- Uyarılar yalnızca arayüzde görünür: e-posta ya da webhook bildirimi yoktur.
+
+**Ölçek**
+
+- Bir milyon satıra kadar ölçüldü; ötesi denenmedi. Yükleme saniyede on bin satır kadardır. Ayrıntı ve hâlâ yavaş olan sorgular: [Performans](docs/performans.md).
+- Veritabanı SQLite'tır: tek yazıcıya izin verir, büyük bir yükleme sürerken canlı takip bekler.
+- Çok olayı olan bir adresin uyarıları, o adresten her yeni satır geldiğinde ilk olayından başlanarak yeniden hesaplanır.
+
+**Arayüz**
+
+- Yalnızca Türkçedir; zamanlar yalnızca UTC gösterilir.
+- Bileşenlerin birim testi yoktur; arayüz tarayıcı testiyle (`npm run e2e`) denenir.
+
+## Gelecek planları
+
+Yapılmadı, sırayla düşünülenler:
+
+1. **Grup başına kaldığı yeri hatırlama:** bir adresin uyarılarını her seferinde baştan hesaplamak yerine son sessiz noktadan devam etmek. Canlı takibin büyük veritabanlarındaki bir saniyelik adımını kısaltır.
+2. **Kimlik doğrulama:** en azından tek bir API anahtarı, aracın bir sunucuda durabilmesi için.
+3. **Toplayıcı ajan:** log dosyasını okuyup satırları toplu halde `POST /ingest` adresine gönderen küçük bir program (Go), sunucunun dosyaya doğrudan erişemediği kurulumlar için.
+4. **Yavaş saldırılar için kurallar:** [tespit ölçümünde](docs/tespit-olcumu.md) denenen uzun pencereli iki kuralın örnek veriyle birlikte depoya alınması.
+5. **Daha çok log biçimi:** nginx/Apache erişim logları ve bunlara bakan Sigma kuralları (`webserver` kategorisi, 73 kural).
+6. **Bildirim:** yeni uyarıda webhook.
+7. **PostgreSQL desteği:** kod SQLAlchemy üzerinden yazıldı; zaman çizelgesinin hızlı sayımı ve anahtar kelime taraması dışında SQLite'a özgü bir şey yok.
+
 ## Yol haritası
 
 | Aşama | Kapsam | Durum |
@@ -387,8 +463,10 @@ Gerçek loglar yanlışlıkla depoya girmesin diye `.gitignore` tüm `*.log` dos
 | 3 | React arayüzü: zaman çizelgesi, log tablosu, uyarı paneli | ✅ |
 | 4 | Davranış kuralları: sıralı olay, port taraması, nadir port; UFW parser'ı ve port görünümü | ✅ |
 | 5 | Sıkıştırılmış ve rotasyonlu dosyalar, canlı takip | ✅ |
-| 6 | Yayına hazırlama: Docker, CI, dokümantasyon | Sırada |
+| 6 | Yayına hazırlama: bir milyon satırla ölçüm, tespit ölçümü, Docker, CI, dokümantasyon; Sigma kuralları | ✅ |
 
 ## Lisans
 
-[MIT](LICENSE)
+Kod ve bu deponun kendi kuralları [MIT](LICENSE) lisanslıdır.
+
+`rules/sigma/` klasöründeki kurallar SigmaHQ'dan alınmıştır ve [Detection Rule License 1.1](rules/sigma/LICENSE.Detection.Rules.md) ile dağıtılır; her dosya yazarını ve özgün kuralın adresini taşır.
