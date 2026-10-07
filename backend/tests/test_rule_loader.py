@@ -254,6 +254,9 @@ def test_disabled_rules_are_loaded_but_not_enabled(tmp_path):
             KEYWORD.replace("keywords: [/etc/shadow]", "keywords: ['**']"),
             "keywords.0: '**' has nothing to look for",
         ),
+        (KEYWORD + "exclude: ['**']\n", "exclude.0: '**' has nothing to look for"),
+        (KEYWORD + "require: [[]]\n", "require: an entry without keywords can never be satisfied"),
+        (KEYWORD + "require: [[sudo, '*']]\n", "require.0.1: '*' has nothing to look for"),
         (KEYWORD.replace("id: KW-900", "id: 'has spaces'"), "id: String should match pattern"),
         (
             THRESHOLD.replace("action: auth_fail", "dst_port: 70000"),

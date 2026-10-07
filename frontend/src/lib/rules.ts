@@ -45,7 +45,9 @@ export function describeCondition(rule: Rule): string {
         : `Şu portların dışındaki bir porta bağlantı: ${rule.ports.join(", ")}`;
     case "keyword": {
       const texts = [...rule.keywords, ...(rule.regex ? [`/${rule.regex}/`] : [])];
-      return `Mesajında şunlardan biri geçen satır: ${texts.join(", ")}`;
+      const required = rule.require.map((entry) => `; ayrıca ${entry.length > 1 ? "şunlardan biri" : "şu"}: ${entry.join(", ")}`);
+      const excluded = rule.exclude.length > 0 ? `; şunlar geçmiyorsa: ${rule.exclude.join(", ")}` : "";
+      return `Mesajında şunlardan biri geçen satır: ${texts.join(", ")}${required.join("")}${excluded}`;
     }
   }
 }

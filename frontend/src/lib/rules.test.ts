@@ -35,8 +35,32 @@ describe("describeCondition", () => {
   });
 
   it("describes keywords and a regular expression", () => {
-    const rule: Rule = { ...common, id: "KW-001", type: "keyword", group_by: "user", keywords: ["/etc/shadow"], regex: "id_rsa$" };
+    const rule: Rule = {
+      ...common,
+      id: "KW-001",
+      type: "keyword",
+      group_by: "user",
+      keywords: ["/etc/shadow"],
+      regex: "id_rsa$",
+      require: [],
+      exclude: [],
+    };
     expect(describeCondition(rule)).toBe("Mesajında şunlardan biri geçen satır: /etc/shadow, /id_rsa$/");
+  });
+
+  it("adds what a keyword rule requires and what it excludes", () => {
+    const rule: Rule = {
+      ...common,
+      id: "KW-002",
+      type: "keyword",
+      keywords: ["scp ", "rsync "],
+      regex: null,
+      require: [["@", "::"], ["COMMAND="]],
+      exclude: ["--dry-run", "localhost"],
+    };
+    expect(describeCondition(rule)).toBe(
+      "Mesajında şunlardan biri geçen satır: scp , rsync ; ayrıca şunlardan biri: @, ::; ayrıca şu: COMMAND=; şunlar geçmiyorsa: --dry-run, localhost",
+    );
   });
 
   it("describes the steps of a sequence in order, with their counts", () => {

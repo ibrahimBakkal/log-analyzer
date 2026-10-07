@@ -137,6 +137,8 @@ class RuleBase(BaseModel):
 class KeywordRule(RuleBase):
     """Alerts on lines whose message contains certain text.
 
+    A line counts if it contains one of ``keywords`` (or matches ``regex``),
+    and one keyword of every entry of ``require``, and none of ``exclude``.
     Case is ignored, and ``*`` in a keyword stands for any text.
     """
 
@@ -147,7 +149,29 @@ class KeywordRule(RuleBase):
         default=[], description="Texts to look for: one of them is enough."
     )
     regex: str | None = Field(default=None, description="A regular expression to look for.")
+    require: list[list[Keyword]] = Field(
+        default=[],
+        description="Texts that must be there as well. Each entry is one keyword, "
+        "or a list of keywords of which one is enough.",
+    )
+    exclude: list[Keyword] = Field(
+        default=[], description="Texts that rule a line out, whatever else it contains."
+    )
     group_by: GroupField = "host"
+
+    @field_validator("require", mode="before")
+    @classmethod
+    def _one_or_several(cls, value: Any) -> Any:
+        if not isinstance(value, list):
+            return value
+        return [entry if isinstance(entry, list) else [entry] for entry in value]
+
+    @field_validator("require")
+    @classmethod
+    def _no_empty_entries(cls, value: list[list[str]]) -> list[list[str]]:
+        if any(not entry for entry in value):
+            raise ValueError("an entry without keywords can never be satisfied")
+        return value
 
     @field_validator("regex")
     @classmethod

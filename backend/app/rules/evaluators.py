@@ -82,7 +82,10 @@ def merge_spans(spans: list[Span]) -> tuple[Span, ...]:
 
 
 class KeywordEvaluator(Evaluator[KeywordRule]):
-    """Every line containing one of the keywords, or matching the regex, counts and alerts."""
+    """Every line with one of the keywords (or matching the regex) counts and alerts,
+
+    provided it also has what the rule requires and nothing of what it excludes.
+    """
 
     def __init__(self, rule: KeywordRule) -> None:
         super().__init__(rule)
@@ -91,9 +94,20 @@ class KeywordEvaluator(Evaluator[KeywordRule]):
             self._wanted.append(_one_of(rule.keywords))
         if rule.regex is not None:
             self._wanted.append(re.compile(rule.regex))
+        self._required = [_one_of(entry) for entry in rule.require]
+        self._excluded = _one_of(rule.exclude) if rule.exclude else None
 
     def spans(self, event: EventRow, key: str) -> tuple[Span, ...] | None:
-        return merge_spans(_places(self._wanted, event.message)) or None
+        message = event.message
+        found = _places(self._wanted, message)
+        if not found or (self._excluded is not None and self._excluded.search(message)):
+            return None
+        for pattern in self._required:
+            there = _places([pattern], message)
+            if not there:
+                return None
+            found += there
+        return merge_spans(found)
 
     def trigger(self, key: str, evidence: Evidence, event: EventRow) -> list[Evidence] | None:
         return [evidence]

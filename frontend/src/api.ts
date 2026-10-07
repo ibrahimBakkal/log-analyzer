@@ -108,7 +108,7 @@ interface RuleCommon {
 }
 
 export type Rule =
-  | (RuleCommon & { type: "keyword"; keywords: string[]; regex: string | null })
+  | (RuleCommon & { type: "keyword"; keywords: string[]; regex: string | null; require: string[][]; exclude: string[] })
   | (RuleCommon & { type: "threshold"; threshold: number; window_seconds: number })
   | (RuleCommon & { type: "sequence"; steps: { match: EventFilter; count: number }[]; within_seconds: number })
   | (RuleCommon & { type: "port_scan"; min_ports: number; window_seconds: number })
