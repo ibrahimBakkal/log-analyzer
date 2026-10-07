@@ -1,0 +1,9 @@
+# Only what the image needs is sent to the builder.
+*
+!pyproject.toml
+!alembic.ini
+!docker-entrypoint.sh
+!app
+!migrations
+**/__pycache__
+**/*.pyc
