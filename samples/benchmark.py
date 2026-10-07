@@ -205,10 +205,17 @@ def run(lines: int, folder: Path, repeat: int) -> None:
         load_seconds, result = load(session, log)
         assert result.lines == lines and result.conflicts == result.duplicates == 0
         rule_seconds, evaluation = timed(lambda: keeper.refresh(session, rules, since=None))
+        # Keyword rules share one pass over the lines, so they are timed together.
         per_rule = []
+        keyword = [rule for rule in rules.enabled if rule.type == "keyword"]
+        if keyword:
+            together, outcome = timed(lambda: evaluate(session, keyword))
+            label = f"{len(keyword)} anahtar kelime kuralı, tek geçişte"
+            per_rule.append((label, together, outcome.total))
         for rule in rules.enabled:
-            one, outcome = timed(lambda rule=rule: evaluate(session, [rule]))
-            per_rule.append((rule.id, rule.type, one, outcome.total))
+            if rule.type != "keyword":
+                one, outcome = timed(lambda rule=rule: evaluate(session, [rule]))
+                per_rule.append((f"{rule.id} ({rule.type})", one, outcome.total))
         evaluate(session, rules.enabled)  # back to the full set of alerts
         again_seconds, again = load(session, log)
         assert again.duplicates == lines
@@ -264,9 +271,12 @@ def run(lines: int, folder: Path, repeat: int) -> None:
         f"{dots(result.unparsed)} tanınmadı |"
     )
     print(f"| Aynı dosyayı yeniden yükleme | {again_seconds:.1f} sn | hepsi kopya, atlandı |")
-    print(f"| Kuralların tümü, baştan | {rule_seconds:.1f} sn | {dots(evaluation.total)} uyarı |")
-    for rule_id, kind, one, total in per_rule:
-        print(f"| &nbsp;&nbsp;{rule_id} ({kind}) | {one:.1f} sn | {dots(total)} uyarı |")
+    print(
+        f"| Kuralların tümü ({len(rules.enabled)}), baştan | {rule_seconds:.1f} sn | "
+        f"{dots(evaluation.total)} uyarı |"
+    )
+    for label, one, total in per_rule:
+        print(f"| &nbsp;&nbsp;{label} | {one:.1f} sn | {dots(total)} uyarı |")
     print(
         f"| Canlı takip adımı: 100 yeni satır | {(append_seconds + step_seconds) * 1000:.0f} ms | "
         f"yazma {append_seconds * 1000:.0f} ms, kurallar {step_seconds * 1000:.0f} ms; "
