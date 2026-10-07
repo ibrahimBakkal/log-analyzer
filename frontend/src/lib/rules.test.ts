@@ -51,7 +51,7 @@ describe("describeCondition", () => {
       require: [],
       exclude: [],
     };
-    expect(describeCondition(rule)).toBe("Mesajında şunlardan biri geçen satır: /etc/shadow, /id_rsa$/");
+    expect(describeCondition(rule)).toBe("Şunlardan biri geçen satır: /etc/shadow, /id_rsa$/");
   });
 
   it("adds what a keyword rule requires and what it excludes", () => {
@@ -65,7 +65,7 @@ describe("describeCondition", () => {
       exclude: ["--dry-run", "localhost"],
     };
     expect(describeCondition(rule)).toBe(
-      "Mesajında şunlardan biri geçen satır: scp , rsync ; ayrıca şunlardan biri: @, ::; ayrıca şu: COMMAND=; şunlar geçmiyorsa: --dry-run, localhost",
+      "Şunlardan biri geçen satır: scp , rsync ; ayrıca şunlardan biri: @, ::; ayrıca şu: COMMAND=; şunlar geçmiyorsa: --dry-run, localhost",
     );
   });
 

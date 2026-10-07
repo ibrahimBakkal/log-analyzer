@@ -47,7 +47,7 @@ export function describeCondition(rule: Rule): string {
       const texts = [...rule.keywords, ...(rule.regex ? [`/${rule.regex}/`] : [])];
       const required = rule.require.map((entry) => `; ayrıca ${entry.length > 1 ? "şunlardan biri" : "şu"}: ${entry.join(", ")}`);
       const excluded = rule.exclude.length > 0 ? `; şunlar geçmiyorsa: ${rule.exclude.join(", ")}` : "";
-      return `Mesajında şunlardan biri geçen satır: ${texts.join(", ")}${required.join("")}${excluded}`;
+      return `Şunlardan biri geçen satır: ${texts.join(", ")}${required.join("")}${excluded}`;
     }
   }
 }

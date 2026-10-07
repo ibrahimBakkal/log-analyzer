@@ -85,28 +85,39 @@ class KeywordEvaluator(Evaluator[KeywordRule]):
     """Every line with one of the keywords (or matching the regex) counts and alerts,
 
     provided it also has what the rule requires and nothing of what it excludes.
+    A line is the name of the program that wrote it, a colon, and its message:
+    ``sudo: bob : TTY=pts/0 ; ...``.
     """
 
     def __init__(self, rule: KeywordRule) -> None:
         super().__init__(rule)
-        self._wanted: list[re.Pattern[str]] = []
-        if rule.keywords:
-            self._wanted.append(_one_of(rule.keywords))
-        if rule.regex is not None:
-            self._wanted.append(re.compile(rule.regex))
+        self._keywords = _one_of(rule.keywords) if rule.keywords else None
+        self._regex = re.compile(rule.regex) if rule.regex is not None else None
         self._required = [_one_of(entry) for entry in rule.require]
         self._excluded = _one_of(rule.exclude) if rule.exclude else None
 
     def spans(self, event: EventRow, key: str) -> tuple[Span, ...] | None:
-        message = event.message
-        found = _places(self._wanted, message)
-        if not found or (self._excluded is not None and self._excluded.search(message)):
+        # Keywords are looked for in the line as its reader sees it: the
+        # program's name, then what it said. A regex sees the message alone,
+        # so that "^" keeps meaning the start of the message.
+        said_by = f"{event.service}: " if event.service else ""
+        line = said_by + event.message
+        found = _places(self._keywords, line, start=len(said_by))
+        if found is None and self._regex is None:
+            return None
+        if self._regex is not None:
+            in_message = _places(self._regex, event.message)
+            if found is None and in_message is None:
+                return None
+            found = (found or []) + (in_message or [])
+        if self._excluded is not None and self._excluded.search(line):
             return None
         for pattern in self._required:
-            there = _places([pattern], message)
-            if not there:
+            there = _places(pattern, line, start=len(said_by))
+            if there is None:
                 return None
             found += there
+        # Possibly nothing to mark: what was found may all be in the program's name.
         return merge_spans(found)
 
     def trigger(self, key: str, evidence: Evidence, event: EventRow) -> list[Evidence] | None:
@@ -123,13 +134,19 @@ def _one_of(keywords: list[str]) -> re.Pattern[str]:
     return re.compile("|".join(patterns), re.IGNORECASE)
 
 
-def _places(patterns: list[re.Pattern[str]], message: str) -> list[Span]:
-    return [
-        match.span()
-        for pattern in patterns
-        for match in pattern.finditer(message)
-        if match.end() > match.start()  # a regex may match the empty string
-    ]
+def _places(pattern: re.Pattern[str] | None, text: str, *, start: int = 0) -> list[Span] | None:
+    """Where *pattern* occurs in *text*, or ``None`` if it does not.
+
+    Positions are counted from *start*, the place in *text* where the message
+    begins; what lies before it is cut off, and may leave nothing.
+    """
+    if pattern is None:
+        return None
+    # A regex may match the empty string, which is no match worth the name.
+    found = [match.span() for match in pattern.finditer(text) if match.end() > match.start()]
+    if not found:
+        return None
+    return [(max(first - start, 0), end - start) for first, end in found if end > start]
 
 
 class ThresholdEvaluator(Evaluator[ThresholdRule]):

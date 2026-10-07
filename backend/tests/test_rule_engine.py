@@ -395,6 +395,48 @@ def test_required_and_excluded_texts_apply_to_a_regex_as_well():
     assert detect(rule, [line("TTY=pts/0 ; USER=#0 ; COMMAND=/bin/bash")]) == []
 
 
+# --- keyword: the program's name is part of the line ------------------------------------------
+
+PKEXEC = "bob: The value for environment variable XAUTHORITY contains suspicious content"
+
+
+def test_keyword_is_found_in_the_name_of_the_program_that_wrote_the_line():
+    rule = keyword_rule(keywords=["pkexec"])
+    [detection] = detect(rule, [line(PKEXEC, service="pkexec")])
+    assert detection.first.spans == ()  # the line counts; in its message there is nothing to mark
+
+    assert detect(rule, [line(PKEXEC, service="sudo")]) == []
+    assert detect(rule, [line(PKEXEC, service=None)]) == []
+
+
+def test_marks_are_placed_in_the_message_whatever_the_program_is_called():
+    message = "pkexec was run; pkexec said: " + PKEXEC
+    rule = keyword_rule(keywords=["pkexec"], require=["XAUTHORITY"])
+    for program in ("pkexec", "a-much-longer-program-name", None):
+        [detection] = detect(rule, [line(message, service=program)])
+        assert marked(detection, message) == ["pkexec", "pkexec", "XAUTHORITY"]
+
+
+def test_keyword_can_span_the_program_and_its_message():
+    rule = keyword_rule(keywords=["pkexec: bob"])
+    [detection] = detect(rule, [line(PKEXEC, service="pkexec")])
+    assert marked(detection, PKEXEC) == ["bob"]
+
+
+def test_required_and_excluded_texts_are_looked_for_in_the_program_name_too():
+    wanted = keyword_rule(keywords=["XAUTHORITY"], require=["pkexec"])
+    unwanted = keyword_rule(keywords=["XAUTHORITY"], exclude=["pkexec"])
+    by_pkexec, by_sudo = line(PKEXEC, service="pkexec"), line(PKEXEC, service="sudo")
+    assert (len(detect(wanted, [by_pkexec])), len(detect(wanted, [by_sudo]))) == (1, 0)
+    assert (len(detect(unwanted, [by_pkexec])), len(detect(unwanted, [by_sudo]))) == (0, 1)
+
+
+def test_regex_sees_the_message_alone():
+    rule = keyword_rule(keywords=[], regex=r"^bob: The value")
+    assert len(detect(rule, [line(PKEXEC, service="pkexec")])) == 1
+    assert detect(keyword_rule(keywords=[], regex="pkexec"), [line(PKEXEC, service="pkexec")]) == []
+
+
 # --- evaluate: the alerts table --------------------------------------------------------------
 
 
@@ -573,11 +615,16 @@ LINES = [
         ({"keywords": ["çözüm*CHMOD"]}, [13]),
         ({"keywords": ["wget"], "require": ["çözüm"]}, [13]),
         ({"keywords": [], "regex": r"UID=\d+", "require": ["gid=27"], "exclude": ["carol"]}, [11]),
+        ({"keywords": ["sudo"]}, list(range(1, 13))),  # the program that wrote the lines
+        ({"keywords": ["sudo: new user"], "exclude": ["useradd"]}, [11, 12]),
+        ({"keywords": ["new user"], "require": ["useradd"]}, []),
+        ({"keywords": ["wget"], "exclude": ["sudo"]}, [13]),
     ],
 )
 def test_database_and_evaluator_agree_on_which_lines_count(session, fields, expected):
     """The database leaves lines out beforehand; that must not change which lines alert."""
     events = [line(message, index, event_id=index) for index, message in enumerate(LINES, 1)]
+    events[-1].service = None  # a line without a program in front
     rule = keyword_rule(cooldown_seconds=0, **fields)
     assert [ids(detection) for detection in detect(rule, events)] == [[n] for n in expected]
 

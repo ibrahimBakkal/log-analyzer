@@ -150,7 +150,9 @@ class KeywordRule(RuleBase):
 
     A line counts if it contains one of ``keywords`` (or matches ``regex``),
     and one keyword of every entry of ``require``, and none of ``exclude``.
-    Case is ignored, and ``*`` in a keyword stands for any text.
+    Case is ignored, and ``*`` in a keyword stands for any text. Keywords are
+    looked for in the name of the program that wrote the line as well as in
+    its message; the regex in the message only.
     """
 
     default_summary: ClassVar[str] = "{rule_name}: {key} üzerinde {count} satır"

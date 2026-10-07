@@ -282,7 +282,7 @@ Kural türleri ve kendi alanları:
 
 | `type` | Ne zaman uyarır | Alanları |
 |---|---|---|
-| `keyword` | Mesajında aranan metin geçen her satırda | `keywords` (büyük/küçük harf ayrımı olmadan), `regex` |
+| `keyword` | Aranan metin geçen her satırda. Satır, onu yazan programın adı ve mesajıdır: `sudo: bob : TTY=pts/0 ; …` | `keywords` (biri yeter; büyük/küçük harf ayrımı yok; `*` araya giren herhangi bir metin), `require` (ayrıca geçmesi gerekenler), `exclude` (geçiyorsa satırı eleyenler), `regex` (yalnızca mesajda aranır) |
 | `threshold` | Bir gruptan kısa sürede çok sayıda eşleşen olay gelince | `threshold`, `window_seconds` |
 | `sequence` | Bir grup, adımları sırayla ve süre dolmadan tamamlayınca | `steps` (her adımda `match` ve `count`), `within_seconds` |
 | `port_scan` | Bir grup kısa sürede çok sayıda farklı hedef porta paket gönderince | `min_ports`, `window_seconds` |

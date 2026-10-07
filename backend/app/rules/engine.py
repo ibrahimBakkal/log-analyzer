@@ -337,7 +337,9 @@ def _one_of(keywords: Sequence[str]) -> list[ColumnElement[bool]]:
     """
     if not all(map(str.isascii, keywords)):
         return []
-    return [or_(*(Event.message.ilike(_like(word), escape="\\") for word in keywords))]
+    # The line as the evaluator reads it: the program's name, then its message.
+    line = func.coalesce(Event.service, "").concat(": ").concat(Event.message)
+    return [or_(*(line.ilike(_like(word), escape="\\") for word in keywords))]
 
 
 def _like(keyword: str) -> str:
