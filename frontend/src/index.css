@@ -1,0 +1,173 @@
+@import "tailwindcss";
+@import "@fontsource-variable/atkinson-hyperlegible-next";
+@import "@fontsource-variable/atkinson-hyperlegible-mono";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * The interface is a marked-up log printout: cool paper, blue-black ink, and
+ * highlighter pens for the lines that matter. Chart and severity colours were
+ * checked for colour-blind separation and contrast against both surfaces.
+ */
+:root {
+  color-scheme: light;
+  --paper: #eef1f4;
+  --surface: #fbfcfd;
+  --ink: #18222d;
+  --ink-2: #4b5866;
+  --ink-3: #6b7885;
+  --rule: #d8dee5;
+  --rule-strong: #c2cad3;
+  --accent: #1c5cab;
+  --accent-soft: #e3edf9;
+
+  --series-events: #2a78d6;
+  --series-suspicious: #eb6834;
+
+  --sev-low: #6b7a8a;
+  --sev-medium: #fab219;
+  --sev-high: #ec835a;
+  --sev-critical: #d03b3b;
+
+  --mark-low: rgb(107 122 138 / 0.22);
+  --mark-medium: rgb(250 178 25 / 0.5);
+  --mark-high: rgb(236 131 90 / 0.45);
+  --mark-critical: rgb(208 59 59 / 0.32);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #131a22;
+  --surface: #1b2430;
+  --ink: #e8edf2;
+  --ink-2: #b4bfca;
+  --ink-3: #8f9caa;
+  --rule: #2c3846;
+  --rule-strong: #3a4757;
+  --accent: #8dbaf2;
+  --accent-soft: #223347;
+
+  --series-events: #3987e5;
+  --series-suspicious: #d95926;
+
+  --mark-low: rgb(143 156 170 / 0.25);
+  --mark-medium: rgb(250 178 25 / 0.36);
+  --mark-high: rgb(236 131 90 / 0.38);
+  --mark-critical: rgb(208 59 59 / 0.42);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono Variable", ui-monospace, monospace;
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Figures line up in columns wherever numbers are compared. */
+.figures {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The highlighter: a translucent band over the text, like a marker pen on paper. */
+mark {
+  color: inherit;
+  background: var(--mark-medium);
+  border-radius: 2px;
+  padding: 1px 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+mark[data-severity="low"] {
+  background: var(--mark-low);
+}
+mark[data-severity="high"] {
+  background: var(--mark-high);
+}
+mark[data-severity="critical"] {
+  background: var(--mark-critical);
+}
+
+[data-severity-edge="low"] {
+  box-shadow: inset 3px 0 0 var(--sev-low);
+}
+[data-severity-edge="medium"] {
+  box-shadow: inset 3px 0 0 var(--sev-medium);
+}
+[data-severity-edge="high"] {
+  box-shadow: inset 3px 0 0 var(--sev-high);
+}
+[data-severity-edge="critical"] {
+  box-shadow: inset 3px 0 0 var(--sev-critical);
+}
+
+/* Form controls share one quiet look. */
+.field {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+.field::placeholder {
+  color: var(--ink-3);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.button-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--surface);
+}
+.button-primary:hover:not(:disabled) {
+  color: var(--surface);
+  filter: brightness(1.08);
+}

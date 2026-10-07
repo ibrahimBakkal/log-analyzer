@@ -32,3 +32,30 @@ jobs:
 
       - name: Testler (pytest)
         run: pytest backend
+
+  frontend:
+    name: "Frontend: tip denetimi, testler, derleme"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Bağımlılıkları kur
+        run: npm ci
+
+      - name: Tip denetimi (tsc)
+        run: npm run typecheck
+
+      - name: Testler (vitest)
+        run: npm test
+
+      - name: Derleme (vite build)
+        run: npm run build
