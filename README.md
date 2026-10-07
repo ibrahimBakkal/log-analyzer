@@ -77,12 +77,14 @@ log-analyzer/
 │       ├── pages/        # Özet, İnceleme, Kurallar
 │       ├── components/   # Timeline, LogTable, AlertPanel, PortView, FilterBar, ...
 │       ├── lib/          # vurgu bölme, filtre ↔ adres, zaman ve port yardımcıları (testleriyle)
+│       ├── demo/         # sunucusuz demo: örnek logların kaydı ve tarayıcıda çalışan API karşılığı
 │       ├── api.ts        # API tipleri ve çağrıları
 │       └── queries.ts    # TanStack Query kancaları
 ├── rules/                # tespit kuralları (YAML): KW-001, SSH-001, SSH-002, NET-001, NET-002
 ├── samples/
 │   ├── generate.py       # örnek auth.log üreteci
 │   ├── generate_ufw.py   # aynı iki günün güvenlik duvarı logunu üretir
+│   ├── build_demo.py     # demo için API yanıtlarını kaydeder
 │   ├── auth.log          # üretilmiş, anonim örnek loglar
 │   └── ufw.log
 └── ruff.toml             # lint ve biçim ayarı
@@ -118,6 +120,7 @@ cd frontend
 npm run typecheck        # TypeScript tip denetimi
 npm test                 # Vitest
 npm run build            # üretim derlemesi
+npm run build:demo       # sunucusuz demo derlemesi
 ```
 
 Aynı kontroller her push ve pull request'te GitHub Actions ile de çalışır (`.github/workflows/ci.yml`).
@@ -163,6 +166,23 @@ Arayüzün fikri, üzeri işaretlenmiş bir log çıktısıdır: her şey log sa
 - **İnceleme:** Filtreler, zaman çizelgesi, log satırları ve uyarılar tek sayfada. Bir uyarıya tıklayınca çizelge o uyarının aralığına gider; tablo o aralıktaki tüm satırları gösterir, kanıt satırları kenar çizgisi ve vurgulu metinle ayrılır. Çizelgede sürükleyerek zaman aralığı seçilir. Filtreler sayfa adresinde tutulur, yani bir görünüm yer imine eklenebilir ve geri tuşu çalışır.
 - **Port görünümü:** İnceleme sayfasında bir adres öne çıktığında (IP filtresi ya da o adresle ilgili bir uyarı) ve güvenlik duvarı o adresi kaydetmişse, zaman çizelgesinin altında aynı zaman ekseniyle bir port grafiği belirir: her paket bir işaret, düşey eksen hedef port. Tarama, kısa sürede dikey dağılan bir işaret yığını olarak görünür; tek porta ısrar, yatay bir sıra olarak. Altında en çok paket alan portlar ve güvenlik duvarının geçirdiği portlar listelenir.
 - **Kurallar:** Yüklü kurallar (ne aradıkları cümleyle yazılır), yüklenemeyen kural dosyaları ve kuralları yeniden yükleme düğmesi.
+
+### Demo: sunucusuz arayüz
+
+Arayüzün, iki örnek logu içinde taşıyan ve hiçbir sunucuya bağlanmayan bir derlemesi vardır. Tek bir HTML dosyasıdır: diskten açılabilir, herhangi bir statik barındırıcıya konabilir.
+
+```bash
+cd frontend
+npm run build:demo               # frontend/dist-demo/index.html (yaklaşık 1,5 MB)
+```
+
+Demoda zaman çizelgesi, filtreler, uyarılar, kanıt satırları, port görünümü ve kurallar sayfası gerçek arayüzdekiyle aynıdır; log yükleme, kuralları yeniden yükleme ve canlı takip yoktur. Veriler `frontend/src/demo/snapshot.json` dosyasından gelir: gerçek API'nin örnek loglar için verdiği yanıtların kaydı. Sorgular tarayıcıda yanıtlanır (`frontend/src/demo/backend.ts`), ve bu yanıtların API'ninkilerle aynı olduğu testlerle denetlenir: `cases.json` gerçek API'ye sorulmuş soruları ve yanıtlarını tutar, Vitest aynı soruları demoya sorar.
+
+Parser ya da kurallar değişince kayıt yeniden üretilir; güncel değilse backend testleri bunu söyler:
+
+```bash
+python samples/build_demo.py     # snapshot.json ve cases.json dosyalarını yeniden yazar
+```
 
 Log tablosu yalnızca görünen satırları çizer (react-window) ve kaydırdıkça sonraki sayfaları getirir. Uzun satırlarda vurguların çevresindeki metin kısaltılır (`[UFW BLOCK] … SRC=198.51.100.150 … DPT=23`); satıra tıklayınca dosyadaki hali vurgularıyla birlikte görünür. Önem dereceleri renkle birlikte şekil ve yazıyla da gösterilir. Açık ve koyu tema vardır; zamanlar UTC olarak gösterilir.
 
