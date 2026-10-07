@@ -27,8 +27,10 @@ export function describeMatch(match: EventFilter | undefined): string {
     .join(", ");
 }
 
-/** What a rule looks for, in a sentence. */
-export function describeCondition(rule: Rule): string {
+type KeywordRule = Extract<Rule, { type: "keyword" }>;
+
+/** What a rule looks for, in a sentence. Keyword rules have lists instead: see keywordClauses. */
+export function describeCondition(rule: Exclude<Rule, KeywordRule>): string {
   const group = GROUP_LABEL[rule.group_by] ?? rule.group_by;
   switch (rule.type) {
     case "threshold":
@@ -43,13 +45,33 @@ export function describeCondition(rule: Rule): string {
       return rule.mode === "watchlist"
         ? `Şu portlardan birine bağlantı: ${rule.ports.join(", ")}`
         : `Şu portların dışındaki bir porta bağlantı: ${rule.ports.join(", ")}`;
-    case "keyword": {
-      const texts = [...rule.keywords, ...(rule.regex ? [`/${rule.regex}/`] : [])];
-      const required = rule.require.map((entry) => `; ayrıca ${entry.length > 1 ? "şunlardan biri" : "şu"}: ${entry.join(", ")}`);
-      const excluded = rule.exclude.length > 0 ? `; şunlar geçmiyorsa: ${rule.exclude.join(", ")}` : "";
-      return `Şunlardan biri geçen satır: ${texts.join(", ")}${required.join("")}${excluded}`;
-    }
   }
+}
+
+export interface KeywordClause {
+  /** How the texts take part: "Şunlardan biri geçen satır". */
+  lead: string;
+  texts: string[];
+  /** The texts are regular expressions, not keywords. */
+  pattern?: boolean;
+}
+
+/** What a keyword rule looks for, as the lists of texts it is made of, in the order they apply. */
+export function keywordClauses(rule: KeywordRule): KeywordClause[] {
+  const clauses: KeywordClause[] = [];
+  if (rule.keywords.length > 0) {
+    clauses.push({ lead: rule.keywords.length > 1 ? "Şunlardan biri geçen satır" : "Şu metnin geçtiği satır", texts: rule.keywords });
+  }
+  if (rule.regex) {
+    clauses.push({ lead: clauses.length > 0 ? "ya da mesajı şu kalıba uyan satır" : "Mesajı şu kalıba uyan satır", texts: [rule.regex], pattern: true });
+  }
+  for (const entry of rule.require) {
+    clauses.push({ lead: entry.length > 1 ? "ayrıca şunlardan biri" : "ayrıca şu", texts: entry });
+  }
+  if (rule.exclude.length > 0) {
+    clauses.push({ lead: rule.exclude.length > 1 ? "şunlardan biri geçiyorsa sayılmaz" : "şu geçiyorsa sayılmaz", texts: rule.exclude });
+  }
+  return clauses;
 }
 
 export interface TextPiece {

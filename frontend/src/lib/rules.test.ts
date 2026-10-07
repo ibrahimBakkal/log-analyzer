@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { EventFilter, Rule } from "../api";
-import { describeCondition, describeMatch, shortLink, splitLinks } from "./rules";
+import { describeCondition, describeMatch, keywordClauses, shortLink, splitLinks } from "./rules";
 
 const any: EventFilter = { action: [], service: [], host: [], user: [], level: [], dst_port: [] };
 const common = {
@@ -40,35 +40,6 @@ describe("describeCondition", () => {
     expect(describeCondition(rule)).toBe("Aynı kaynak adres için 60 sn içinde 5 eşleşen olay");
   });
 
-  it("describes keywords and a regular expression", () => {
-    const rule: Rule = {
-      ...common,
-      id: "KW-001",
-      type: "keyword",
-      group_by: "user",
-      keywords: ["/etc/shadow"],
-      regex: "id_rsa$",
-      require: [],
-      exclude: [],
-    };
-    expect(describeCondition(rule)).toBe("Şunlardan biri geçen satır: /etc/shadow, /id_rsa$/");
-  });
-
-  it("adds what a keyword rule requires and what it excludes", () => {
-    const rule: Rule = {
-      ...common,
-      id: "KW-002",
-      type: "keyword",
-      keywords: ["scp ", "rsync "],
-      regex: null,
-      require: [["@", "::"], ["COMMAND="]],
-      exclude: ["--dry-run", "localhost"],
-    };
-    expect(describeCondition(rule)).toBe(
-      "Şunlardan biri geçen satır: scp , rsync ; ayrıca şunlardan biri: @, ::; ayrıca şu: COMMAND=; şunlar geçmiyorsa: --dry-run, localhost",
-    );
-  });
-
   it("describes the steps of a sequence in order, with their counts", () => {
     const rule: Rule = {
       ...common,
@@ -100,6 +71,38 @@ describe("describeCondition", () => {
   it("falls back to the field name for a group it has no word for", () => {
     const rule: Rule = { ...common, id: "X-1", type: "threshold", group_by: "dst_ip", threshold: 2, window_seconds: 10 };
     expect(describeCondition(rule)).toBe("Aynı dst_ip için 10 sn içinde 2 eşleşen olay");
+  });
+});
+
+describe("keywordClauses", () => {
+  const keyword = { ...common, id: "KW-001", type: "keyword" as const, regex: null, require: [] as string[][], exclude: [] as string[] };
+
+  it("is one list for a plain keyword rule", () => {
+    expect(keywordClauses({ ...keyword, keywords: ["/etc/shadow", "/etc/sudoers"] })).toEqual([
+      { lead: "Şunlardan biri geçen satır", texts: ["/etc/shadow", "/etc/sudoers"] },
+    ]);
+    expect(keywordClauses({ ...keyword, keywords: ["REPLACE"] })).toEqual([{ lead: "Şu metnin geçtiği satır", texts: ["REPLACE"] }]);
+  });
+
+  it("puts a regular expression after the keywords, or first when there are none", () => {
+    expect(keywordClauses({ ...keyword, keywords: ["/etc/shadow"], regex: "id_rsa$" })).toEqual([
+      { lead: "Şu metnin geçtiği satır", texts: ["/etc/shadow"] },
+      { lead: "ya da mesajı şu kalıba uyan satır", texts: ["id_rsa$"], pattern: true },
+    ]);
+    expect(keywordClauses({ ...keyword, keywords: [], regex: "id_rsa$" })).toEqual([
+      { lead: "Mesajı şu kalıba uyan satır", texts: ["id_rsa$"], pattern: true },
+    ]);
+  });
+
+  it("lists what the rule requires, entry by entry, and what it excludes", () => {
+    const rule = { ...keyword, keywords: ["scp ", "rsync "], require: [["@", "::"], ["COMMAND="]], exclude: ["--dry-run", "localhost"] };
+    expect(keywordClauses(rule)).toEqual([
+      { lead: "Şunlardan biri geçen satır", texts: ["scp ", "rsync "] },
+      { lead: "ayrıca şunlardan biri", texts: ["@", "::"] },
+      { lead: "ayrıca şu", texts: ["COMMAND="] },
+      { lead: "şunlardan biri geçiyorsa sayılmaz", texts: ["--dry-run", "localhost"] },
+    ]);
+    expect(keywordClauses({ ...keyword, keywords: ["rm x"], exclude: ["x."] })[1]).toEqual({ lead: "şu geçiyorsa sayılmaz", texts: ["x."] });
   });
 });
 
