@@ -108,3 +108,34 @@ class IngestReport(BaseModel):
     duplicates: int = Field(description="Already stored by an earlier upload of the file.")
     conflicts: int = Field(description="Line number already stored with different text.")
     alerts: int = Field(description="Alerts that exist once the rules have run again.")
+
+
+class TimelineBucket(BaseModel):
+    ts: datetime = Field(description="Start of the bucket, in UTC.")
+    count: int
+    warnings: int = Field(description="How many of `count` are warning-level events.")
+
+
+class Timeline(BaseModel):
+    bucket_seconds: int
+    buckets: list[TimelineBucket] = Field(description="Buckets that contain events, in order.")
+
+
+class SourceStats(BaseModel):
+    src_ip: str
+    events: int
+    failures: int = Field(description="Failed logins from this address.")
+
+
+class Stats(BaseModel):
+    events: int
+    parsed: int
+    unparsed: int
+    unparsed_ratio: float = Field(description="unparsed / events; 0 when there are no events.")
+    first_event: datetime | None
+    last_event: datetime | None
+    sources: int = Field(description="Distinct source addresses.")
+    actions: dict[Action, int]
+    alerts: int
+    alerts_by_severity: dict[Severity, int]
+    top_sources: list[SourceStats] = Field(description="The addresses with most failed logins.")

@@ -1,25 +1,21 @@
 """GET /events: stored log lines, oldest first, filtered and paginated."""
 
 import base64
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, or_, select
 
-from app.enums import Action, Level
-from app.models import Alert, AlertEvent, Event
+from app.models import Event
 from app.routers import SessionDep
+from app.routers._filters import EventFilters
 from app.routers._present import present_events
 from app.schemas import EventPage
 
 router = APIRouter(tags=["events"])
 
 MAX_LIMIT = 500
-
-
-def _as_utc(moment: datetime) -> datetime:
-    return moment if moment.tzinfo else moment.replace(tzinfo=UTC)
 
 
 def _encode_cursor(event: Event) -> str:
@@ -41,26 +37,7 @@ def _decode_cursor(cursor: str) -> tuple[datetime, int]:
 @router.get("/events")
 def list_events(
     session: SessionDep,
-    start: Annotated[
-        datetime | None,
-        Query(description="Only events at or after this time. ISO 8601; UTC if no offset."),
-    ] = None,
-    end: Annotated[
-        datetime | None,
-        Query(description="Only events before this time. ISO 8601; UTC if no offset."),
-    ] = None,
-    host: str | None = None,
-    service: Annotated[str | None, Query(description="Program name, e.g. sshd.")] = None,
-    ip: Annotated[str | None, Query(description="Source or destination address.")] = None,
-    level: Level | None = None,
-    action: Action | None = None,
-    parsed: Annotated[
-        bool | None, Query(description="false: only lines that no pattern recognized.")
-    ] = None,
-    alert_id: Annotated[int | None, Query(description="Only the evidence of this alert.")] = None,
-    rule_id: Annotated[
-        str | None, Query(description="Only events that are evidence for alerts of this rule.")
-    ] = None,
+    filters: Annotated[EventFilters, Depends()],
     limit: Annotated[int, Query(ge=1, le=MAX_LIMIT)] = 100,
     cursor: Annotated[str | None, Query(description="`next_cursor` of the previous page.")] = None,
 ) -> EventPage:
@@ -72,33 +49,7 @@ def list_events(
     An event that is evidence for an alert carries `highlights`: the alert, its
     rule and the part of the message that made it count.
     """
-    query = select(Event).order_by(Event.ts, Event.id)
-    if start is not None:
-        query = query.where(Event.ts >= _as_utc(start))
-    if end is not None:
-        query = query.where(Event.ts < _as_utc(end))
-    if host is not None:
-        query = query.where(Event.host == host)
-    if service is not None:
-        query = query.where(Event.service == service)
-    if ip is not None:
-        query = query.where(or_(Event.src_ip == ip, Event.dst_ip == ip))
-    if level is not None:
-        query = query.where(Event.level == level)
-    if action is not None:
-        query = query.where(Event.action == action)
-    if parsed is not None:
-        query = query.where(Event.parsed == parsed)
-    if alert_id is not None:
-        evidence = select(AlertEvent.event_id).where(AlertEvent.alert_id == alert_id)
-        query = query.where(Event.id.in_(evidence))
-    if rule_id is not None:
-        evidence = (
-            select(AlertEvent.event_id)
-            .join(Alert, Alert.id == AlertEvent.alert_id)
-            .where(Alert.rule_id == rule_id)
-        )
-        query = query.where(Event.id.in_(evidence))
+    query = filters.apply(select(Event)).order_by(Event.ts, Event.id)
     if cursor is not None:
         ts, event_id = _decode_cursor(cursor)
         query = query.where(or_(Event.ts > ts, and_(Event.ts == ts, Event.id > event_id)))

@@ -1,6 +1,6 @@
 """GET /alerts: what the rules found."""
 
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Query
@@ -9,6 +9,7 @@ from sqlalchemy import func, select
 from app.enums import Severity
 from app.models import Alert, AlertEvent, Event
 from app.routers import SessionDep
+from app.routers._filters import as_utc
 from app.routers._present import present_events
 from app.schemas import AlertList, AlertOut
 
@@ -16,10 +17,6 @@ router = APIRouter(tags=["alerts"])
 
 MAX_LIMIT = 500
 EVIDENCE_PER_ALERT = 100
-
-
-def _as_utc(moment: datetime) -> datetime:
-    return moment if moment.tzinfo else moment.replace(tzinfo=UTC)
 
 
 @router.get("/alerts")
@@ -56,9 +53,9 @@ def list_alerts(
     if group_key is not None:
         query = query.where(Alert.group_key == group_key)
     if start is not None:
-        query = query.where(Alert.last_seen >= _as_utc(start))
+        query = query.where(Alert.last_seen >= as_utc(start))
     if end is not None:
-        query = query.where(Alert.first_seen < _as_utc(end))
+        query = query.where(Alert.first_seen < as_utc(end))
 
     total = session.scalar(select(func.count()).select_from(query.subquery()))
     alerts = session.scalars(
