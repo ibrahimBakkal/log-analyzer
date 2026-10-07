@@ -1,4 +1,4 @@
-"""Reading rule files from a directory.
+"""Reading rule files from a directory and the folders inside it.
 
 One YAML file holds one rule. A file that cannot be used never stops the
 others from loading: it is reported with a message that says what is wrong.
@@ -38,20 +38,21 @@ def load_rules(directory: Path) -> RuleSet:
     rules: dict[str, Rule] = {}
     sources: dict[str, str] = {}
     errors: list[RuleError] = []
-    files = sorted(path for path in directory.iterdir() if path.suffix in {".yaml", ".yml"})
+    files = sorted(
+        path for path in directory.rglob("*") if path.suffix in {".yaml", ".yml"} and path.is_file()
+    )
     for path in files:
+        name = path.relative_to(directory).as_posix()
         try:
             rule = _load_file(path)
         except ValueError as error:
-            errors.append(RuleError(path.name, str(error)))
+            errors.append(RuleError(name, str(error)))
             continue
         if rule.id in rules:
-            errors.append(
-                RuleError(path.name, f"id {rule.id!r} is already used by {sources[rule.id]}")
-            )
+            errors.append(RuleError(name, f"id {rule.id!r} is already used by {sources[rule.id]}"))
             continue
         rules[rule.id] = rule
-        sources[rule.id] = path.name
+        sources[rule.id] = name
     return RuleSet(tuple(rules.values()), tuple(errors))
 
 

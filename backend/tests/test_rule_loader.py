@@ -181,6 +181,23 @@ def test_rules_load_in_file_name_order_and_other_files_are_ignored(tmp_path):
     assert [rule.id for rule in rules.rules] == ["KW-900", "SSH-900"]
 
 
+def test_rules_in_folders_are_loaded_too_and_named_with_their_folder(tmp_path):
+    folder = tmp_path / "sigma"
+    folder.mkdir()
+    (tmp_path / "looks-like-a-rule.yaml").mkdir()
+    write(tmp_path, z__yaml=KEYWORD)
+    write(folder, a__yaml=THRESHOLD, broken__yaml="id: [", LICENSE__md="not a rule")
+    write(folder, again__yaml=KEYWORD)
+
+    rules = load_rules(tmp_path)
+
+    assert [rule.id for rule in rules.rules] == ["SSH-900", "KW-900"]
+    assert [(error.file, error.message) for error in rules.errors] == [
+        ("sigma/broken.yaml", rules.errors[0].message),
+        ("z.yaml", "id 'KW-900' is already used by sigma/again.yaml"),
+    ]
+
+
 def test_where_a_rule_comes_from_can_be_written_down(tmp_path):
     rule, error = load_one(
         tmp_path,
