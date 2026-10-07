@@ -23,6 +23,7 @@ from app.rules.schema import (
     Rule,
     SequenceRule,
     ThresholdRule,
+    keyword_parts,
 )
 
 Span = tuple[int, int]  # [start, end) character positions in an event's message
@@ -85,25 +86,36 @@ class KeywordEvaluator(Evaluator[KeywordRule]):
 
     def __init__(self, rule: KeywordRule) -> None:
         super().__init__(rule)
-        self._patterns: list[re.Pattern[str]] = []
+        self._wanted: list[re.Pattern[str]] = []
         if rule.keywords:
-            # Longest first, so that "shadow" does not win over "/etc/shadow".
-            words = sorted(rule.keywords, key=len, reverse=True)
-            self._patterns.append(re.compile("|".join(map(re.escape, words)), re.IGNORECASE))
+            self._wanted.append(_one_of(rule.keywords))
         if rule.regex is not None:
-            self._patterns.append(re.compile(rule.regex))
+            self._wanted.append(re.compile(rule.regex))
 
     def spans(self, event: EventRow, key: str) -> tuple[Span, ...] | None:
-        found = [
-            match.span()
-            for pattern in self._patterns
-            for match in pattern.finditer(event.message)
-            if match.end() > match.start()  # a regex may match the empty string
-        ]
-        return merge_spans(found) or None
+        return merge_spans(_places(self._wanted, event.message)) or None
 
     def trigger(self, key: str, evidence: Evidence, event: EventRow) -> list[Evidence] | None:
         return [evidence]
+
+
+def _one_of(keywords: list[str]) -> re.Pattern[str]:
+    """Matches any of *keywords*, whatever the case; ``*`` in a keyword is any text."""
+    # Longest first, so that "shadow" does not win over "/etc/shadow".
+    words = sorted(keywords, key=len, reverse=True)
+    # As little text as possible for a "*": the mark should not run on to the
+    # last place the keyword's ending occurs in the line.
+    patterns = (".*?".join(map(re.escape, keyword_parts(word))) for word in words)
+    return re.compile("|".join(patterns), re.IGNORECASE)
+
+
+def _places(patterns: list[re.Pattern[str]], message: str) -> list[Span]:
+    return [
+        match.span()
+        for pattern in patterns
+        for match in pattern.finditer(message)
+        if match.end() > match.start()  # a regex may match the empty string
+    ]
 
 
 class ThresholdEvaluator(Evaluator[ThresholdRule]):

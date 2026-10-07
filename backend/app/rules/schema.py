@@ -10,6 +10,7 @@ from string import Formatter
 from typing import Annotated, Any, ClassVar, Literal
 
 from pydantic import (
+    AfterValidator,
     BaseModel,
     ConfigDict,
     Field,
@@ -22,6 +23,39 @@ from pydantic import (
 from app.enums import Action, Level, Severity
 
 GroupField = Literal["src_ip", "user", "host", "service"]
+
+
+def keyword_parts(keyword: str) -> list[str]:
+    r"""The pieces of text a keyword is made of; ``*`` between them stands for any text.
+
+    ``wget *; chmod +x`` is "wget ", then anything, then "; chmod +x". An
+    asterisk at either end changes nothing, since a keyword is looked for
+    anywhere in a line. ``\*`` is an asterisk and ``\\`` a backslash; any other
+    backslash is just that. This is how Sigma writes keywords, so theirs can be
+    used as they are.
+    """
+    parts = [""]
+    position = 0
+    while position < len(keyword):
+        character = keyword[position]
+        if character == "\\" and keyword[position + 1 : position + 2] in ("*", "\\"):
+            parts[-1] += keyword[position + 1]
+            position += 1
+        elif character == "*":
+            parts.append("")
+        else:
+            parts[-1] += character
+        position += 1
+    return [part for part in parts if part]
+
+
+def _looks_for_something(keyword: str) -> str:
+    if not keyword_parts(keyword):
+        raise ValueError(f"{keyword!r} has nothing to look for")
+    return keyword
+
+
+Keyword = Annotated[str, AfterValidator(_looks_for_something)]
 
 
 class EventFilter(BaseModel):
@@ -101,13 +135,16 @@ class RuleBase(BaseModel):
 
 
 class KeywordRule(RuleBase):
-    """Alerts on lines whose message contains certain text."""
+    """Alerts on lines whose message contains certain text.
+
+    Case is ignored, and ``*`` in a keyword stands for any text.
+    """
 
     default_summary: ClassVar[str] = "{rule_name}: {key} üzerinde {count} satır"
 
     type: Literal["keyword"]
-    keywords: list[Annotated[str, Field(min_length=1)]] = Field(
-        default=[], description="Texts to look for, ignoring case."
+    keywords: list[Keyword] = Field(
+        default=[], description="Texts to look for: one of them is enough."
     )
     regex: str | None = Field(default=None, description="A regular expression to look for.")
     group_by: GroupField = "host"

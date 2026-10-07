@@ -248,7 +248,11 @@ def test_disabled_rules_are_loaded_but_not_enabled(tmp_path):
         ),
         (
             KEYWORD.replace("keywords: [/etc/shadow]", "keywords: ['']"),
-            "keywords.0: String should have at least 1 character",
+            "keywords.0: '' has nothing to look for",
+        ),
+        (
+            KEYWORD.replace("keywords: [/etc/shadow]", "keywords: ['**']"),
+            "keywords.0: '**' has nothing to look for",
         ),
         (KEYWORD.replace("id: KW-900", "id: 'has spaces'"), "id: String should match pattern"),
         (

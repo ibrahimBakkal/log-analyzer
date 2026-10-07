@@ -25,6 +25,7 @@ from app.rules.schema import (
     RarePortRule,
     Rule,
     SequenceRule,
+    keyword_parts,
 )
 
 
@@ -314,11 +315,8 @@ def _selection(rule: Rule) -> list[ColumnElement[bool]]:
     """What the database can already tell about which events matter to a rule."""
     conditions = _conditions(rule.match)
     if isinstance(rule, KeywordRule):
-        # Not for non-ASCII keywords: SQLite only folds the case of ASCII letters,
-        # the evaluator folds all of them.
-        if rule.regex is None and all(map(str.isascii, rule.keywords)):
-            contains = (Event.message.icontains(word, autoescape=True) for word in rule.keywords)
-            conditions.append(or_(*contains))
+        if rule.regex is None:
+            conditions.extend(_one_of(rule.keywords))
     elif isinstance(rule, SequenceRule):
         conditions.append(or_(*(and_(*_conditions(step.match)) for step in rule.steps)))
     elif isinstance(rule, PortScanRule):
@@ -327,6 +325,26 @@ def _selection(rule: Rule) -> list[ColumnElement[bool]]:
         listed = Event.dst_port.in_(rule.ports)
         conditions.append(listed if rule.mode == "watchlist" else Event.dst_port.not_in(rule.ports))
     return conditions
+
+
+def _one_of(keywords: Sequence[str]) -> list[ColumnElement[bool]]:
+    """Lines with one of *keywords*, as far as the database can be trusted to tell.
+
+    Not for non-ASCII keywords: SQLite only folds the case of ASCII letters, the
+    evaluator folds all of them. For those nothing is said, and the evaluator sorts it out.
+    """
+    if not all(map(str.isascii, keywords)):
+        return []
+    return [or_(*(Event.message.ilike(_like(word), escape="\\") for word in keywords))]
+
+
+def _like(keyword: str) -> str:
+    """A LIKE pattern for a keyword: its parts in order, anything before, between and after."""
+    escaped = (
+        part.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        for part in keyword_parts(keyword)
+    )
+    return "%" + "%".join(escaped) + "%"
 
 
 def _conditions(wanted: EventFilter) -> list[ColumnElement[bool]]:
