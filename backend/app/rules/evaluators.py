@@ -150,11 +150,24 @@ class SequenceEvaluator(Evaluator[SequenceRule]):
     def __init__(self, rule: SequenceRule) -> None:
         super().__init__(rule)
         self._recent: defaultdict[str, deque[tuple[Evidence, frozenset[int]]]] = defaultdict(deque)
+        # Each step's filter as plain (field, accepted values) pairs: asked for
+        # every event, so not through the model.
+        self._tests = [
+            tuple((name, frozenset(accepted)) for name, accepted in step.match if accepted)
+            for step in rule.steps
+        ]
+        self._last: tuple[int, frozenset[int]] = (-1, frozenset())
 
     def _steps(self, event: EventRow) -> frozenset[int]:
-        return frozenset(
-            index for index, step in enumerate(self.rule.steps) if step.match.matches(event)
-        )
+        """The steps *event* could serve. Asked twice per event; remembered once."""
+        if self._last[0] != event.id:
+            steps = frozenset(
+                index
+                for index, tests in enumerate(self._tests)
+                if all(getattr(event, name) in accepted for name, accepted in tests)
+            )
+            self._last = (event.id, steps)
+        return self._last[1]
 
     def spans(self, event: EventRow, key: str) -> tuple[Span, ...] | None:
         return _span_of(event.message, key) if self._steps(event) else None
@@ -245,9 +258,23 @@ def _span_of(message: str, text: str) -> tuple[Span, ...]:
 
 
 def _port_span(message: str, port: int) -> tuple[Span, ...]:
-    """The destination port in a packet log line (``DPT=23``)."""
-    match = re.search(rf"\bDPT=({port})\b", message)
-    return (match.span(1),) if match else ()
+    """The destination port in a packet log line (``DPT=23``, as a word of its own)."""
+    # Plain search rather than a regular expression per port: there are 65,536
+    # of them, far more than the pattern cache holds.
+    field = f"DPT={port}"
+    start = message.find(field)
+    while start >= 0:
+        end = start + len(field)
+        if not (start and _in_word(message[start - 1])) and not (
+            end < len(message) and _in_word(message[end])
+        ):
+            return ((start + 4, end),)
+        start = message.find(field, start + 1)
+    return ()
+
+
+def _in_word(character: str) -> bool:
+    return character.isalnum() or character == "_"
 
 
 _EVALUATORS: dict[type, type[Evaluator]] = {

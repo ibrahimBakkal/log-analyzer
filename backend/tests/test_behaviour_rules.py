@@ -9,6 +9,7 @@ from sqlalchemy import select
 from app.models import Alert, AlertEvent, Event
 from app.rules import evaluate
 from app.rules.engine import detect
+from app.rules.evaluators import _port_span
 from app.rules.schema import RULE
 
 T0 = datetime(2026, 9, 9, 3, 0, 0, tzinfo=UTC)
@@ -529,3 +530,27 @@ def test_any_rule_can_be_limited_to_certain_destination_ports(session):
     evaluate(session, [rule])
     [alert] = alerts(session)
     assert (alert.count, alert.last_seen) == (5, T0 + timedelta(seconds=4))
+
+
+@pytest.mark.parametrize(
+    ("message", "port", "marked"),
+    [
+        ("SPT=40000 DPT=23 SYN", 23, "23"),
+        ("DPT=23", 23, "23"),
+        ("PROTO=TCP DPT=8080", 8080, "8080"),
+        # Not the port asked for, although its digits are in there somewhere.
+        ("SPT=23 DPT=230 SYN", 23, None),
+        ("SPT=23 DPT=123 SYN", 23, None),
+        ("DPT=2 DPT=23 SYN", 23, "23"),
+        # Not the field at all: only a name that ends the same way.
+        ("ODPT=23 DPT=23 SYN", 23, "23"),
+        ("ODPT=23 SYN", 23, None),
+        ("no ports here", 23, None),
+    ],
+)
+def test_port_is_found_only_as_the_value_of_its_own_field(message, port, marked):
+    spans = _port_span(message, port)
+    assert [message[start:end] for start, end in spans] == ([marked] if marked else [])
+    if marked:
+        [(start, _)] = spans
+        assert message[start - 4 : start] == "DPT=" and (start == 4 or message[start - 5] == " ")
