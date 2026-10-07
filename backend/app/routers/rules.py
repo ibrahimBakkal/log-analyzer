@@ -6,6 +6,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 
 from app.config import get_settings
+from app.live import Hub
 from app.routers import SessionDep
 from app.rules import RuleSet, evaluate, load_rules
 from app.schemas import EvaluationOut, RuleErrorOut, RuleList, RuleReload
@@ -41,6 +42,8 @@ def reload_rules(request: Request, session: SessionDep) -> RuleReload:
     rules = load_rules(get_settings().rules_dir)
     request.app.state.rules = rules
     evaluation = evaluate(session, rules.enabled)
+    hub: Hub = request.app.state.hub
+    hub.publish("update", {"reason": "rules", "added": 0, "alerts": evaluation.total})
     return RuleReload(
         rules=list(rules.rules), errors=_errors(rules), alerts=EvaluationOut(**asdict(evaluation))
     )

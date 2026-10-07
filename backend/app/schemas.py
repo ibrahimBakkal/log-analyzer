@@ -165,3 +165,18 @@ class PortReport(BaseModel):
     ports: list[PortStats] = Field(description="The busiest ports first.")
     connections: list[PortConnection] = Field(description="Single packets, oldest first.")
     truncated: bool = Field(description="True if `connections` does not hold all of them.")
+
+
+class FollowedFileOut(BaseModel):
+    path: str
+    state: str = Field(
+        description="`following`, `waiting` (the file does not exist yet) or `error`."
+    )
+    detail: str | None = Field(description="Why, when the file is not being followed.")
+    source: str | None = Field(description="The name the file's lines are stored under.")
+    lines: int = Field(description="Lines read from the file as it is now.")
+    read_at: datetime | None = Field(description="When new lines were last read.")
+
+
+class FollowStatus(BaseModel):
+    following: list[FollowedFileOut]

@@ -67,11 +67,12 @@ def make_engine(url: str, **options: Any) -> Engine:
 
 
 @lru_cache
-def _session_factory() -> sessionmaker[Session]:
+def session_factory() -> sessionmaker[Session]:
+    """Makes sessions on the configured database."""
     return sessionmaker(bind=make_engine(get_settings().database_url), expire_on_commit=False)
 
 
 def get_session() -> Iterator[Session]:
     """FastAPI dependency: one database session per request."""
-    with _session_factory()() as session:
+    with session_factory()() as session:
         yield session

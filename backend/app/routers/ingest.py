@@ -12,6 +12,7 @@ from app.ingest import DamagedFileError, NoTimestampsError, ingest_lines, open_l
 from app.models import Alert
 from app.parsers import UnknownParserError, create_parser
 from app.routers import SessionDep
+from app.routers.live import HubDep
 from app.routers.rules import RulesDep
 from app.rules import evaluate
 from app.schemas import IngestReport
@@ -29,6 +30,7 @@ def _source_name(name: str | None) -> str:
 def ingest_file(
     session: SessionDep,
     rules: RulesDep,
+    hub: HubDep,
     file: Annotated[UploadFile, File(description="The log file to load.")],
     parser: Annotated[
         str,
@@ -92,7 +94,9 @@ def ingest_file(
         detail = f"{error}. The lines before that were stored."
         raise HTTPException(status_code=422, detail=detail) from None
 
-    if result.parsed or result.unparsed:  # new events: the alerts may have changed
+    if result.added:  # new events: the alerts may have changed
         evaluate(session, rules.enabled)
-    alerts = session.scalar(select(func.count()).select_from(Alert))
-    return IngestReport(**asdict(result), alerts=alerts or 0)
+    alerts = session.scalar(select(func.count()).select_from(Alert)) or 0
+    if result.added:
+        hub.publish("update", {"reason": "ingest", "added": result.added, "alerts": alerts})
+    return IngestReport(**asdict(result), alerts=alerts)

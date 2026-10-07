@@ -9,7 +9,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import alerts, events, health, ingest, ports, rules, stats, timeline
+from app.db import session_factory
+from app.follow import Follower
+from app.live import Hub, on_exit_signal
+from app.routers import alerts, events, health, ingest, live, ports, rules, stats, timeline
 from app.rules import load_rules
 
 log = logging.getLogger(__name__)
@@ -17,10 +20,33 @@ log = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    app.state.rules = load_rules(get_settings().rules_dir)
+    settings = get_settings()
+    app.state.rules = load_rules(settings.rules_dir)
     for error in app.state.rules.errors:
         log.warning("rule file %s was not loaded: %s", error.file, error.message)
-    yield
+
+    app.state.hub = Hub()
+    app.state.follower = None
+    if settings.follow:
+        app.state.follower = Follower(
+            settings.follow,
+            session_factory=session_factory(),
+            rules=lambda: app.state.rules,
+            hub=app.state.hub,
+            tz=settings.follow_tz,
+            interval=settings.follow_interval,
+        )
+        app.state.follower.start()
+        log.info("following %s", ", ".join(str(path) for path in settings.follow))
+    # Open /stream responses would keep the server from shutting down.
+    restore_signals = on_exit_signal(app.state.hub.close)
+    try:
+        yield
+    finally:
+        restore_signals()
+        if app.state.follower is not None:
+            app.state.follower.stop()
+        app.state.hub.close()
 
 
 app = FastAPI(
@@ -44,3 +70,4 @@ app.include_router(rules.router)
 app.include_router(timeline.router)
 app.include_router(stats.router)
 app.include_router(ports.router)
+app.include_router(live.router)

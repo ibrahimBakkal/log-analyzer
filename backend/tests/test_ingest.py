@@ -2,6 +2,7 @@
 
 import io
 import math
+import tracemalloc
 from datetime import UTC, datetime
 
 import pytest
@@ -71,6 +72,19 @@ def test_overlong_line_is_one_line_and_never_held_in_memory_whole():
         (4, "yyyyyy", ingest.MAX_LINE_LENGTH),
     ]
     assert Counting.largest <= 4 * ingest.MAX_LINE_LENGTH
+
+
+def test_memory_does_not_grow_with_the_length_of_a_line():
+    stream = io.BytesIO(b"x" * 20_000_000 + b"\nafter\n" + b"y" * 20_000_000)
+    tracemalloc.start()
+    try:
+        lines = [(number, len(text)) for number, text in read_lines(stream)]
+        _, peak = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
+
+    assert lines == [(1, ingest.MAX_LINE_LENGTH), (2, 5), (3, ingest.MAX_LINE_LENGTH)]
+    assert peak < 1_000_000  # the two lines are 20 MB each
 
 
 def test_read_lines_reads_one_line_at_a_time():
