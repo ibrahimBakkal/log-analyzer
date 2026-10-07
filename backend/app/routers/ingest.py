@@ -30,7 +30,13 @@ def ingest_file(
     session: SessionDep,
     rules: RulesDep,
     file: Annotated[UploadFile, File(description="The log file to load.")],
-    parser: Annotated[str, Form(description="Format of the file.")] = "auth",
+    parser: Annotated[
+        str,
+        Form(
+            description="What to look for in the file: `auto` recognizes the lines of every "
+            "known format, `auth` only sshd and sudo, `ufw` only the firewall's packet log."
+        ),
+    ] = "auto",
     year: Annotated[
         int | None,
         Form(
