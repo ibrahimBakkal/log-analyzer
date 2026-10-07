@@ -1,0 +1,1057 @@
+Sep  9 00:00:07 web-01 sshd[1208]: Server listening on 0.0.0.0 port 22.
+Sep  9 00:00:07 web-01 sshd[1208]: Server listening on :: port 22.
+Sep  9 00:17:01 web-01 CRON[1232]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 00:17:01 web-01 CRON[1232]: pam_unix(cron:session): session closed for user root
+Sep  9 00:34:10 web-01 sshd[1239]: Invalid user dev from 203.0.113.9 port 37168
+Sep  9 00:34:10 web-01 sshd[1239]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 00:34:10 web-01 sshd[1239]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.9
+Sep  9 00:34:12 web-01 sshd[1239]: Failed password for invalid user dev from 203.0.113.9 port 37168 ssh2
+Sep  9 00:34:12 web-01 sshd[1239]: Connection closed by invalid user dev 203.0.113.9 port 37168 [preauth]
+Sep  9 01:02:10 web-01 sshd[1253]: Invalid user mysql from 203.0.113.9 port 52587
+Sep  9 01:02:10 web-01 sshd[1253]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:02:10 web-01 sshd[1253]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.9
+Sep  9 01:02:11 web-01 sshd[1253]: Failed password for invalid user mysql from 203.0.113.9 port 52587 ssh2
+Sep  9 01:02:11 web-01 sshd[1253]: Received disconnect from 203.0.113.9 port 52587:11: Bye Bye [preauth]
+Sep  9 01:02:11 web-01 sshd[1253]: Disconnected from invalid user mysql 203.0.113.9 port 52587 [preauth]
+Sep  9 01:04:28 web-01 sshd[1274]: Invalid user ftpuser from 203.0.113.24 port 46085
+Sep  9 01:04:29 web-01 sshd[1274]: Connection closed by invalid user ftpuser 203.0.113.24 port 46085 [preauth]
+Sep  9 01:17:01 web-01 CRON[1277]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 01:17:01 web-01 CRON[1277]: pam_unix(cron:session): session closed for user root
+Sep  9 01:47:50 web-01 sshd[1288]: Invalid user vagrant from 198.51.100.23 port 43329
+Sep  9 01:47:50 web-01 sshd[1288]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:47:50 web-01 sshd[1288]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:47:51 web-01 sshd[1288]: Failed password for invalid user vagrant from 198.51.100.23 port 43329 ssh2
+Sep  9 01:47:51 web-01 sshd[1288]: Received disconnect from 198.51.100.23 port 43329:11: Bye Bye [preauth]
+Sep  9 01:47:51 web-01 sshd[1288]: Disconnected from invalid user vagrant 198.51.100.23 port 43329 [preauth]
+Sep  9 01:47:52 web-01 sshd[1295]: Invalid user ansible from 198.51.100.23 port 41907
+Sep  9 01:47:52 web-01 sshd[1295]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:47:52 web-01 sshd[1295]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:47:54 web-01 sshd[1295]: Failed password for invalid user ansible from 198.51.100.23 port 41907 ssh2
+Sep  9 01:47:54 web-01 sshd[1295]: Connection closed by invalid user ansible 198.51.100.23 port 41907 [preauth]
+Sep  9 01:47:57 web-01 sshd[1314]: Invalid user oracle from 198.51.100.23 port 51440
+Sep  9 01:47:57 web-01 sshd[1314]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:47:57 web-01 sshd[1314]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:00 web-01 sshd[1314]: Failed password for invalid user oracle from 198.51.100.23 port 51440 ssh2
+Sep  9 01:48:00 web-01 sshd[1314]: Connection closed by invalid user oracle 198.51.100.23 port 51440 [preauth]
+Sep  9 01:48:01 web-01 sshd[1319]: Invalid user ubuntu from 198.51.100.23 port 33708
+Sep  9 01:48:01 web-01 sshd[1319]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:01 web-01 sshd[1319]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:03 web-01 sshd[1319]: Failed password for invalid user ubuntu from 198.51.100.23 port 33708 ssh2
+Sep  9 01:48:03 web-01 sshd[1319]: Received disconnect from 198.51.100.23 port 33708:11: Bye Bye [preauth]
+Sep  9 01:48:03 web-01 sshd[1319]: Disconnected from invalid user ubuntu 198.51.100.23 port 33708 [preauth]
+Sep  9 01:48:04 web-01 sshd[1336]: Invalid user steam from 198.51.100.23 port 48744
+Sep  9 01:48:04 web-01 sshd[1336]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:04 web-01 sshd[1336]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:05 web-01 sshd[1336]: Failed password for invalid user steam from 198.51.100.23 port 48744 ssh2
+Sep  9 01:48:05 web-01 sshd[1336]: Connection closed by invalid user steam 198.51.100.23 port 48744 [preauth]
+Sep  9 01:48:08 web-01 sshd[1355]: Invalid user pi from 198.51.100.23 port 43920
+Sep  9 01:48:08 web-01 sshd[1355]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:08 web-01 sshd[1355]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:10 web-01 sshd[1355]: Failed password for invalid user pi from 198.51.100.23 port 43920 ssh2
+Sep  9 01:48:10 web-01 sshd[1355]: Received disconnect from 198.51.100.23 port 43920:11: Bye Bye [preauth]
+Sep  9 01:48:10 web-01 sshd[1355]: Disconnected from invalid user pi 198.51.100.23 port 43920 [preauth]
+Sep  9 01:48:12 web-01 sshd[1372]: Invalid user centos from 198.51.100.23 port 50980
+Sep  9 01:48:12 web-01 sshd[1372]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:12 web-01 sshd[1372]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:13 web-01 sshd[1372]: Failed password for invalid user centos from 198.51.100.23 port 50980 ssh2
+Sep  9 01:48:13 web-01 sshd[1372]: Connection closed by invalid user centos 198.51.100.23 port 50980 [preauth]
+Sep  9 01:48:15 web-01 sshd[1394]: Invalid user testuser from 198.51.100.23 port 35573
+Sep  9 01:48:15 web-01 sshd[1394]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:15 web-01 sshd[1394]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:16 web-01 sshd[1394]: Failed password for invalid user testuser from 198.51.100.23 port 35573 ssh2
+Sep  9 01:48:16 web-01 sshd[1394]: Received disconnect from 198.51.100.23 port 35573:11: Bye Bye [preauth]
+Sep  9 01:48:16 web-01 sshd[1394]: Disconnected from invalid user testuser 198.51.100.23 port 35573 [preauth]
+Sep  9 01:48:20 web-01 sshd[1418]: Invalid user operator from 198.51.100.23 port 50960
+Sep  9 01:48:20 web-01 sshd[1418]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:20 web-01 sshd[1418]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:21 web-01 sshd[1418]: Failed password for invalid user operator from 198.51.100.23 port 50960 ssh2
+Sep  9 01:48:21 web-01 sshd[1418]: Connection closed by invalid user operator 198.51.100.23 port 50960 [preauth]
+Sep  9 01:48:25 web-01 sshd[1435]: Invalid user admin from 198.51.100.23 port 47453
+Sep  9 01:48:25 web-01 sshd[1435]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:25 web-01 sshd[1435]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:26 web-01 sshd[1435]: Failed password for invalid user admin from 198.51.100.23 port 47453 ssh2
+Sep  9 01:48:26 web-01 sshd[1435]: Connection closed by invalid user admin 198.51.100.23 port 47453 [preauth]
+Sep  9 01:48:28 web-01 sshd[1439]: Invalid user user from 198.51.100.23 port 46019
+Sep  9 01:48:28 web-01 sshd[1439]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:28 web-01 sshd[1439]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:31 web-01 sshd[1439]: Failed password for invalid user user from 198.51.100.23 port 46019 ssh2
+Sep  9 01:48:31 web-01 sshd[1439]: Connection closed by invalid user user 198.51.100.23 port 46019 [preauth]
+Sep  9 01:48:32 web-01 sshd[1454]: Invalid user hadoop from 198.51.100.23 port 48275
+Sep  9 01:48:32 web-01 sshd[1454]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:32 web-01 sshd[1454]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:35 web-01 sshd[1454]: Failed password for invalid user hadoop from 198.51.100.23 port 48275 ssh2
+Sep  9 01:48:35 web-01 sshd[1454]: Connection closed by invalid user hadoop 198.51.100.23 port 48275 [preauth]
+Sep  9 01:48:37 web-01 sshd[1478]: Invalid user server from 198.51.100.23 port 57210
+Sep  9 01:48:37 web-01 sshd[1478]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:37 web-01 sshd[1478]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:40 web-01 sshd[1478]: Failed password for invalid user server from 198.51.100.23 port 57210 ssh2
+Sep  9 01:48:40 web-01 sshd[1478]: Connection closed by invalid user server 198.51.100.23 port 57210 [preauth]
+Sep  9 01:48:42 web-01 sshd[1496]: Invalid user jenkins from 198.51.100.23 port 41645
+Sep  9 01:48:42 web-01 sshd[1496]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:42 web-01 sshd[1496]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:44 web-01 sshd[1496]: Failed password for invalid user jenkins from 198.51.100.23 port 41645 ssh2
+Sep  9 01:48:44 web-01 sshd[1496]: Connection closed by invalid user jenkins 198.51.100.23 port 41645 [preauth]
+Sep  9 01:48:44 web-01 sshd[1501]: Invalid user backup from 198.51.100.23 port 56403
+Sep  9 01:48:44 web-01 sshd[1501]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:44 web-01 sshd[1501]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:45 web-01 sshd[1501]: Failed password for invalid user backup from 198.51.100.23 port 56403 ssh2
+Sep  9 01:48:45 web-01 sshd[1501]: Connection closed by invalid user backup 198.51.100.23 port 56403 [preauth]
+Sep  9 01:48:47 web-01 sshd[1514]: Invalid user student from 198.51.100.23 port 39044
+Sep  9 01:48:47 web-01 sshd[1514]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:47 web-01 sshd[1514]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:48 web-01 sshd[1514]: Failed password for invalid user student from 198.51.100.23 port 39044 ssh2
+Sep  9 01:48:48 web-01 sshd[1514]: Received disconnect from 198.51.100.23 port 39044:11: Bye Bye [preauth]
+Sep  9 01:48:48 web-01 sshd[1514]: Disconnected from invalid user student 198.51.100.23 port 39044 [preauth]
+Sep  9 01:48:51 web-01 sshd[1519]: Invalid user git from 198.51.100.23 port 56511
+Sep  9 01:48:51 web-01 sshd[1519]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:51 web-01 sshd[1519]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:54 web-01 sshd[1519]: Failed password for invalid user git from 198.51.100.23 port 56511 ssh2
+Sep  9 01:48:54 web-01 sshd[1519]: Received disconnect from 198.51.100.23 port 56511:11: Bye Bye [preauth]
+Sep  9 01:48:54 web-01 sshd[1519]: Disconnected from invalid user git 198.51.100.23 port 56511 [preauth]
+Sep  9 01:48:55 web-01 sshd[1530]: Invalid user odoo from 198.51.100.23 port 36062
+Sep  9 01:48:55 web-01 sshd[1530]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:55 web-01 sshd[1530]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:48:56 web-01 sshd[1530]: Failed password for invalid user odoo from 198.51.100.23 port 36062 ssh2
+Sep  9 01:48:56 web-01 sshd[1530]: Connection closed by invalid user odoo 198.51.100.23 port 36062 [preauth]
+Sep  9 01:48:59 web-01 sshd[1545]: Invalid user info from 198.51.100.23 port 38647
+Sep  9 01:48:59 web-01 sshd[1545]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:48:59 web-01 sshd[1545]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:01 web-01 sshd[1545]: Failed password for invalid user info from 198.51.100.23 port 38647 ssh2
+Sep  9 01:49:01 web-01 sshd[1545]: Connection closed by invalid user info 198.51.100.23 port 38647 [preauth]
+Sep  9 01:49:02 web-01 sshd[1562]: Invalid user tomcat from 198.51.100.23 port 41756
+Sep  9 01:49:02 web-01 sshd[1562]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:02 web-01 sshd[1562]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:03 web-01 sshd[1562]: Failed password for invalid user tomcat from 198.51.100.23 port 41756 ssh2
+Sep  9 01:49:03 web-01 sshd[1562]: Received disconnect from 198.51.100.23 port 41756:11: Bye Bye [preauth]
+Sep  9 01:49:03 web-01 sshd[1562]: Disconnected from invalid user tomcat 198.51.100.23 port 41756 [preauth]
+Sep  9 01:49:06 web-01 sshd[1568]: Invalid user postgres from 198.51.100.23 port 55620
+Sep  9 01:49:06 web-01 sshd[1568]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:06 web-01 sshd[1568]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:07 web-01 sshd[1568]: Failed password for invalid user postgres from 198.51.100.23 port 55620 ssh2
+Sep  9 01:49:07 web-01 sshd[1568]: Connection closed by invalid user postgres 198.51.100.23 port 55620 [preauth]
+Sep  9 01:49:11 web-01 sshd[1591]: Invalid user demo from 198.51.100.23 port 36129
+Sep  9 01:49:11 web-01 sshd[1591]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:11 web-01 sshd[1591]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:12 web-01 sshd[1591]: Failed password for invalid user demo from 198.51.100.23 port 36129 ssh2
+Sep  9 01:49:12 web-01 sshd[1591]: Connection closed by invalid user demo 198.51.100.23 port 36129 [preauth]
+Sep  9 01:49:16 web-01 sshd[1607]: Invalid user kafka from 198.51.100.23 port 48454
+Sep  9 01:49:16 web-01 sshd[1607]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:16 web-01 sshd[1607]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:18 web-01 sshd[1607]: Failed password for invalid user kafka from 198.51.100.23 port 48454 ssh2
+Sep  9 01:49:18 web-01 sshd[1607]: Connection closed by invalid user kafka 198.51.100.23 port 48454 [preauth]
+Sep  9 01:49:18 web-01 sshd[1617]: Invalid user elastic from 198.51.100.23 port 41041
+Sep  9 01:49:18 web-01 sshd[1617]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:18 web-01 sshd[1617]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:20 web-01 sshd[1617]: Failed password for invalid user elastic from 198.51.100.23 port 41041 ssh2
+Sep  9 01:49:20 web-01 sshd[1617]: Connection closed by invalid user elastic 198.51.100.23 port 41041 [preauth]
+Sep  9 01:49:20 web-01 sshd[1630]: Invalid user support from 198.51.100.23 port 45898
+Sep  9 01:49:20 web-01 sshd[1630]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:20 web-01 sshd[1630]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:22 web-01 sshd[1630]: Failed password for invalid user support from 198.51.100.23 port 45898 ssh2
+Sep  9 01:49:22 web-01 sshd[1630]: Connection closed by invalid user support 198.51.100.23 port 45898 [preauth]
+Sep  9 01:49:22 web-01 sshd[1645]: Invalid user docker from 198.51.100.23 port 37739
+Sep  9 01:49:22 web-01 sshd[1645]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:22 web-01 sshd[1645]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:23 web-01 sshd[1645]: Failed password for invalid user docker from 198.51.100.23 port 37739 ssh2
+Sep  9 01:49:23 web-01 sshd[1645]: Received disconnect from 198.51.100.23 port 37739:11: Bye Bye [preauth]
+Sep  9 01:49:23 web-01 sshd[1645]: Disconnected from invalid user docker 198.51.100.23 port 37739 [preauth]
+Sep  9 01:49:26 web-01 sshd[1651]: Invalid user dev from 198.51.100.23 port 35559
+Sep  9 01:49:26 web-01 sshd[1651]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:26 web-01 sshd[1651]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:27 web-01 sshd[1651]: Failed password for invalid user dev from 198.51.100.23 port 35559 ssh2
+Sep  9 01:49:27 web-01 sshd[1651]: Connection closed by invalid user dev 198.51.100.23 port 35559 [preauth]
+Sep  9 01:49:31 web-01 sshd[1667]: Invalid user zabbix from 198.51.100.23 port 52635
+Sep  9 01:49:31 web-01 sshd[1667]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:31 web-01 sshd[1667]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:34 web-01 sshd[1667]: Failed password for invalid user zabbix from 198.51.100.23 port 52635 ssh2
+Sep  9 01:49:34 web-01 sshd[1667]: Received disconnect from 198.51.100.23 port 52635:11: Bye Bye [preauth]
+Sep  9 01:49:34 web-01 sshd[1667]: Disconnected from invalid user zabbix 198.51.100.23 port 52635 [preauth]
+Sep  9 01:49:34 web-01 sshd[1691]: Invalid user es from 198.51.100.23 port 58185
+Sep  9 01:49:34 web-01 sshd[1691]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:34 web-01 sshd[1691]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:37 web-01 sshd[1691]: Failed password for invalid user es from 198.51.100.23 port 58185 ssh2
+Sep  9 01:49:37 web-01 sshd[1691]: Connection closed by invalid user es 198.51.100.23 port 58185 [preauth]
+Sep  9 01:49:39 web-01 sshd[1705]: Invalid user webmaster from 198.51.100.23 port 42511
+Sep  9 01:49:39 web-01 sshd[1705]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 01:49:39 web-01 sshd[1705]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23
+Sep  9 01:49:42 web-01 sshd[1705]: Failed password for invalid user webmaster from 198.51.100.23 port 42511 ssh2
+Sep  9 01:49:42 web-01 sshd[1705]: Received disconnect from 198.51.100.23 port 42511:11: Bye Bye [preauth]
+Sep  9 01:49:42 web-01 sshd[1705]: Disconnected from invalid user webmaster 198.51.100.23 port 42511 [preauth]
+Sep  9 02:17:01 web-01 CRON[1729]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 02:17:01 web-01 CRON[1729]: pam_unix(cron:session): session closed for user root
+Sep  9 03:12:36 web-01 sshd[1734]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:38 web-01 sshd[1739]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:39 web-01 sshd[1734]: Failed password for root from 203.0.113.45 port 52744 ssh2
+Sep  9 03:12:39 web-01 sshd[1734]: Connection closed by authenticating user root 203.0.113.45 port 52744 [preauth]
+Sep  9 03:12:40 web-01 sshd[1739]: Failed password for root from 203.0.113.45 port 39682 ssh2
+Sep  9 03:12:40 web-01 sshd[1755]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:41 web-01 sshd[1755]: Failed password for root from 203.0.113.45 port 35227 ssh2
+Sep  9 03:12:42 web-01 sshd[1755]: Failed password for root from 203.0.113.45 port 35227 ssh2
+Sep  9 03:12:43 web-01 sshd[1739]: Failed password for root from 203.0.113.45 port 39682 ssh2
+Sep  9 03:12:44 web-01 sshd[1739]: Failed password for root from 203.0.113.45 port 39682 ssh2
+Sep  9 03:12:44 web-01 sshd[1739]: Connection closed by authenticating user root 203.0.113.45 port 39682 [preauth]
+Sep  9 03:12:44 web-01 sshd[1739]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:44 web-01 sshd[1755]: Failed password for root from 203.0.113.45 port 35227 ssh2
+Sep  9 03:12:44 web-01 sshd[1755]: Connection closed by authenticating user root 203.0.113.45 port 35227 [preauth]
+Sep  9 03:12:44 web-01 sshd[1755]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:44 web-01 sshd[1769]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:45 web-01 sshd[1769]: Failed password for root from 203.0.113.45 port 33837 ssh2
+Sep  9 03:12:47 web-01 sshd[1769]: Failed password for root from 203.0.113.45 port 33837 ssh2
+Sep  9 03:12:47 web-01 sshd[1769]: Received disconnect from 203.0.113.45 port 33837:11: Bye Bye [preauth]
+Sep  9 03:12:47 web-01 sshd[1769]: Disconnected from authenticating user root 203.0.113.45 port 33837 [preauth]
+Sep  9 03:12:47 web-01 sshd[1769]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:48 web-01 sshd[1789]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:49 web-01 sshd[1789]: Failed password for root from 203.0.113.45 port 55292 ssh2
+Sep  9 03:12:49 web-01 sshd[1789]: Received disconnect from 203.0.113.45 port 55292:11: Bye Bye [preauth]
+Sep  9 03:12:49 web-01 sshd[1789]: Disconnected from authenticating user root 203.0.113.45 port 55292 [preauth]
+Sep  9 03:12:50 web-01 sshd[1810]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:53 web-01 sshd[1810]: Failed password for root from 203.0.113.45 port 36528 ssh2
+Sep  9 03:12:53 web-01 sshd[1834]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:54 web-01 sshd[1810]: Failed password for root from 203.0.113.45 port 36528 ssh2
+Sep  9 03:12:54 web-01 sshd[1810]: Connection closed by authenticating user root 203.0.113.45 port 36528 [preauth]
+Sep  9 03:12:54 web-01 sshd[1810]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:54 web-01 sshd[1834]: Failed password for root from 203.0.113.45 port 35107 ssh2
+Sep  9 03:12:54 web-01 sshd[1834]: Connection closed by authenticating user root 203.0.113.45 port 35107 [preauth]
+Sep  9 03:12:56 web-01 sshd[1850]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:12:59 web-01 sshd[1850]: Failed password for root from 203.0.113.45 port 57309 ssh2
+Sep  9 03:12:59 web-01 sshd[1874]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:00 web-01 sshd[1878]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:01 web-01 sshd[1850]: Failed password for root from 203.0.113.45 port 57309 ssh2
+Sep  9 03:13:01 web-01 sshd[1874]: Failed password for root from 203.0.113.45 port 45957 ssh2
+Sep  9 03:13:01 web-01 sshd[1900]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:02 web-01 sshd[1878]: Failed password for root from 203.0.113.45 port 34074 ssh2
+Sep  9 03:13:02 web-01 sshd[1914]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:03 web-01 sshd[1850]: Failed password for root from 203.0.113.45 port 57309 ssh2
+Sep  9 03:13:03 web-01 sshd[1850]: Connection closed by authenticating user root 203.0.113.45 port 57309 [preauth]
+Sep  9 03:13:03 web-01 sshd[1850]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:04 web-01 sshd[1874]: Failed password for root from 203.0.113.45 port 45957 ssh2
+Sep  9 03:13:04 web-01 sshd[1900]: Failed password for root from 203.0.113.45 port 40269 ssh2
+Sep  9 03:13:04 web-01 sshd[1900]: Received disconnect from 203.0.113.45 port 40269:11: Bye Bye [preauth]
+Sep  9 03:13:04 web-01 sshd[1900]: Disconnected from authenticating user root 203.0.113.45 port 40269 [preauth]
+Sep  9 03:13:04 web-01 sshd[1914]: Failed password for root from 203.0.113.45 port 59684 ssh2
+Sep  9 03:13:04 web-01 sshd[1935]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:05 web-01 sshd[1878]: Failed password for root from 203.0.113.45 port 34074 ssh2
+Sep  9 03:13:06 web-01 sshd[1942]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:07 web-01 sshd[1874]: Failed password for root from 203.0.113.45 port 45957 ssh2
+Sep  9 03:13:07 web-01 sshd[1874]: Connection closed by authenticating user root 203.0.113.45 port 45957 [preauth]
+Sep  9 03:13:07 web-01 sshd[1874]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:07 web-01 sshd[1878]: Failed password for root from 203.0.113.45 port 34074 ssh2
+Sep  9 03:13:07 web-01 sshd[1878]: Connection closed by authenticating user root 203.0.113.45 port 34074 [preauth]
+Sep  9 03:13:07 web-01 sshd[1878]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:07 web-01 sshd[1914]: Failed password for root from 203.0.113.45 port 59684 ssh2
+Sep  9 03:13:07 web-01 sshd[1935]: Failed password for root from 203.0.113.45 port 49773 ssh2
+Sep  9 03:13:08 web-01 sshd[1914]: Failed password for root from 203.0.113.45 port 59684 ssh2
+Sep  9 03:13:08 web-01 sshd[1914]: Received disconnect from 203.0.113.45 port 59684:11: Bye Bye [preauth]
+Sep  9 03:13:08 web-01 sshd[1914]: Disconnected from authenticating user root 203.0.113.45 port 59684 [preauth]
+Sep  9 03:13:08 web-01 sshd[1914]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:09 web-01 sshd[1935]: Failed password for root from 203.0.113.45 port 49773 ssh2
+Sep  9 03:13:09 web-01 sshd[1935]: Received disconnect from 203.0.113.45 port 49773:11: Bye Bye [preauth]
+Sep  9 03:13:09 web-01 sshd[1935]: Disconnected from authenticating user root 203.0.113.45 port 49773 [preauth]
+Sep  9 03:13:09 web-01 sshd[1935]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:09 web-01 sshd[1942]: Failed password for root from 203.0.113.45 port 47051 ssh2
+Sep  9 03:13:10 web-01 sshd[1952]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:11 web-01 sshd[1942]: Failed password for root from 203.0.113.45 port 47051 ssh2
+Sep  9 03:13:12 web-01 sshd[1942]: Failed password for root from 203.0.113.45 port 47051 ssh2
+Sep  9 03:13:12 web-01 sshd[1942]: Connection closed by authenticating user root 203.0.113.45 port 47051 [preauth]
+Sep  9 03:13:12 web-01 sshd[1942]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:13 web-01 sshd[1952]: Failed password for root from 203.0.113.45 port 43288 ssh2
+Sep  9 03:13:13 web-01 sshd[1966]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:14 web-01 sshd[1952]: Failed password for root from 203.0.113.45 port 43288 ssh2
+Sep  9 03:13:14 web-01 sshd[1952]: Received disconnect from 203.0.113.45 port 43288:11: Bye Bye [preauth]
+Sep  9 03:13:14 web-01 sshd[1952]: Disconnected from authenticating user root 203.0.113.45 port 43288 [preauth]
+Sep  9 03:13:14 web-01 sshd[1952]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:15 web-01 sshd[1966]: Failed password for root from 203.0.113.45 port 55498 ssh2
+Sep  9 03:13:17 web-01 sshd[1966]: Failed password for root from 203.0.113.45 port 55498 ssh2
+Sep  9 03:13:17 web-01 sshd[1966]: Connection closed by authenticating user root 203.0.113.45 port 55498 [preauth]
+Sep  9 03:13:17 web-01 sshd[1966]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:17 web-01 sshd[1972]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:18 web-01 sshd[1993]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:19 web-01 sshd[1972]: Failed password for root from 203.0.113.45 port 33970 ssh2
+Sep  9 03:13:19 web-01 sshd[1993]: Failed password for root from 203.0.113.45 port 49630 ssh2
+Sep  9 03:13:20 web-01 sshd[1972]: Failed password for root from 203.0.113.45 port 33970 ssh2
+Sep  9 03:13:22 web-01 sshd[1972]: Failed password for root from 203.0.113.45 port 33970 ssh2
+Sep  9 03:13:22 web-01 sshd[1972]: Connection closed by authenticating user root 203.0.113.45 port 33970 [preauth]
+Sep  9 03:13:22 web-01 sshd[1972]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:22 web-01 sshd[1993]: Failed password for root from 203.0.113.45 port 49630 ssh2
+Sep  9 03:13:22 web-01 sshd[1993]: Received disconnect from 203.0.113.45 port 49630:11: Bye Bye [preauth]
+Sep  9 03:13:22 web-01 sshd[1993]: Disconnected from authenticating user root 203.0.113.45 port 49630 [preauth]
+Sep  9 03:13:22 web-01 sshd[1993]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:22 web-01 sshd[2009]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:23 web-01 sshd[2009]: Failed password for root from 203.0.113.45 port 34544 ssh2
+Sep  9 03:13:26 web-01 sshd[2009]: Failed password for root from 203.0.113.45 port 34544 ssh2
+Sep  9 03:13:26 web-01 sshd[2009]: Connection closed by authenticating user root 203.0.113.45 port 34544 [preauth]
+Sep  9 03:13:26 web-01 sshd[2009]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:26 web-01 sshd[2031]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:27 web-01 sshd[2031]: Failed password for root from 203.0.113.45 port 47252 ssh2
+Sep  9 03:13:28 web-01 sshd[2031]: Failed password for root from 203.0.113.45 port 47252 ssh2
+Sep  9 03:13:29 web-01 sshd[2034]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:30 web-01 sshd[2031]: Failed password for root from 203.0.113.45 port 47252 ssh2
+Sep  9 03:13:30 web-01 sshd[2031]: Connection closed by authenticating user root 203.0.113.45 port 47252 [preauth]
+Sep  9 03:13:30 web-01 sshd[2031]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:31 web-01 sshd[2034]: Failed password for root from 203.0.113.45 port 55648 ssh2
+Sep  9 03:13:31 web-01 sshd[2045]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:32 web-01 sshd[2034]: Failed password for root from 203.0.113.45 port 55648 ssh2
+Sep  9 03:13:32 web-01 sshd[2034]: Connection closed by authenticating user root 203.0.113.45 port 55648 [preauth]
+Sep  9 03:13:32 web-01 sshd[2034]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:32 web-01 sshd[2058]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:33 web-01 sshd[2045]: Failed password for root from 203.0.113.45 port 37957 ssh2
+Sep  9 03:13:33 web-01 sshd[2058]: Failed password for root from 203.0.113.45 port 60339 ssh2
+Sep  9 03:13:33 web-01 sshd[2058]: Connection closed by authenticating user root 203.0.113.45 port 60339 [preauth]
+Sep  9 03:13:33 web-01 sshd[2061]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:34 web-01 sshd[2061]: Failed password for root from 203.0.113.45 port 60035 ssh2
+Sep  9 03:13:36 web-01 sshd[2045]: Failed password for root from 203.0.113.45 port 37957 ssh2
+Sep  9 03:13:36 web-01 sshd[2061]: Failed password for root from 203.0.113.45 port 60035 ssh2
+Sep  9 03:13:36 web-01 sshd[2068]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:37 web-01 sshd[2045]: Failed password for root from 203.0.113.45 port 37957 ssh2
+Sep  9 03:13:37 web-01 sshd[2045]: Connection closed by authenticating user root 203.0.113.45 port 37957 [preauth]
+Sep  9 03:13:37 web-01 sshd[2045]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:38 web-01 sshd[2068]: Failed password for root from 203.0.113.45 port 60120 ssh2
+Sep  9 03:13:38 web-01 sshd[2073]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:39 web-01 sshd[2061]: Failed password for root from 203.0.113.45 port 60035 ssh2
+Sep  9 03:13:39 web-01 sshd[2061]: Connection closed by authenticating user root 203.0.113.45 port 60035 [preauth]
+Sep  9 03:13:39 web-01 sshd[2061]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:40 web-01 sshd[2068]: Failed password for root from 203.0.113.45 port 60120 ssh2
+Sep  9 03:13:40 web-01 sshd[2068]: Connection closed by authenticating user root 203.0.113.45 port 60120 [preauth]
+Sep  9 03:13:40 web-01 sshd[2068]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:40 web-01 sshd[2096]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:41 web-01 sshd[2073]: Failed password for root from 203.0.113.45 port 39013 ssh2
+Sep  9 03:13:42 web-01 sshd[2096]: Failed password for root from 203.0.113.45 port 41820 ssh2
+Sep  9 03:13:42 web-01 sshd[2096]: Connection closed by authenticating user root 203.0.113.45 port 41820 [preauth]
+Sep  9 03:13:43 web-01 sshd[2101]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:44 web-01 sshd[2073]: Failed password for root from 203.0.113.45 port 39013 ssh2
+Sep  9 03:13:44 web-01 sshd[2073]: Received disconnect from 203.0.113.45 port 39013:11: Bye Bye [preauth]
+Sep  9 03:13:44 web-01 sshd[2073]: Disconnected from authenticating user root 203.0.113.45 port 39013 [preauth]
+Sep  9 03:13:44 web-01 sshd[2073]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:46 web-01 sshd[2101]: Failed password for root from 203.0.113.45 port 42036 ssh2
+Sep  9 03:13:46 web-01 sshd[2101]: Connection closed by authenticating user root 203.0.113.45 port 42036 [preauth]
+Sep  9 03:13:47 web-01 sshd[2116]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:50 web-01 sshd[2116]: Failed password for root from 203.0.113.45 port 47400 ssh2
+Sep  9 03:13:50 web-01 sshd[2116]: Connection closed by authenticating user root 203.0.113.45 port 47400 [preauth]
+Sep  9 03:13:50 web-01 sshd[2133]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:52 web-01 sshd[2141]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:53 web-01 sshd[2133]: Failed password for root from 203.0.113.45 port 57765 ssh2
+Sep  9 03:13:55 web-01 sshd[2133]: Failed password for root from 203.0.113.45 port 57765 ssh2
+Sep  9 03:13:55 web-01 sshd[2141]: Failed password for root from 203.0.113.45 port 40593 ssh2
+Sep  9 03:13:56 web-01 sshd[2153]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:57 web-01 sshd[2133]: Failed password for root from 203.0.113.45 port 57765 ssh2
+Sep  9 03:13:57 web-01 sshd[2133]: Received disconnect from 203.0.113.45 port 57765:11: Bye Bye [preauth]
+Sep  9 03:13:57 web-01 sshd[2133]: Disconnected from authenticating user root 203.0.113.45 port 57765 [preauth]
+Sep  9 03:13:57 web-01 sshd[2133]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:57 web-01 sshd[2141]: Failed password for root from 203.0.113.45 port 40593 ssh2
+Sep  9 03:13:58 web-01 sshd[2141]: Failed password for root from 203.0.113.45 port 40593 ssh2
+Sep  9 03:13:58 web-01 sshd[2141]: Received disconnect from 203.0.113.45 port 40593:11: Bye Bye [preauth]
+Sep  9 03:13:58 web-01 sshd[2141]: Disconnected from authenticating user root 203.0.113.45 port 40593 [preauth]
+Sep  9 03:13:58 web-01 sshd[2141]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:13:59 web-01 sshd[2153]: Failed password for root from 203.0.113.45 port 43194 ssh2
+Sep  9 03:13:59 web-01 sshd[2153]: Connection closed by authenticating user root 203.0.113.45 port 43194 [preauth]
+Sep  9 03:14:00 web-01 sshd[2174]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:14:01 web-01 sshd[2178]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:14:03 web-01 sshd[2174]: Failed password for root from 203.0.113.45 port 54515 ssh2
+Sep  9 03:14:04 web-01 sshd[2174]: Failed password for root from 203.0.113.45 port 54515 ssh2
+Sep  9 03:14:04 web-01 sshd[2174]: Connection closed by authenticating user root 203.0.113.45 port 54515 [preauth]
+Sep  9 03:14:04 web-01 sshd[2174]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep  9 03:14:04 web-01 sshd[2178]: Failed password for root from 203.0.113.45 port 49227 ssh2
+Sep  9 03:14:04 web-01 sshd[2178]: Connection closed by authenticating user root 203.0.113.45 port 49227 [preauth]
+Sep  9 03:17:01 web-01 CRON[2186]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 03:17:01 web-01 CRON[2186]: pam_unix(cron:session): session closed for user root
+Sep  9 03:47:33 web-01 sshd[2210]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.100  user=root
+Sep  9 03:47:36 web-01 sshd[2210]: Failed password for root from 203.0.113.100 port 35016 ssh2
+Sep  9 03:47:36 web-01 sshd[2210]: Connection closed by authenticating user root 203.0.113.100 port 35016 [preauth]
+Sep  9 04:17:01 web-01 CRON[2221]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 04:17:01 web-01 CRON[2221]: pam_unix(cron:session): session closed for user root
+Sep  9 05:17:01 web-01 CRON[2245]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 05:17:01 web-01 CRON[2245]: pam_unix(cron:session): session closed for user root
+Sep  9 06:06:46 web-01 sshd[2263]: Invalid user git from 203.0.113.120 port 34415
+Sep  9 06:06:47 web-01 sshd[2263]: Connection closed by invalid user git 203.0.113.120 port 34415 [preauth]
+Sep  9 06:17:01 web-01 CRON[2279]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 06:17:01 web-01 CRON[2279]: pam_unix(cron:session): session closed for user root
+Sep  9 07:09:46 web-01 sshd[2288]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.120  user=root
+Sep  9 07:09:48 web-01 sshd[2288]: Failed password for root from 203.0.113.120 port 47667 ssh2
+Sep  9 07:09:48 web-01 sshd[2288]: Connection closed by authenticating user root 203.0.113.120 port 47667 [preauth]
+Sep  9 07:16:49 web-01 sshd[2302]: Invalid user elastic from 198.51.100.115 port 44204
+Sep  9 07:16:49 web-01 sshd[2302]: Connection closed by invalid user elastic 198.51.100.115 port 44204 [preauth]
+Sep  9 07:17:01 web-01 CRON[2308]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 07:17:01 web-01 CRON[2308]: pam_unix(cron:session): session closed for user root
+Sep  9 08:17:01 web-01 CRON[2332]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 08:17:01 web-01 CRON[2332]: pam_unix(cron:session): session closed for user root
+Sep  9 09:09:27 web-01 sshd[2351]: Invalid user ftpuser from 203.0.113.219 port 41453
+Sep  9 09:09:29 web-01 sshd[2351]: Connection closed by invalid user ftpuser 203.0.113.219 port 41453 [preauth]
+Sep  9 09:17:01 web-01 CRON[2355]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 09:17:01 web-01 CRON[2355]: pam_unix(cron:session): session closed for user root
+Sep  9 09:40:07 web-01 sshd[2370]: Accepted publickey for alice from 192.0.2.10 port 37340 ssh2: ED25519 SHA256:2R59DOGY2f7THFWpaVRAF6+d3bZ2RsUPYzLsfDe/Vjk
+Sep  9 09:40:07 web-01 sshd[2370]: pam_unix(sshd:session): session opened for user alice(uid=1000) by (uid=0)
+Sep  9 09:40:07 web-01 systemd-logind[612]: New session 21 of user alice.
+Sep  9 09:47:26 web-01 sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/apt update
+Sep  9 09:47:26 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by alice(uid=1000)
+Sep  9 09:47:26 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep  9 10:00:36 web-01 sshd[2379]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 10:00:39 web-01 sshd[2379]: Failed password for root from 198.51.100.77 port 44530 ssh2
+Sep  9 10:00:39 web-01 sshd[2379]: Connection closed by authenticating user root 198.51.100.77 port 44530 [preauth]
+Sep  9 10:17:01 web-01 CRON[2388]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 10:17:01 web-01 CRON[2388]: pam_unix(cron:session): session closed for user root
+Sep  9 10:17:40 web-01 sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/systemctl reload nginx
+Sep  9 10:17:40 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by alice(uid=1000)
+Sep  9 10:17:43 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep  9 10:24:36 web-01 sshd[2399]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 10:24:39 web-01 sshd[2399]: Failed password for root from 198.51.100.77 port 33486 ssh2
+Sep  9 10:24:39 web-01 sshd[2399]: Connection closed by authenticating user root 198.51.100.77 port 33486 [preauth]
+Sep  9 10:26:38 web-01 sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/journalctl -u nginx --since today
+Sep  9 10:26:38 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by alice(uid=1000)
+Sep  9 10:26:38 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep  9 10:28:54 web-01 sshd[2371]: Received disconnect from 192.0.2.10 port 37340:11: disconnected by user
+Sep  9 10:28:54 web-01 sshd[2371]: Disconnected from user alice 192.0.2.10 port 37340
+Sep  9 10:28:54 web-01 sshd[2370]: pam_unix(sshd:session): session closed for user alice
+Sep  9 10:28:54 web-01 systemd-logind[612]: Session 21 logged out. Waiting for processes to exit.
+Sep  9 10:28:54 web-01 systemd-logind[612]: Removed session 21.
+Sep  9 10:34:37 web-01 sshd[2412]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.0.2.11  user=bob
+Sep  9 10:34:39 web-01 sshd[2412]: Failed password for bob from 192.0.2.11 port 59291 ssh2
+Sep  9 10:34:43 web-01 sshd[2412]: Accepted password for bob from 192.0.2.11 port 59291 ssh2
+Sep  9 10:34:43 web-01 sshd[2412]: pam_unix(sshd:session): session opened for user bob(uid=1001) by (uid=0)
+Sep  9 10:34:43 web-01 systemd-logind[612]: New session 22 of user bob.
+Sep  9 10:44:36 web-01 sshd[2430]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 10:44:39 web-01 sshd[2430]: Failed password for root from 198.51.100.77 port 51312 ssh2
+Sep  9 10:44:39 web-01 sshd[2430]: Received disconnect from 198.51.100.77 port 51312:11: Bye Bye [preauth]
+Sep  9 10:44:39 web-01 sshd[2430]: Disconnected from authenticating user root 198.51.100.77 port 51312 [preauth]
+Sep  9 11:04:36 web-01 sshd[2438]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 11:04:39 web-01 sshd[2438]: Failed password for root from 198.51.100.77 port 52638 ssh2
+Sep  9 11:04:39 web-01 sshd[2438]: Connection closed by authenticating user root 198.51.100.77 port 52638 [preauth]
+Sep  9 11:07:45 web-01 sshd[2453]: Invalid user tomcat from 203.0.113.4 port 32786
+Sep  9 11:07:47 web-01 sshd[2453]: Connection closed by invalid user tomcat 203.0.113.4 port 32786 [preauth]
+Sep  9 11:16:19 web-01 sshd[2472]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.49  user=root
+Sep  9 11:16:22 web-01 sshd[2472]: Failed password for root from 203.0.113.49 port 34684 ssh2
+Sep  9 11:16:22 web-01 sshd[2472]: Received disconnect from 203.0.113.49 port 34684:11: Bye Bye [preauth]
+Sep  9 11:16:22 web-01 sshd[2472]: Disconnected from authenticating user root 203.0.113.49 port 34684 [preauth]
+Sep  9 11:17:01 web-01 CRON[2477]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 11:17:01 web-01 CRON[2477]: pam_unix(cron:session): session closed for user root
+Sep  9 11:27:21 web-01 sshd[2481]: Accepted publickey for deploy from 192.0.2.50 port 37862 ssh2: ED25519 SHA256:h5GqzewuXBKshUkntqaoh7iOoWV9DIE5R060xn7pfBD
+Sep  9 11:27:21 web-01 sshd[2481]: pam_unix(sshd:session): session opened for user deploy(uid=1002) by (uid=0)
+Sep  9 11:27:21 web-01 systemd-logind[612]: New session 23 of user deploy.
+Sep  9 11:27:50 web-01 sshd[2498]: Invalid user git from 203.0.113.210 port 35013
+Sep  9 11:27:50 web-01 sshd[2498]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 11:27:50 web-01 sshd[2498]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.210
+Sep  9 11:27:53 web-01 sshd[2498]: Failed password for invalid user git from 203.0.113.210 port 35013 ssh2
+Sep  9 11:27:53 web-01 sshd[2498]: Connection closed by invalid user git 203.0.113.210 port 35013 [preauth]
+Sep  9 11:28:36 web-01 sshd[2511]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 11:28:37 web-01 sshd[2511]: Failed password for root from 198.51.100.77 port 58187 ssh2
+Sep  9 11:28:37 web-01 sshd[2511]: Connection closed by authenticating user root 198.51.100.77 port 58187 [preauth]
+Sep  9 11:29:18 web-01 sudo:   deploy : TTY=pts/0 ; PWD=/home/deploy ; USER=root ; COMMAND=/usr/bin/systemctl restart app
+Sep  9 11:29:18 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by deploy(uid=1002)
+Sep  9 11:29:20 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep  9 11:29:34 web-01 sshd[2483]: Received disconnect from 192.0.2.50 port 37862:11: disconnected by user
+Sep  9 11:29:34 web-01 sshd[2483]: Disconnected from user deploy 192.0.2.50 port 37862
+Sep  9 11:29:34 web-01 sshd[2481]: pam_unix(sshd:session): session closed for user deploy
+Sep  9 11:29:34 web-01 systemd-logind[612]: Session 23 logged out. Waiting for processes to exit.
+Sep  9 11:29:34 web-01 systemd-logind[612]: Removed session 23.
+Sep  9 11:40:27 web-01 sshd[2413]: Received disconnect from 192.0.2.11 port 59291:11: disconnected by user
+Sep  9 11:40:27 web-01 sshd[2413]: Disconnected from user bob 192.0.2.11 port 59291
+Sep  9 11:40:27 web-01 sshd[2412]: pam_unix(sshd:session): session closed for user bob
+Sep  9 11:40:27 web-01 systemd-logind[612]: Session 22 logged out. Waiting for processes to exit.
+Sep  9 11:40:27 web-01 systemd-logind[612]: Removed session 22.
+Sep  9 11:45:57 web-01 sshd[2532]: Invalid user user from 198.51.100.48 port 33084
+Sep  9 11:45:57 web-01 sshd[2532]: Connection closed by invalid user user 198.51.100.48 port 33084 [preauth]
+Sep  9 11:53:36 web-01 sshd[2557]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 11:53:39 web-01 sshd[2557]: Failed password for root from 198.51.100.77 port 39944 ssh2
+Sep  9 11:53:39 web-01 sshd[2557]: Connection closed by authenticating user root 198.51.100.77 port 39944 [preauth]
+Sep  9 11:55:30 web-01 sshd[2569]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.135  user=root
+Sep  9 11:55:32 web-01 sshd[2569]: Failed password for root from 203.0.113.135 port 33609 ssh2
+Sep  9 11:55:32 web-01 sshd[2569]: Connection closed by authenticating user root 203.0.113.135 port 33609 [preauth]
+Sep  9 12:09:57 web-01 sshd[2584]: Invalid user es from 198.51.100.48 port 50645
+Sep  9 12:09:57 web-01 sshd[2584]: Connection closed by invalid user es 198.51.100.48 port 50645 [preauth]
+Sep  9 12:17:01 web-01 CRON[2597]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 12:17:01 web-01 CRON[2597]: pam_unix(cron:session): session closed for user root
+Sep  9 12:17:36 web-01 sshd[2619]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 12:17:39 web-01 sshd[2619]: Failed password for root from 198.51.100.77 port 54976 ssh2
+Sep  9 12:17:39 web-01 sshd[2619]: Received disconnect from 198.51.100.77 port 54976:11: Bye Bye [preauth]
+Sep  9 12:17:39 web-01 sshd[2619]: Disconnected from authenticating user root 198.51.100.77 port 54976 [preauth]
+Sep  9 12:47:36 web-01 sshd[2644]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 12:47:37 web-01 sshd[2644]: Failed password for root from 198.51.100.77 port 60238 ssh2
+Sep  9 12:47:37 web-01 sshd[2644]: Connection closed by authenticating user root 198.51.100.77 port 60238 [preauth]
+Sep  9 12:48:27 web-01 sshd[2649]: Invalid user jenkins from 198.51.100.198 port 60566
+Sep  9 12:48:27 web-01 sshd[2649]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 12:48:27 web-01 sshd[2649]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.198
+Sep  9 12:48:28 web-01 sshd[2649]: Failed password for invalid user jenkins from 198.51.100.198 port 60566 ssh2
+Sep  9 12:48:28 web-01 sshd[2649]: Connection closed by invalid user jenkins 198.51.100.198 port 60566 [preauth]
+Sep  9 13:17:01 web-01 CRON[2655]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 13:17:01 web-01 CRON[2655]: pam_unix(cron:session): session closed for user root
+Sep  9 13:17:36 web-01 sshd[2671]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 13:17:37 web-01 sshd[2671]: Failed password for root from 198.51.100.77 port 53947 ssh2
+Sep  9 13:17:37 web-01 sshd[2671]: Connection closed by authenticating user root 198.51.100.77 port 53947 [preauth]
+Sep  9 13:44:36 web-01 sshd[2690]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 13:44:39 web-01 sshd[2690]: Failed password for root from 198.51.100.77 port 33861 ssh2
+Sep  9 13:44:39 web-01 sshd[2690]: Connection closed by authenticating user root 198.51.100.77 port 33861 [preauth]
+Sep  9 14:01:05 web-01 sshd[2705]: Accepted publickey for alice from 192.0.2.10 port 52494 ssh2: ED25519 SHA256:2R59DOGY2f7THFWpaVRAF6+d3bZ2RsUPYzLsfDe/Vjk
+Sep  9 14:01:05 web-01 sshd[2705]: pam_unix(sshd:session): session opened for user alice(uid=1000) by (uid=0)
+Sep  9 14:01:05 web-01 systemd-logind[612]: New session 26 of user alice.
+Sep  9 14:02:27 web-01 sshd[2718]: Invalid user www from 198.51.100.198 port 43165
+Sep  9 14:02:28 web-01 sshd[2718]: Connection closed by invalid user www 198.51.100.198 port 43165 [preauth]
+Sep  9 14:06:36 web-01 sshd[2731]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 14:06:38 web-01 sshd[2731]: Failed password for root from 198.51.100.77 port 35721 ssh2
+Sep  9 14:06:38 web-01 sshd[2731]: Connection closed by authenticating user root 198.51.100.77 port 35721 [preauth]
+Sep  9 14:14:59 web-01 sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/journalctl -u nginx --since today
+Sep  9 14:14:59 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by alice(uid=1000)
+Sep  9 14:15:02 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep  9 14:17:01 web-01 CRON[2736]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 14:17:01 web-01 CRON[2736]: pam_unix(cron:session): session closed for user root
+Sep  9 14:20:51 web-01 sshd[2755]: Invalid user operator from 203.0.113.156 port 53187
+Sep  9 14:20:52 web-01 sshd[2755]: Connection closed by invalid user operator 203.0.113.156 port 53187 [preauth]
+Sep  9 14:32:36 web-01 sshd[2769]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 14:32:37 web-01 sshd[2769]: Failed password for root from 198.51.100.77 port 38523 ssh2
+Sep  9 14:32:37 web-01 sshd[2769]: Connection closed by authenticating user root 198.51.100.77 port 38523 [preauth]
+Sep  9 14:39:43 web-01 sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/sbin/ufw status
+Sep  9 14:39:43 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by alice(uid=1000)
+Sep  9 14:39:44 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep  9 14:53:06 web-01 sshd[2707]: Received disconnect from 192.0.2.10 port 52494:11: disconnected by user
+Sep  9 14:53:06 web-01 sshd[2707]: Disconnected from user alice 192.0.2.10 port 52494
+Sep  9 14:53:06 web-01 sshd[2705]: pam_unix(sshd:session): session closed for user alice
+Sep  9 14:53:06 web-01 systemd-logind[612]: Session 26 logged out. Waiting for processes to exit.
+Sep  9 14:53:06 web-01 systemd-logind[612]: Removed session 26.
+Sep  9 15:00:36 web-01 sshd[2792]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 15:00:39 web-01 sshd[2792]: Failed password for root from 198.51.100.77 port 44756 ssh2
+Sep  9 15:00:39 web-01 sshd[2792]: Connection closed by authenticating user root 198.51.100.77 port 44756 [preauth]
+Sep  9 15:06:05 web-01 sshd[2802]: Accepted publickey for deploy from 192.0.2.50 port 35937 ssh2: ED25519 SHA256:h5GqzewuXBKshUkntqaoh7iOoWV9DIE5R060xn7pfBD
+Sep  9 15:06:05 web-01 sshd[2802]: pam_unix(sshd:session): session opened for user deploy(uid=1002) by (uid=0)
+Sep  9 15:06:05 web-01 systemd-logind[612]: New session 27 of user deploy.
+Sep  9 15:08:13 web-01 sudo:   deploy : TTY=pts/0 ; PWD=/home/deploy ; USER=root ; COMMAND=/usr/bin/systemctl restart app
+Sep  9 15:08:13 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by deploy(uid=1002)
+Sep  9 15:08:15 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep  9 15:08:27 web-01 sshd[2803]: Received disconnect from 192.0.2.50 port 35937:11: disconnected by user
+Sep  9 15:08:27 web-01 sshd[2803]: Disconnected from user deploy 192.0.2.50 port 35937
+Sep  9 15:08:27 web-01 sshd[2802]: pam_unix(sshd:session): session closed for user deploy
+Sep  9 15:08:27 web-01 systemd-logind[612]: Session 27 logged out. Waiting for processes to exit.
+Sep  9 15:08:27 web-01 systemd-logind[612]: Removed session 27.
+Sep  9 15:17:01 web-01 CRON[2813]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 15:17:01 web-01 CRON[2813]: pam_unix(cron:session): session closed for user root
+Sep  9 15:24:36 web-01 sshd[2821]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 15:24:37 web-01 sshd[2821]: Failed password for root from 198.51.100.77 port 59980 ssh2
+Sep  9 15:24:37 web-01 sshd[2821]: Connection closed by authenticating user root 198.51.100.77 port 59980 [preauth]
+Sep  9 15:25:21 web-01 sshd[2844]: Invalid user nagios from 203.0.113.79 port 45842
+Sep  9 15:25:23 web-01 sshd[2844]: Connection closed by invalid user nagios 203.0.113.79 port 45842 [preauth]
+Sep  9 15:33:52 web-01 sshd[2852]: Invalid user admin from 198.51.100.137 port 45561
+Sep  9 15:33:52 web-01 sshd[2852]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 15:33:52 web-01 sshd[2852]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.137
+Sep  9 15:33:54 web-01 sshd[2852]: Failed password for invalid user admin from 198.51.100.137 port 45561 ssh2
+Sep  9 15:33:54 web-01 sshd[2852]: Received disconnect from 198.51.100.137 port 45561:11: Bye Bye [preauth]
+Sep  9 15:33:54 web-01 sshd[2852]: Disconnected from invalid user admin 198.51.100.137 port 45561 [preauth]
+Sep  9 15:51:36 web-01 sshd[2869]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 15:51:38 web-01 sshd[2869]: Failed password for root from 198.51.100.77 port 59195 ssh2
+Sep  9 15:51:38 web-01 sshd[2869]: Received disconnect from 198.51.100.77 port 59195:11: Bye Bye [preauth]
+Sep  9 15:51:38 web-01 sshd[2869]: Disconnected from authenticating user root 198.51.100.77 port 59195 [preauth]
+Sep  9 16:13:58 web-01 sshd[2893]: Invalid user minecraft from 198.51.100.81 port 35042
+Sep  9 16:13:58 web-01 sshd[2893]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 16:13:58 web-01 sshd[2893]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.81
+Sep  9 16:14:00 web-01 sshd[2893]: Failed password for invalid user minecraft from 198.51.100.81 port 35042 ssh2
+Sep  9 16:14:00 web-01 sshd[2893]: Connection closed by invalid user minecraft 198.51.100.81 port 35042 [preauth]
+Sep  9 16:16:36 web-01 sshd[2916]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 16:16:37 web-01 sshd[2916]: Failed password for root from 198.51.100.77 port 59121 ssh2
+Sep  9 16:16:37 web-01 sshd[2916]: Connection closed by authenticating user root 198.51.100.77 port 59121 [preauth]
+Sep  9 16:17:01 web-01 CRON[2923]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 16:17:01 web-01 CRON[2923]: pam_unix(cron:session): session closed for user root
+Sep  9 16:27:21 web-01 sshd[2928]: Invalid user docker from 203.0.113.79 port 40891
+Sep  9 16:27:21 web-01 sshd[2928]: Connection closed by invalid user docker 203.0.113.79 port 40891 [preauth]
+Sep  9 16:37:36 web-01 sshd[2945]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 16:37:37 web-01 sshd[2945]: Failed password for root from 198.51.100.77 port 37380 ssh2
+Sep  9 16:37:37 web-01 sshd[2945]: Received disconnect from 198.51.100.77 port 37380:11: Bye Bye [preauth]
+Sep  9 16:37:37 web-01 sshd[2945]: Disconnected from authenticating user root 198.51.100.77 port 37380 [preauth]
+Sep  9 16:40:15 web-01 sshd[2956]: Invalid user centos from 198.51.100.75 port 49615
+Sep  9 16:40:15 web-01 sshd[2956]: Connection closed by invalid user centos 198.51.100.75 port 49615 [preauth]
+Sep  9 16:50:23 web-01 sshd[2970]: Invalid user centos from 198.51.100.131 port 46362
+Sep  9 16:50:24 web-01 sshd[2970]: Connection closed by invalid user centos 198.51.100.131 port 46362 [preauth]
+Sep  9 17:07:36 web-01 sshd[2982]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 17:07:39 web-01 sshd[2982]: Failed password for root from 198.51.100.77 port 45790 ssh2
+Sep  9 17:07:39 web-01 sshd[2982]: Connection closed by authenticating user root 198.51.100.77 port 45790 [preauth]
+Sep  9 17:17:01 web-01 CRON[2999]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 17:17:01 web-01 CRON[2999]: pam_unix(cron:session): session closed for user root
+Sep  9 17:33:36 web-01 sshd[3003]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 17:33:38 web-01 sshd[3003]: Failed password for root from 198.51.100.77 port 33224 ssh2
+Sep  9 17:33:38 web-01 sshd[3003]: Connection closed by authenticating user root 198.51.100.77 port 33224 [preauth]
+Sep  9 18:00:23 web-01 sshd[3015]: Invalid user jenkins from 203.0.113.204 port 36904
+Sep  9 18:00:24 web-01 sshd[3015]: Connection closed by invalid user jenkins 203.0.113.204 port 36904 [preauth]
+Sep  9 18:00:36 web-01 sshd[3038]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 18:00:39 web-01 sshd[3038]: Failed password for root from 198.51.100.77 port 44845 ssh2
+Sep  9 18:00:39 web-01 sshd[3038]: Received disconnect from 198.51.100.77 port 44845:11: Bye Bye [preauth]
+Sep  9 18:00:39 web-01 sshd[3038]: Disconnected from authenticating user root 198.51.100.77 port 44845 [preauth]
+Sep  9 18:04:15 web-01 sshd[3060]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.191  user=root
+Sep  9 18:04:16 web-01 sshd[3060]: Failed password for root from 203.0.113.191 port 55747 ssh2
+Sep  9 18:04:16 web-01 sshd[3060]: Connection closed by authenticating user root 203.0.113.191 port 55747 [preauth]
+Sep  9 18:06:23 web-01 sshd[3077]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.132  user=root
+Sep  9 18:06:24 web-01 sshd[3077]: Failed password for root from 203.0.113.132 port 47468 ssh2
+Sep  9 18:06:24 web-01 sshd[3077]: Connection closed by authenticating user root 203.0.113.132 port 47468 [preauth]
+Sep  9 18:17:01 web-01 CRON[3094]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 18:17:01 web-01 CRON[3094]: pam_unix(cron:session): session closed for user root
+Sep  9 18:24:36 web-01 sshd[3107]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 18:24:38 web-01 sshd[3107]: Failed password for root from 198.51.100.77 port 51922 ssh2
+Sep  9 18:24:38 web-01 sshd[3107]: Received disconnect from 198.51.100.77 port 51922:11: Bye Bye [preauth]
+Sep  9 18:24:38 web-01 sshd[3107]: Disconnected from authenticating user root 198.51.100.77 port 51922 [preauth]
+Sep  9 18:49:36 web-01 sshd[3126]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 18:49:39 web-01 sshd[3126]: Failed password for root from 198.51.100.77 port 36318 ssh2
+Sep  9 18:49:39 web-01 sshd[3126]: Connection closed by authenticating user root 198.51.100.77 port 36318 [preauth]
+Sep  9 19:09:36 web-01 sshd[3130]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 19:09:39 web-01 sshd[3130]: Failed password for root from 198.51.100.77 port 53069 ssh2
+Sep  9 19:09:39 web-01 sshd[3130]: Connection closed by authenticating user root 198.51.100.77 port 53069 [preauth]
+Sep  9 19:13:21 web-01 sshd[3136]: Invalid user backup from 203.0.113.1 port 35792
+Sep  9 19:13:23 web-01 sshd[3136]: Connection closed by invalid user backup 203.0.113.1 port 35792 [preauth]
+Sep  9 19:17:01 web-01 CRON[3161]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 19:17:01 web-01 CRON[3161]: pam_unix(cron:session): session closed for user root
+Sep  9 19:38:16 web-01 sshd[3180]: Accepted publickey for deploy from 192.0.2.50 port 56679 ssh2: ED25519 SHA256:h5GqzewuXBKshUkntqaoh7iOoWV9DIE5R060xn7pfBD
+Sep  9 19:38:16 web-01 sshd[3180]: pam_unix(sshd:session): session opened for user deploy(uid=1002) by (uid=0)
+Sep  9 19:38:16 web-01 systemd-logind[612]: New session 28 of user deploy.
+Sep  9 19:38:36 web-01 sshd[3190]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 19:38:39 web-01 sshd[3190]: Failed password for root from 198.51.100.77 port 40021 ssh2
+Sep  9 19:38:39 web-01 sshd[3190]: Connection closed by authenticating user root 198.51.100.77 port 40021 [preauth]
+Sep  9 19:38:51 web-01 sudo:   deploy : TTY=pts/0 ; PWD=/home/deploy ; USER=root ; COMMAND=/usr/bin/systemctl restart app
+Sep  9 19:38:51 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by deploy(uid=1002)
+Sep  9 19:38:54 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep  9 19:39:45 web-01 sshd[3181]: Received disconnect from 192.0.2.50 port 56679:11: disconnected by user
+Sep  9 19:39:45 web-01 sshd[3181]: Disconnected from user deploy 192.0.2.50 port 56679
+Sep  9 19:39:45 web-01 sshd[3180]: pam_unix(sshd:session): session closed for user deploy
+Sep  9 19:39:45 web-01 systemd-logind[612]: Session 28 logged out. Waiting for processes to exit.
+Sep  9 19:39:45 web-01 systemd-logind[612]: Removed session 28.
+Sep  9 20:05:36 web-01 sshd[3207]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 20:05:38 web-01 sshd[3207]: Failed password for root from 198.51.100.77 port 55740 ssh2
+Sep  9 20:05:38 web-01 sshd[3207]: Connection closed by authenticating user root 198.51.100.77 port 55740 [preauth]
+Sep  9 20:15:43 web-01 sshd[3221]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.60  user=root
+Sep  9 20:15:45 web-01 sshd[3221]: Failed password for root from 198.51.100.60 port 35451 ssh2
+Sep  9 20:15:45 web-01 sshd[3221]: Connection closed by authenticating user root 198.51.100.60 port 35451 [preauth]
+Sep  9 20:17:01 web-01 CRON[3233]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 20:17:01 web-01 CRON[3233]: pam_unix(cron:session): session closed for user root
+Sep  9 20:22:21 web-01 sshd[3249]: Invalid user operator from 203.0.113.1 port 58036
+Sep  9 20:22:21 web-01 sshd[3249]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 20:22:21 web-01 sshd[3249]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.1
+Sep  9 20:22:22 web-01 sshd[3249]: Failed password for invalid user operator from 203.0.113.1 port 58036 ssh2
+Sep  9 20:22:22 web-01 sshd[3249]: Connection closed by invalid user operator 203.0.113.1 port 58036 [preauth]
+Sep  9 20:26:36 web-01 sshd[3273]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 20:26:37 web-01 sshd[3273]: Failed password for root from 198.51.100.77 port 37348 ssh2
+Sep  9 20:26:37 web-01 sshd[3273]: Received disconnect from 198.51.100.77 port 37348:11: Bye Bye [preauth]
+Sep  9 20:26:37 web-01 sshd[3273]: Disconnected from authenticating user root 198.51.100.77 port 37348 [preauth]
+Sep  9 20:39:52 web-01 sshd[3296]: Invalid user demo from 198.51.100.34 port 59586
+Sep  9 20:39:52 web-01 sshd[3296]: Connection closed by invalid user demo 198.51.100.34 port 59586 [preauth]
+Sep  9 20:46:16 web-01 sshd[3301]: Invalid user user from 203.0.113.133 port 54456
+Sep  9 20:46:18 web-01 sshd[3301]: Connection closed by invalid user user 203.0.113.133 port 54456 [preauth]
+Sep  9 20:48:21 web-01 sshd[3307]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.19  user=root
+Sep  9 20:48:24 web-01 sshd[3307]: Failed password for root from 203.0.113.19 port 43244 ssh2
+Sep  9 20:48:24 web-01 sshd[3307]: Connection closed by authenticating user root 203.0.113.19 port 43244 [preauth]
+Sep  9 20:50:36 web-01 sshd[3319]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 20:50:37 web-01 sshd[3319]: Failed password for root from 198.51.100.77 port 48910 ssh2
+Sep  9 20:50:37 web-01 sshd[3319]: Connection closed by authenticating user root 198.51.100.77 port 48910 [preauth]
+Sep  9 21:17:01 web-01 CRON[3343]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 21:17:01 web-01 CRON[3343]: pam_unix(cron:session): session closed for user root
+Sep  9 21:18:36 web-01 sshd[3356]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 21:18:38 web-01 sshd[3356]: Failed password for root from 198.51.100.77 port 37213 ssh2
+Sep  9 21:18:38 web-01 sshd[3356]: Connection closed by authenticating user root 198.51.100.77 port 37213 [preauth]
+Sep  9 21:33:52 web-01 sshd[3377]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.34  user=root
+Sep  9 21:33:53 web-01 sshd[3377]: Failed password for root from 198.51.100.34 port 39293 ssh2
+Sep  9 21:33:53 web-01 sshd[3377]: Connection closed by authenticating user root 198.51.100.34 port 39293 [preauth]
+Sep  9 21:48:36 web-01 sshd[3391]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.77  user=root
+Sep  9 21:48:39 web-01 sshd[3391]: Failed password for root from 198.51.100.77 port 57119 ssh2
+Sep  9 21:48:39 web-01 sshd[3391]: Received disconnect from 198.51.100.77 port 57119:11: Bye Bye [preauth]
+Sep  9 21:48:39 web-01 sshd[3391]: Disconnected from authenticating user root 198.51.100.77 port 57119 [preauth]
+Sep  9 21:52:07 web-01 sshd[3414]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.98  user=root
+Sep  9 21:52:09 web-01 sshd[3414]: Failed password for root from 203.0.113.98 port 46150 ssh2
+Sep  9 21:52:09 web-01 sshd[3414]: Connection closed by authenticating user root 203.0.113.98 port 46150 [preauth]
+Sep  9 21:54:52 web-01 sshd[3421]: Invalid user mysql from 198.51.100.219 port 39655
+Sep  9 21:54:52 web-01 sshd[3421]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 21:54:52 web-01 sshd[3421]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.219
+Sep  9 21:54:54 web-01 sshd[3421]: Failed password for invalid user mysql from 198.51.100.219 port 39655 ssh2
+Sep  9 21:54:54 web-01 sshd[3421]: Received disconnect from 198.51.100.219 port 39655:11: Bye Bye [preauth]
+Sep  9 21:54:54 web-01 sshd[3421]: Disconnected from invalid user mysql 198.51.100.219 port 39655 [preauth]
+Sep  9 22:17:01 web-01 CRON[3433]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 22:17:01 web-01 CRON[3433]: pam_unix(cron:session): session closed for user root
+Sep  9 22:44:07 web-01 sshd[3456]: Invalid user postgres from 203.0.113.98 port 54962
+Sep  9 22:44:07 web-01 sshd[3456]: pam_unix(sshd:auth): check pass; user unknown
+Sep  9 22:44:07 web-01 sshd[3456]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.98
+Sep  9 22:44:10 web-01 sshd[3456]: Failed password for invalid user postgres from 203.0.113.98 port 54962 ssh2
+Sep  9 22:44:10 web-01 sshd[3456]: Received disconnect from 203.0.113.98 port 54962:11: Bye Bye [preauth]
+Sep  9 22:44:10 web-01 sshd[3456]: Disconnected from invalid user postgres 203.0.113.98 port 54962 [preauth]
+Sep  9 22:50:09 web-01 sshd[3463]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.222  user=root
+Sep  9 22:50:12 web-01 sshd[3463]: Failed password for root from 198.51.100.222 port 48391 ssh2
+Sep  9 22:50:12 web-01 sshd[3463]: Received disconnect from 198.51.100.222 port 48391:11: Bye Bye [preauth]
+Sep  9 22:50:12 web-01 sshd[3463]: Disconnected from authenticating user root 198.51.100.222 port 48391 [preauth]
+Sep  9 23:17:01 web-01 CRON[3486]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep  9 23:17:01 web-01 CRON[3486]: pam_unix(cron:session): session closed for user root
+Sep 10 00:17:01 web-01 CRON[3505]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 00:17:01 web-01 CRON[3505]: pam_unix(cron:session): session closed for user root
+Sep 10 00:37:07 web-01 sshd[3508]: Invalid user info from 198.51.100.237 port 33003
+Sep 10 00:37:07 web-01 sshd[3508]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 00:37:07 web-01 sshd[3508]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.237
+Sep 10 00:37:08 web-01 sshd[3508]: Failed password for invalid user info from 198.51.100.237 port 33003 ssh2
+Sep 10 00:37:08 web-01 sshd[3508]: Received disconnect from 198.51.100.237 port 33003:11: Bye Bye [preauth]
+Sep 10 00:37:08 web-01 sshd[3508]: Disconnected from invalid user info 198.51.100.237 port 33003 [preauth]
+Sep 10 00:46:14 web-01 sshd[3520]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.111  user=root
+Sep 10 00:46:16 web-01 sshd[3520]: Failed password for root from 198.51.100.111 port 37950 ssh2
+Sep 10 00:46:16 web-01 sshd[3520]: Connection closed by authenticating user root 198.51.100.111 port 37950 [preauth]
+Sep 10 01:10:19 web-01 sshd[3529]: Invalid user testuser from 198.51.100.84 port 36557
+Sep 10 01:10:19 web-01 sshd[3529]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 01:10:19 web-01 sshd[3529]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.84
+Sep 10 01:10:21 web-01 sshd[3529]: Failed password for invalid user testuser from 198.51.100.84 port 36557 ssh2
+Sep 10 01:10:21 web-01 sshd[3529]: Received disconnect from 198.51.100.84 port 36557:11: Bye Bye [preauth]
+Sep 10 01:10:21 web-01 sshd[3529]: Disconnected from invalid user testuser 198.51.100.84 port 36557 [preauth]
+Sep 10 01:17:01 web-01 CRON[3547]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 01:17:01 web-01 CRON[3547]: pam_unix(cron:session): session closed for user root
+Sep 10 01:49:19 web-01 sshd[3557]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.84  user=root
+Sep 10 01:49:21 web-01 sshd[3557]: Failed password for root from 198.51.100.84 port 55993 ssh2
+Sep 10 01:49:21 web-01 sshd[3557]: Connection closed by authenticating user root 198.51.100.84 port 55993 [preauth]
+Sep 10 02:17:01 web-01 CRON[3564]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 02:17:01 web-01 CRON[3564]: pam_unix(cron:session): session closed for user root
+Sep 10 02:31:37 web-01 sshd[3576]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:31:40 web-01 sshd[3576]: Failed password for bob from 203.0.113.99 port 57090 ssh2
+Sep 10 02:31:41 web-01 sshd[3576]: Failed password for bob from 203.0.113.99 port 57090 ssh2
+Sep 10 02:31:43 web-01 sshd[3576]: Failed password for bob from 203.0.113.99 port 57090 ssh2
+Sep 10 02:31:43 web-01 sshd[3576]: Connection closed by authenticating user bob 203.0.113.99 port 57090 [preauth]
+Sep 10 02:31:43 web-01 sshd[3576]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:31:45 web-01 sshd[3595]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:31:47 web-01 sshd[3595]: Failed password for bob from 203.0.113.99 port 52941 ssh2
+Sep 10 02:31:49 web-01 sshd[3595]: Failed password for bob from 203.0.113.99 port 52941 ssh2
+Sep 10 02:31:50 web-01 sshd[3595]: Failed password for bob from 203.0.113.99 port 52941 ssh2
+Sep 10 02:31:50 web-01 sshd[3595]: Connection closed by authenticating user bob 203.0.113.99 port 52941 [preauth]
+Sep 10 02:31:50 web-01 sshd[3595]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:31:51 web-01 sshd[3619]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:31:53 web-01 sshd[3619]: Failed password for bob from 203.0.113.99 port 47296 ssh2
+Sep 10 02:31:54 web-01 sshd[3619]: Failed password for bob from 203.0.113.99 port 47296 ssh2
+Sep 10 02:31:56 web-01 sshd[3619]: Failed password for bob from 203.0.113.99 port 47296 ssh2
+Sep 10 02:31:56 web-01 sshd[3619]: Connection closed by authenticating user bob 203.0.113.99 port 47296 [preauth]
+Sep 10 02:31:56 web-01 sshd[3619]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:31:58 web-01 sshd[3641]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:32:01 web-01 sshd[3641]: Failed password for bob from 203.0.113.99 port 50609 ssh2
+Sep 10 02:32:03 web-01 sshd[3641]: Failed password for bob from 203.0.113.99 port 50609 ssh2
+Sep 10 02:32:04 web-01 sshd[3641]: Failed password for bob from 203.0.113.99 port 50609 ssh2
+Sep 10 02:32:04 web-01 sshd[3641]: Connection closed by authenticating user bob 203.0.113.99 port 50609 [preauth]
+Sep 10 02:32:04 web-01 sshd[3641]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:32:04 web-01 sshd[3663]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:32:06 web-01 sshd[3663]: Failed password for bob from 203.0.113.99 port 36770 ssh2
+Sep 10 02:32:07 web-01 sshd[3663]: Failed password for bob from 203.0.113.99 port 36770 ssh2
+Sep 10 02:32:10 web-01 sshd[3663]: Failed password for bob from 203.0.113.99 port 36770 ssh2
+Sep 10 02:32:10 web-01 sshd[3663]: Connection closed by authenticating user bob 203.0.113.99 port 36770 [preauth]
+Sep 10 02:32:10 web-01 sshd[3663]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:32:13 web-01 sshd[3670]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:32:14 web-01 sshd[3670]: Failed password for bob from 203.0.113.99 port 33467 ssh2
+Sep 10 02:32:16 web-01 sshd[3670]: Failed password for bob from 203.0.113.99 port 33467 ssh2
+Sep 10 02:32:17 web-01 sshd[3670]: Failed password for bob from 203.0.113.99 port 33467 ssh2
+Sep 10 02:32:17 web-01 sshd[3670]: Received disconnect from 203.0.113.99 port 33467:11: Bye Bye [preauth]
+Sep 10 02:32:17 web-01 sshd[3670]: Disconnected from authenticating user bob 203.0.113.99 port 33467 [preauth]
+Sep 10 02:32:17 web-01 sshd[3670]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:32:22 web-01 sshd[3678]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:32:23 web-01 sshd[3678]: Failed password for bob from 203.0.113.99 port 39492 ssh2
+Sep 10 02:32:26 web-01 sshd[3678]: Failed password for bob from 203.0.113.99 port 39492 ssh2
+Sep 10 02:32:27 web-01 sshd[3678]: Failed password for bob from 203.0.113.99 port 39492 ssh2
+Sep 10 02:32:27 web-01 sshd[3678]: Connection closed by authenticating user bob 203.0.113.99 port 39492 [preauth]
+Sep 10 02:32:27 web-01 sshd[3678]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:32:28 web-01 sshd[3695]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:32:29 web-01 sshd[3695]: Failed password for bob from 203.0.113.99 port 43534 ssh2
+Sep 10 02:32:32 web-01 sshd[3695]: Failed password for bob from 203.0.113.99 port 43534 ssh2
+Sep 10 02:32:33 web-01 sshd[3695]: Failed password for bob from 203.0.113.99 port 43534 ssh2
+Sep 10 02:32:33 web-01 sshd[3695]: Connection closed by authenticating user bob 203.0.113.99 port 43534 [preauth]
+Sep 10 02:32:33 web-01 sshd[3695]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.99  user=bob
+Sep 10 02:32:44 web-01 sshd[3711]: Accepted password for bob from 203.0.113.99 port 37027 ssh2
+Sep 10 02:32:44 web-01 sshd[3711]: pam_unix(sshd:session): session opened for user bob(uid=1001) by (uid=0)
+Sep 10 02:32:44 web-01 systemd-logind[612]: New session 31 of user bob.
+Sep 10 02:34:08 web-01 sudo:      bob : user NOT in sudoers ; TTY=pts/0 ; PWD=/home/bob ; USER=root ; COMMAND=/usr/bin/cat /etc/shadow
+Sep 10 02:36:28 web-01 sudo:      bob : user NOT in sudoers ; TTY=pts/0 ; PWD=/home/bob ; USER=root ; COMMAND=/usr/bin/su -
+Sep 10 02:37:18 web-01 sshd[3713]: Received disconnect from 203.0.113.99 port 37027:11: disconnected by user
+Sep 10 02:37:18 web-01 sshd[3713]: Disconnected from user bob 203.0.113.99 port 37027
+Sep 10 02:37:18 web-01 sshd[3711]: pam_unix(sshd:session): session closed for user bob
+Sep 10 02:37:18 web-01 systemd-logind[612]: Session 31 logged out. Waiting for processes to exit.
+Sep 10 02:37:18 web-01 systemd-logind[612]: Removed session 31.
+Sep 10 02:54:29 web-01 sshd[3721]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.72  user=root
+Sep 10 02:54:32 web-01 sshd[3721]: Failed password for root from 198.51.100.72 port 60088 ssh2
+Sep 10 02:54:32 web-01 sshd[3721]: Received disconnect from 198.51.100.72 port 60088:11: Bye Bye [preauth]
+Sep 10 02:54:32 web-01 sshd[3721]: Disconnected from authenticating user root 198.51.100.72 port 60088 [preauth]
+Sep 10 03:17:01 web-01 CRON[3743]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 03:17:01 web-01 CRON[3743]: pam_unix(cron:session): session closed for user root
+Sep 10 04:17:01 web-01 CRON[3760]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 04:17:01 web-01 CRON[3760]: pam_unix(cron:session): session closed for user root
+Sep 10 04:53:00 web-01 sshd[3780]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.139  user=root
+Sep 10 04:53:03 web-01 sshd[3780]: Failed password for root from 198.51.100.139 port 52169 ssh2
+Sep 10 04:53:03 web-01 sshd[3780]: Received disconnect from 198.51.100.139 port 52169:11: Bye Bye [preauth]
+Sep 10 04:53:03 web-01 sshd[3780]: Disconnected from authenticating user root 198.51.100.139 port 52169 [preauth]
+Sep 10 05:06:13 web-01 sshd[3792]: Invalid user administrator from 203.0.113.71 port 36547
+Sep 10 05:06:14 web-01 sshd[3792]: Connection closed by invalid user administrator 203.0.113.71 port 36547 [preauth]
+Sep 10 05:17:01 web-01 CRON[3801]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 05:17:01 web-01 CRON[3801]: pam_unix(cron:session): session closed for user root
+Sep 10 05:24:07 web-01 sshd[3825]: Invalid user webmaster from 203.0.113.48 port 52249
+Sep 10 05:24:07 web-01 sshd[3825]: Connection closed by invalid user webmaster 203.0.113.48 port 52249 [preauth]
+Sep 10 05:35:29 web-01 sshd[3842]: Invalid user jenkins from 198.51.100.26 port 38092
+Sep 10 05:35:29 web-01 sshd[3842]: Connection closed by invalid user jenkins 198.51.100.26 port 38092 [preauth]
+Sep 10 05:39:00 web-01 sshd[3857]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.139  user=root
+Sep 10 05:39:02 web-01 sshd[3857]: Failed password for root from 198.51.100.139 port 58080 ssh2
+Sep 10 05:39:02 web-01 sshd[3857]: Received disconnect from 198.51.100.139 port 58080:11: Bye Bye [preauth]
+Sep 10 05:39:02 web-01 sshd[3857]: Disconnected from authenticating user root 198.51.100.139 port 58080 [preauth]
+Sep 10 05:43:13 web-01 sshd[3865]: Invalid user ansible from 203.0.113.71 port 36320
+Sep 10 05:43:15 web-01 sshd[3865]: Connection closed by invalid user ansible 203.0.113.71 port 36320 [preauth]
+Sep 10 05:56:07 web-01 sshd[3887]: Invalid user dev from 198.51.100.129 port 34754
+Sep 10 05:56:07 web-01 sshd[3887]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 05:56:07 web-01 sshd[3887]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.129
+Sep 10 05:56:09 web-01 sshd[3887]: Failed password for invalid user dev from 198.51.100.129 port 34754 ssh2
+Sep 10 05:56:09 web-01 sshd[3887]: Received disconnect from 198.51.100.129 port 34754:11: Bye Bye [preauth]
+Sep 10 05:56:09 web-01 sshd[3887]: Disconnected from invalid user dev 198.51.100.129 port 34754 [preauth]
+Sep 10 06:17:01 web-01 CRON[3898]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 06:17:01 web-01 CRON[3898]: pam_unix(cron:session): session closed for user root
+Sep 10 06:31:37 web-01 sshd[3921]: Invalid user kafka from 198.51.100.207 port 39461
+Sep 10 06:31:39 web-01 sshd[3921]: Connection closed by invalid user kafka 198.51.100.207 port 39461 [preauth]
+Sep 10 06:42:29 web-01 sshd[3935]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.26  user=root
+Sep 10 06:42:31 web-01 sshd[3935]: Failed password for root from 198.51.100.26 port 56903 ssh2
+Sep 10 06:42:31 web-01 sshd[3935]: Received disconnect from 198.51.100.26 port 56903:11: Bye Bye [preauth]
+Sep 10 06:42:31 web-01 sshd[3935]: Disconnected from authenticating user root 198.51.100.26 port 56903 [preauth]
+Sep 10 07:04:27 web-01 sshd[3960]: Invalid user teamspeak from 198.51.100.242 port 47515
+Sep 10 07:04:27 web-01 sshd[3960]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 07:04:27 web-01 sshd[3960]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.242
+Sep 10 07:04:29 web-01 sshd[3960]: Failed password for invalid user teamspeak from 198.51.100.242 port 47515 ssh2
+Sep 10 07:04:29 web-01 sshd[3960]: Received disconnect from 198.51.100.242 port 47515:11: Bye Bye [preauth]
+Sep 10 07:04:29 web-01 sshd[3960]: Disconnected from invalid user teamspeak 198.51.100.242 port 47515 [preauth]
+Sep 10 07:17:01 web-01 CRON[3972]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 07:17:01 web-01 CRON[3972]: pam_unix(cron:session): session closed for user root
+Sep 10 07:26:37 web-01 sshd[3980]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.207  user=root
+Sep 10 07:26:38 web-01 sshd[3980]: Failed password for root from 198.51.100.207 port 45737 ssh2
+Sep 10 07:26:38 web-01 sshd[3980]: Connection closed by authenticating user root 198.51.100.207 port 45737 [preauth]
+Sep 10 07:54:27 web-01 sshd[3997]: Invalid user jenkins from 198.51.100.242 port 41766
+Sep 10 07:54:28 web-01 sshd[3997]: Connection closed by invalid user jenkins 198.51.100.242 port 41766 [preauth]
+Sep 10 08:17:01 web-01 CRON[4013]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 08:17:01 web-01 CRON[4013]: pam_unix(cron:session): session closed for user root
+Sep 10 09:05:35 web-01 sshd[4023]: Accepted publickey for alice from 192.0.2.10 port 55855 ssh2: ED25519 SHA256:2R59DOGY2f7THFWpaVRAF6+d3bZ2RsUPYzLsfDe/Vjk
+Sep 10 09:05:35 web-01 sshd[4023]: pam_unix(sshd:session): session opened for user alice(uid=1000) by (uid=0)
+Sep 10 09:05:35 web-01 systemd-logind[612]: New session 33 of user alice.
+Sep 10 09:09:02 web-01 sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/systemctl reload nginx
+Sep 10 09:09:02 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by alice(uid=1000)
+Sep 10 09:09:02 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep 10 09:17:01 web-01 CRON[4026]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 09:17:01 web-01 CRON[4026]: pam_unix(cron:session): session closed for user root
+Sep 10 09:17:38 web-01 sshd[4030]: Invalid user admin from 198.51.100.188 port 47785
+Sep 10 09:17:40 web-01 sshd[4030]: Connection closed by invalid user admin 198.51.100.188 port 47785 [preauth]
+Sep 10 09:21:28 web-01 sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/tail -n 100 /var/log/nginx/error.log
+Sep 10 09:21:28 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by alice(uid=1000)
+Sep 10 09:21:29 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep 10 09:25:40 web-01 sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/sbin/ufw status
+Sep 10 09:25:40 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by alice(uid=1000)
+Sep 10 09:25:40 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep 10 09:41:15 web-01 sshd[4049]: Invalid user user from 203.0.113.36 port 35976
+Sep 10 09:41:15 web-01 sshd[4049]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 09:41:15 web-01 sshd[4049]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.36
+Sep 10 09:41:16 web-01 sshd[4049]: Failed password for invalid user user from 203.0.113.36 port 35976 ssh2
+Sep 10 09:41:16 web-01 sshd[4049]: Connection closed by invalid user user 203.0.113.36 port 35976 [preauth]
+Sep 10 09:49:39 web-01 sshd[4025]: Received disconnect from 192.0.2.10 port 55855:11: disconnected by user
+Sep 10 09:49:39 web-01 sshd[4025]: Disconnected from user alice 192.0.2.10 port 55855
+Sep 10 09:49:39 web-01 sshd[4023]: pam_unix(sshd:session): session closed for user alice
+Sep 10 09:49:39 web-01 systemd-logind[612]: Session 33 logged out. Waiting for processes to exit.
+Sep 10 09:49:39 web-01 systemd-logind[612]: Removed session 33.
+Sep 10 09:51:33 web-01 sshd[4059]: Invalid user teamspeak from 203.0.113.55 port 58777
+Sep 10 09:51:33 web-01 sshd[4059]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 09:51:33 web-01 sshd[4059]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.55
+Sep 10 09:51:36 web-01 sshd[4059]: Failed password for invalid user teamspeak from 203.0.113.55 port 58777 ssh2
+Sep 10 09:51:36 web-01 sshd[4059]: Connection closed by invalid user teamspeak 203.0.113.55 port 58777 [preauth]
+Sep 10 10:02:03 web-01 sshd[4064]: Invalid user redis from 198.51.100.6 port 52163
+Sep 10 10:02:05 web-01 sshd[4064]: Connection closed by invalid user redis 198.51.100.6 port 52163 [preauth]
+Sep 10 10:16:28 web-01 sshd[4074]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.58  user=root
+Sep 10 10:16:30 web-01 sshd[4074]: Failed password for root from 198.51.100.58 port 47851 ssh2
+Sep 10 10:16:30 web-01 sshd[4074]: Connection closed by authenticating user root 198.51.100.58 port 47851 [preauth]
+Sep 10 10:17:01 web-01 CRON[4087]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 10:17:01 web-01 CRON[4087]: pam_unix(cron:session): session closed for user root
+Sep 10 10:26:27 web-01 sshd[4112]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.73  user=root
+Sep 10 10:26:30 web-01 sshd[4112]: Failed password for root from 198.51.100.73 port 35944 ssh2
+Sep 10 10:26:30 web-01 sshd[4112]: Connection closed by authenticating user root 198.51.100.73 port 35944 [preauth]
+Sep 10 10:35:54 web-01 sshd[4119]: Invalid user server from 198.51.100.200 port 53404
+Sep 10 10:35:54 web-01 sshd[4119]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 10:35:54 web-01 sshd[4119]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.200
+Sep 10 10:35:57 web-01 sshd[4119]: Failed password for invalid user server from 198.51.100.200 port 53404 ssh2
+Sep 10 10:35:57 web-01 sshd[4119]: Connection closed by invalid user server 198.51.100.200 port 53404 [preauth]
+Sep 10 10:39:40 web-01 sshd[4123]: Accepted password for bob from 192.0.2.11 port 50270 ssh2
+Sep 10 10:39:40 web-01 sshd[4123]: pam_unix(sshd:session): session opened for user bob(uid=1001) by (uid=0)
+Sep 10 10:39:40 web-01 systemd-logind[612]: New session 35 of user bob.
+Sep 10 11:15:10 web-01 sshd[4148]: Accepted publickey for deploy from 192.0.2.50 port 45201 ssh2: ED25519 SHA256:h5GqzewuXBKshUkntqaoh7iOoWV9DIE5R060xn7pfBD
+Sep 10 11:15:10 web-01 sshd[4148]: pam_unix(sshd:session): session opened for user deploy(uid=1002) by (uid=0)
+Sep 10 11:15:10 web-01 systemd-logind[612]: New session 38 of user deploy.
+Sep 10 11:16:51 web-01 sudo:   deploy : TTY=pts/0 ; PWD=/home/deploy ; USER=root ; COMMAND=/usr/bin/systemctl restart app
+Sep 10 11:16:51 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by deploy(uid=1002)
+Sep 10 11:16:52 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep 10 11:17:01 web-01 CRON[4166]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 11:17:01 web-01 CRON[4166]: pam_unix(cron:session): session closed for user root
+Sep 10 11:17:27 web-01 sshd[4149]: Received disconnect from 192.0.2.50 port 45201:11: disconnected by user
+Sep 10 11:17:27 web-01 sshd[4149]: Disconnected from user deploy 192.0.2.50 port 45201
+Sep 10 11:17:27 web-01 sshd[4148]: pam_unix(sshd:session): session closed for user deploy
+Sep 10 11:17:27 web-01 systemd-logind[612]: Session 38 logged out. Waiting for processes to exit.
+Sep 10 11:17:27 web-01 systemd-logind[612]: Removed session 38.
+Sep 10 11:20:48 web-01 sshd[4188]: Invalid user vagrant from 198.51.100.138 port 51649
+Sep 10 11:20:49 web-01 sshd[4188]: Connection closed by invalid user vagrant 198.51.100.138 port 51649 [preauth]
+Sep 10 11:31:26 web-01 sshd[4125]: Received disconnect from 192.0.2.11 port 50270:11: disconnected by user
+Sep 10 11:31:26 web-01 sshd[4125]: Disconnected from user bob 192.0.2.11 port 50270
+Sep 10 11:31:26 web-01 sshd[4123]: pam_unix(sshd:session): session closed for user bob
+Sep 10 11:31:26 web-01 systemd-logind[612]: Session 35 logged out. Waiting for processes to exit.
+Sep 10 11:31:26 web-01 systemd-logind[612]: Removed session 35.
+Sep 10 11:34:45 web-01 sshd[4193]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.205  user=root
+Sep 10 11:34:47 web-01 sshd[4193]: Failed password for root from 198.51.100.205 port 44662 ssh2
+Sep 10 11:34:47 web-01 sshd[4193]: Connection closed by authenticating user root 198.51.100.205 port 44662 [preauth]
+Sep 10 11:39:54 web-01 sshd[4204]: Invalid user admin from 198.51.100.200 port 57375
+Sep 10 11:39:54 web-01 sshd[4204]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 11:39:54 web-01 sshd[4204]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.200
+Sep 10 11:39:55 web-01 sshd[4204]: Failed password for invalid user admin from 198.51.100.200 port 57375 ssh2
+Sep 10 11:39:55 web-01 sshd[4204]: Received disconnect from 198.51.100.200 port 57375:11: Bye Bye [preauth]
+Sep 10 11:39:55 web-01 sshd[4204]: Disconnected from invalid user admin 198.51.100.200 port 57375 [preauth]
+Sep 10 12:17:01 web-01 CRON[4211]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 12:17:01 web-01 CRON[4211]: pam_unix(cron:session): session closed for user root
+Sep 10 12:27:05 web-01 sshd[4217]: Invalid user nagios from 203.0.113.85 port 60347
+Sep 10 12:27:05 web-01 sshd[4217]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 12:27:05 web-01 sshd[4217]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.85
+Sep 10 12:27:08 web-01 sshd[4217]: Failed password for invalid user nagios from 203.0.113.85 port 60347 ssh2
+Sep 10 12:27:08 web-01 sshd[4217]: Connection closed by invalid user nagios 203.0.113.85 port 60347 [preauth]
+Sep 10 13:17:01 web-01 CRON[4227]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 13:17:01 web-01 CRON[4227]: pam_unix(cron:session): session closed for user root
+Sep 10 14:17:01 web-01 CRON[4233]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 14:17:01 web-01 CRON[4233]: pam_unix(cron:session): session closed for user root
+Sep 10 14:24:17 web-01 sshd[4243]: Accepted publickey for alice from 192.0.2.10 port 44898 ssh2: ED25519 SHA256:2R59DOGY2f7THFWpaVRAF6+d3bZ2RsUPYzLsfDe/Vjk
+Sep 10 14:24:17 web-01 sshd[4243]: pam_unix(sshd:session): session opened for user alice(uid=1000) by (uid=0)
+Sep 10 14:24:17 web-01 systemd-logind[612]: New session 41 of user alice.
+Sep 10 14:31:46 web-01 sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/systemctl status app
+Sep 10 14:31:46 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by alice(uid=1000)
+Sep 10 14:31:48 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep 10 14:47:29 web-01 sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/systemctl reload nginx
+Sep 10 14:47:29 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by alice(uid=1000)
+Sep 10 14:47:29 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep 10 14:54:39 web-01 sshd[4245]: Received disconnect from 192.0.2.10 port 44898:11: disconnected by user
+Sep 10 14:54:39 web-01 sshd[4245]: Disconnected from user alice 192.0.2.10 port 44898
+Sep 10 14:54:39 web-01 sshd[4243]: pam_unix(sshd:session): session closed for user alice
+Sep 10 14:54:39 web-01 systemd-logind[612]: Session 41 logged out. Waiting for processes to exit.
+Sep 10 14:54:39 web-01 systemd-logind[612]: Removed session 41.
+Sep 10 15:11:31 web-01 sshd[4265]: Invalid user info from 203.0.113.233 port 48766
+Sep 10 15:11:31 web-01 sshd[4265]: Connection closed by invalid user info 203.0.113.233 port 48766 [preauth]
+Sep 10 15:17:01 web-01 CRON[4270]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 15:17:01 web-01 CRON[4270]: pam_unix(cron:session): session closed for user root
+Sep 10 15:30:42 web-01 sshd[4288]: Invalid user server from 203.0.113.248 port 45530
+Sep 10 15:30:42 web-01 sshd[4288]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 15:30:42 web-01 sshd[4288]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.248
+Sep 10 15:30:45 web-01 sshd[4288]: Failed password for invalid user server from 203.0.113.248 port 45530 ssh2
+Sep 10 15:30:45 web-01 sshd[4288]: Received disconnect from 203.0.113.248 port 45530:11: Bye Bye [preauth]
+Sep 10 15:30:45 web-01 sshd[4288]: Disconnected from invalid user server 203.0.113.248 port 45530 [preauth]
+Sep 10 15:40:39 web-01 sshd[4311]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:41 web-01 sshd[4336]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:42 web-01 sshd[4311]: Failed password for root from 203.0.113.45 port 36035 ssh2
+Sep 10 15:40:42 web-01 sshd[4336]: Failed password for root from 203.0.113.45 port 54223 ssh2
+Sep 10 15:40:43 web-01 sshd[4336]: Failed password for root from 203.0.113.45 port 54223 ssh2
+Sep 10 15:40:43 web-01 sshd[4336]: Connection closed by authenticating user root 203.0.113.45 port 54223 [preauth]
+Sep 10 15:40:43 web-01 sshd[4336]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:44 web-01 sshd[4311]: Failed password for root from 203.0.113.45 port 36035 ssh2
+Sep 10 15:40:44 web-01 sshd[4311]: Connection closed by authenticating user root 203.0.113.45 port 36035 [preauth]
+Sep 10 15:40:44 web-01 sshd[4311]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:44 web-01 sshd[4348]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:47 web-01 sshd[4348]: Failed password for root from 203.0.113.45 port 53190 ssh2
+Sep 10 15:40:47 web-01 sshd[4351]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:49 web-01 sshd[4348]: Failed password for root from 203.0.113.45 port 53190 ssh2
+Sep 10 15:40:49 web-01 sshd[4348]: Connection closed by authenticating user root 203.0.113.45 port 53190 [preauth]
+Sep 10 15:40:49 web-01 sshd[4348]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:50 web-01 sshd[4351]: Failed password for root from 203.0.113.45 port 60926 ssh2
+Sep 10 15:40:51 web-01 sshd[4361]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:52 web-01 sshd[4351]: Failed password for root from 203.0.113.45 port 60926 ssh2
+Sep 10 15:40:54 web-01 sshd[4351]: Failed password for root from 203.0.113.45 port 60926 ssh2
+Sep 10 15:40:54 web-01 sshd[4351]: Connection closed by authenticating user root 203.0.113.45 port 60926 [preauth]
+Sep 10 15:40:54 web-01 sshd[4351]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:54 web-01 sshd[4361]: Failed password for root from 203.0.113.45 port 33944 ssh2
+Sep 10 15:40:54 web-01 sshd[4369]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:55 web-01 sshd[4361]: Failed password for root from 203.0.113.45 port 33944 ssh2
+Sep 10 15:40:55 web-01 sshd[4369]: Failed password for root from 203.0.113.45 port 57238 ssh2
+Sep 10 15:40:55 web-01 sshd[4369]: Connection closed by authenticating user root 203.0.113.45 port 57238 [preauth]
+Sep 10 15:40:55 web-01 sshd[4388]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:56 web-01 sshd[4361]: Failed password for root from 203.0.113.45 port 33944 ssh2
+Sep 10 15:40:56 web-01 sshd[4361]: Connection closed by authenticating user root 203.0.113.45 port 33944 [preauth]
+Sep 10 15:40:56 web-01 sshd[4361]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:56 web-01 sshd[4388]: Failed password for root from 203.0.113.45 port 55833 ssh2
+Sep 10 15:40:56 web-01 sshd[4393]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:57 web-01 sshd[4393]: Failed password for root from 203.0.113.45 port 43397 ssh2
+Sep 10 15:40:57 web-01 sshd[4393]: Connection closed by authenticating user root 203.0.113.45 port 43397 [preauth]
+Sep 10 15:40:58 web-01 sshd[4388]: Failed password for root from 203.0.113.45 port 55833 ssh2
+Sep 10 15:40:59 web-01 sshd[4388]: Failed password for root from 203.0.113.45 port 55833 ssh2
+Sep 10 15:40:59 web-01 sshd[4388]: Connection closed by authenticating user root 203.0.113.45 port 55833 [preauth]
+Sep 10 15:40:59 web-01 sshd[4388]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:40:59 web-01 sshd[4408]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:00 web-01 sshd[4408]: Failed password for root from 203.0.113.45 port 37538 ssh2
+Sep 10 15:41:01 web-01 sshd[4412]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:02 web-01 sshd[4412]: Failed password for root from 203.0.113.45 port 38504 ssh2
+Sep 10 15:41:02 web-01 sshd[4412]: Connection closed by authenticating user root 203.0.113.45 port 38504 [preauth]
+Sep 10 15:41:03 web-01 sshd[4408]: Failed password for root from 203.0.113.45 port 37538 ssh2
+Sep 10 15:41:03 web-01 sshd[4408]: Connection closed by authenticating user root 203.0.113.45 port 37538 [preauth]
+Sep 10 15:41:03 web-01 sshd[4408]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:05 web-01 sshd[4426]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:06 web-01 sshd[4426]: Failed password for root from 203.0.113.45 port 55152 ssh2
+Sep 10 15:41:08 web-01 sshd[4426]: Failed password for root from 203.0.113.45 port 55152 ssh2
+Sep 10 15:41:09 web-01 sshd[4429]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:11 web-01 sshd[4426]: Failed password for root from 203.0.113.45 port 55152 ssh2
+Sep 10 15:41:11 web-01 sshd[4426]: Connection closed by authenticating user root 203.0.113.45 port 55152 [preauth]
+Sep 10 15:41:11 web-01 sshd[4426]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:11 web-01 sshd[4429]: Failed password for root from 203.0.113.45 port 41090 ssh2
+Sep 10 15:41:13 web-01 sshd[4429]: Failed password for root from 203.0.113.45 port 41090 ssh2
+Sep 10 15:41:13 web-01 sshd[4434]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:16 web-01 sshd[4429]: Failed password for root from 203.0.113.45 port 41090 ssh2
+Sep 10 15:41:16 web-01 sshd[4429]: Connection closed by authenticating user root 203.0.113.45 port 41090 [preauth]
+Sep 10 15:41:16 web-01 sshd[4429]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:16 web-01 sshd[4434]: Failed password for root from 203.0.113.45 port 54971 ssh2
+Sep 10 15:41:16 web-01 sshd[4444]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:17 web-01 sshd[4434]: Failed password for root from 203.0.113.45 port 54971 ssh2
+Sep 10 15:41:17 web-01 sshd[4434]: Connection closed by authenticating user root 203.0.113.45 port 54971 [preauth]
+Sep 10 15:41:17 web-01 sshd[4434]: PAM 1 more authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:19 web-01 sshd[4444]: Failed password for root from 203.0.113.45 port 42570 ssh2
+Sep 10 15:41:19 web-01 sshd[4465]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:41:21 web-01 sshd[4444]: Failed password for root from 203.0.113.45 port 42570 ssh2
+Sep 10 15:41:21 web-01 sshd[4465]: Failed password for root from 203.0.113.45 port 45373 ssh2
+Sep 10 15:41:21 web-01 sshd[4465]: Connection closed by authenticating user root 203.0.113.45 port 45373 [preauth]
+Sep 10 15:41:24 web-01 sshd[4444]: Failed password for root from 203.0.113.45 port 42570 ssh2
+Sep 10 15:41:24 web-01 sshd[4444]: Connection closed by authenticating user root 203.0.113.45 port 42570 [preauth]
+Sep 10 15:41:24 web-01 sshd[4444]: PAM 2 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45  user=root
+Sep 10 15:43:20 web-01 sshd[4472]: Accepted publickey for deploy from 192.0.2.50 port 40273 ssh2: ED25519 SHA256:h5GqzewuXBKshUkntqaoh7iOoWV9DIE5R060xn7pfBD
+Sep 10 15:43:20 web-01 sshd[4472]: pam_unix(sshd:session): session opened for user deploy(uid=1002) by (uid=0)
+Sep 10 15:43:20 web-01 systemd-logind[612]: New session 43 of user deploy.
+Sep 10 15:43:44 web-01 sudo:   deploy : TTY=pts/0 ; PWD=/home/deploy ; USER=root ; COMMAND=/usr/bin/systemctl restart app
+Sep 10 15:43:44 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by deploy(uid=1002)
+Sep 10 15:43:46 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep 10 15:45:12 web-01 sshd[4473]: Received disconnect from 192.0.2.50 port 40273:11: disconnected by user
+Sep 10 15:45:12 web-01 sshd[4473]: Disconnected from user deploy 192.0.2.50 port 40273
+Sep 10 15:45:12 web-01 sshd[4472]: pam_unix(sshd:session): session closed for user deploy
+Sep 10 15:45:12 web-01 systemd-logind[612]: Session 43 logged out. Waiting for processes to exit.
+Sep 10 15:45:12 web-01 systemd-logind[612]: Removed session 43.
+Sep 10 16:00:31 web-01 sshd[4492]: Invalid user operator from 203.0.113.233 port 54685
+Sep 10 16:00:31 web-01 sshd[4492]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 16:00:31 web-01 sshd[4492]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.233
+Sep 10 16:00:34 web-01 sshd[4492]: Failed password for invalid user operator from 203.0.113.233 port 54685 ssh2
+Sep 10 16:00:34 web-01 sshd[4492]: Received disconnect from 203.0.113.233 port 54685:11: Bye Bye [preauth]
+Sep 10 16:00:34 web-01 sshd[4492]: Disconnected from invalid user operator 203.0.113.233 port 54685 [preauth]
+Sep 10 16:17:01 web-01 CRON[4515]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 16:17:01 web-01 CRON[4515]: pam_unix(cron:session): session closed for user root
+Sep 10 17:04:01 web-01 sshd[4539]: Invalid user pi from 203.0.113.23 port 38266
+Sep 10 17:04:01 web-01 sshd[4539]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 17:04:01 web-01 sshd[4539]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.23
+Sep 10 17:04:04 web-01 sshd[4539]: Failed password for invalid user pi from 203.0.113.23 port 38266 ssh2
+Sep 10 17:04:04 web-01 sshd[4539]: Connection closed by invalid user pi 203.0.113.23 port 38266 [preauth]
+Sep 10 17:17:01 web-01 CRON[4564]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 17:17:01 web-01 CRON[4564]: pam_unix(cron:session): session closed for user root
+Sep 10 17:18:49 web-01 sshd[4587]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.203  user=root
+Sep 10 17:18:50 web-01 sshd[4587]: Failed password for root from 203.0.113.203 port 48692 ssh2
+Sep 10 17:18:50 web-01 sshd[4587]: Received disconnect from 203.0.113.203 port 48692:11: Bye Bye [preauth]
+Sep 10 17:18:50 web-01 sshd[4587]: Disconnected from authenticating user root 203.0.113.203 port 48692 [preauth]
+Sep 10 17:55:13 web-01 sshd[4594]: Invalid user nagios from 203.0.113.32 port 57457
+Sep 10 17:55:14 web-01 sshd[4594]: Connection closed by invalid user nagios 203.0.113.32 port 57457 [preauth]
+Sep 10 18:17:01 web-01 CRON[4619]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 18:17:01 web-01 CRON[4619]: pam_unix(cron:session): session closed for user root
+Sep 10 18:25:01 web-01 sshd[4623]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.137  user=root
+Sep 10 18:25:02 web-01 sshd[4623]: Failed password for root from 203.0.113.137 port 36944 ssh2
+Sep 10 18:25:02 web-01 sshd[4623]: Connection closed by authenticating user root 203.0.113.137 port 36944 [preauth]
+Sep 10 18:45:01 web-01 sshd[4632]: Invalid user jenkins from 203.0.113.137 port 54622
+Sep 10 18:45:01 web-01 sshd[4632]: pam_unix(sshd:auth): check pass; user unknown
+Sep 10 18:45:01 web-01 sshd[4632]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.137
+Sep 10 18:45:02 web-01 sshd[4632]: Failed password for invalid user jenkins from 203.0.113.137 port 54622 ssh2
+Sep 10 18:45:02 web-01 sshd[4632]: Connection closed by invalid user jenkins 203.0.113.137 port 54622 [preauth]
+Sep 10 19:17:01 web-01 CRON[4641]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 19:17:01 web-01 CRON[4641]: pam_unix(cron:session): session closed for user root
+Sep 10 19:25:17 web-01 sshd[4654]: Accepted publickey for deploy from 192.0.2.50 port 39681 ssh2: ED25519 SHA256:h5GqzewuXBKshUkntqaoh7iOoWV9DIE5R060xn7pfBD
+Sep 10 19:25:17 web-01 sshd[4654]: pam_unix(sshd:session): session opened for user deploy(uid=1002) by (uid=0)
+Sep 10 19:25:17 web-01 systemd-logind[612]: New session 46 of user deploy.
+Sep 10 19:26:49 web-01 sudo:   deploy : TTY=pts/0 ; PWD=/home/deploy ; USER=root ; COMMAND=/usr/bin/systemctl restart app
+Sep 10 19:26:49 web-01 sudo: pam_unix(sudo:session): session opened for user root(uid=0) by deploy(uid=1002)
+Sep 10 19:26:51 web-01 sudo: pam_unix(sudo:session): session closed for user root
+Sep 10 19:27:15 web-01 sshd[4656]: Received disconnect from 192.0.2.50 port 39681:11: disconnected by user
+Sep 10 19:27:15 web-01 sshd[4656]: Disconnected from user deploy 192.0.2.50 port 39681
+Sep 10 19:27:15 web-01 sshd[4654]: pam_unix(sshd:session): session closed for user deploy
+Sep 10 19:27:15 web-01 systemd-logind[612]: Session 46 logged out. Waiting for processes to exit.
+Sep 10 19:27:15 web-01 systemd-logind[612]: Removed session 46.
+Sep 10 20:17:01 web-01 CRON[4669]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 20:17:01 web-01 CRON[4669]: pam_unix(cron:session): session closed for user root
+Sep 10 21:17:01 web-01 CRON[4680]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 21:17:01 web-01 CRON[4680]: pam_unix(cron:session): session closed for user root
+Sep 10 22:17:01 web-01 CRON[4703]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 22:17:01 web-01 CRON[4703]: pam_unix(cron:session): session closed for user root
+Sep 10 23:17:01 web-01 CRON[4715]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Sep 10 23:17:01 web-01 CRON[4715]: pam_unix(cron:session): session closed for user root
