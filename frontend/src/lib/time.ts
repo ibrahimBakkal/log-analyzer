@@ -3,14 +3,17 @@ import type { BucketWidth } from "../api";
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 
-export const BUCKET_MS: Record<BucketWidth, number> = { "1m": MINUTE, "5m": 5 * MINUTE, "1h": HOUR };
+const DAY = 24 * HOUR;
 
-/** The finest bucket width that keeps a time range at about 180 bars or fewer. */
+export const BUCKET_MS: Record<BucketWidth, number> = { "1m": MINUTE, "5m": 5 * MINUTE, "1h": HOUR, "1d": DAY };
+
+/** The finest bucket width that keeps a time range at 180 bars or fewer (days beyond that). */
 export function chooseBucket(startMs: number, endMs: number): BucketWidth {
   const span = endMs - startMs;
-  if (span <= 3 * HOUR) return "1m";
-  if (span <= 15 * HOUR) return "5m";
-  return "1h";
+  if (span <= 180 * MINUTE) return "1m";
+  if (span <= 180 * 5 * MINUTE) return "5m";
+  if (span <= 180 * HOUR) return "1h";
+  return "1d";
 }
 
 /** ISO 8601 in UTC without the milliseconds the API never sends: 2026-09-10T02:31:00Z. */
@@ -32,7 +35,7 @@ export function rangeAround(firstSeen: string, lastSeen: string): { start: strin
 // All times are shown in UTC, the zone the backend stores them in.
 const TIME = new Intl.DateTimeFormat("tr-TR", { timeZone: "UTC", hour: "2-digit", minute: "2-digit", second: "2-digit" });
 const SHORT_TIME = new Intl.DateTimeFormat("tr-TR", { timeZone: "UTC", hour: "2-digit", minute: "2-digit" });
-const DAY = new Intl.DateTimeFormat("tr-TR", { timeZone: "UTC", day: "numeric", month: "short" });
+const DAY_FORMAT = new Intl.DateTimeFormat("tr-TR", { timeZone: "UTC", day: "numeric", month: "short" });
 
 export function formatTime(value: string | number): string {
   return TIME.format(new Date(value));
@@ -43,7 +46,7 @@ export function formatShortTime(value: string | number): string {
 }
 
 export function formatDay(value: string | number): string {
-  return DAY.format(new Date(value));
+  return DAY_FORMAT.format(new Date(value));
 }
 
 export function formatDateTime(value: string | number): string {
@@ -60,14 +63,14 @@ export function formatDuration(ms: number): string {
   return minutes % 60 ? `${hours} sa ${minutes % 60} dk` : `${hours} sa`;
 }
 
-const TICK_STEPS = [MINUTE, 5 * MINUTE, 15 * MINUTE, 30 * MINUTE, HOUR, 3 * HOUR, 6 * HOUR, 12 * HOUR, 24 * HOUR];
+const TICK_STEPS = [MINUTE, 5 * MINUTE, 15 * MINUTE, 30 * MINUTE, HOUR, 3 * HOUR, 6 * HOUR, 12 * HOUR, DAY];
 
 /** Round times for axis ticks: the smallest step that gives at most `maxTicks` ticks. */
 export function timeTicks(startMs: number, endMs: number, maxTicks: number): number[] {
   const span = Math.max(endMs - startMs, 1);
   const fit = TICK_STEPS.find((candidate) => span / candidate <= maxTicks);
   // Longer than the table reaches: whole days, as many as needed.
-  const step = fit ?? Math.ceil(span / maxTicks / (24 * HOUR)) * 24 * HOUR;
+  const step = fit ?? Math.ceil(span / maxTicks / DAY) * DAY;
   const ticks: number[] = [];
   for (let tick = Math.ceil(startMs / step) * step; tick <= endMs; tick += step) ticks.push(tick);
   return ticks;

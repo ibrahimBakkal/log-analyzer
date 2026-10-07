@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chooseBucket, formatDuration, niceCeiling, rangeAround, timeTicks, toIso } from "./time";
+import { BUCKET_MS, chooseBucket, formatDuration, niceCeiling, rangeAround, timeTicks, toIso } from "./time";
 
 const T0 = Date.parse("2026-09-09T00:00:00Z");
 const MINUTE = 60_000;
@@ -11,7 +11,18 @@ describe("chooseBucket", () => {
     expect(chooseBucket(T0, T0 + 3 * HOUR)).toBe("1m");
     expect(chooseBucket(T0, T0 + 3 * HOUR + 1)).toBe("5m");
     expect(chooseBucket(T0, T0 + 15 * HOUR)).toBe("5m");
+    expect(chooseBucket(T0, T0 + 15 * HOUR + 1)).toBe("1h");
     expect(chooseBucket(T0, T0 + 48 * HOUR)).toBe("1h");
+    expect(chooseBucket(T0, T0 + 180 * HOUR)).toBe("1h");
+    expect(chooseBucket(T0, T0 + 180 * HOUR + 1)).toBe("1d");
+    expect(chooseBucket(T0, T0 + 400 * 24 * HOUR)).toBe("1d");
+  });
+
+  it("never asks for more than 180 bars, up to half a year", () => {
+    for (const hours of [0.1, 1, 3, 3.1, 14, 15, 16, 47, 180, 181, 24 * 30, 24 * 180]) {
+      const width = BUCKET_MS[chooseBucket(T0, T0 + hours * HOUR)];
+      expect((hours * HOUR) / width).toBeLessThanOrEqual(180);
+    }
   });
 });
 

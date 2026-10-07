@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Alert, TimelineData } from "../api";
-import { formatCount, formatDateTime, formatShortTime, niceCeiling, toIso } from "../lib/time";
+import { formatCount, formatDateTime, formatDay, formatShortTime, niceCeiling, toIso } from "../lib/time";
 import { useWidth } from "../lib/useWidth";
 import { SEVERITY_LABEL } from "./Severity";
 import { TimeAxis } from "./TimeAxis";
@@ -205,7 +205,7 @@ export function Timeline({ data, startMs, endMs, alerts, selectedAlertId, onSele
           }}
         >
           <div className="figures mb-1 text-ink-2">
-            {formatDateTime(hovered.ms)} – {formatShortTime(hovered.ms + bucketMs)}
+            {bucketMs >= 86_400_000 ? formatDay(hovered.ms) : `${formatDateTime(hovered.ms)} – ${formatShortTime(hovered.ms + bucketMs)}`}
           </div>
           <TooltipRow color="var(--series-suspicious)" value={hovered.warnings} label="şüpheli olay" />
           <TooltipRow color="var(--series-events)" value={hovered.count - hovered.warnings} label="diğer olay" />

@@ -34,7 +34,7 @@ interface Snapshot {
 const snapshot = JSON.parse(recording) as Snapshot;
 const TIME = new Map(snapshot.events.map((event) => [event.id, Date.parse(event.ts)]));
 
-const BUCKET_SECONDS: Record<string, number> = { "1m": 60, "5m": 300, "1h": 3600 };
+const BUCKET_SECONDS: Record<string, number> = { "1m": 60, "5m": 300, "1h": 3600, "1d": 86400 };
 const MAX_PAGE = 500;
 const MAX_PORTS = 500;
 const MAX_CONNECTIONS = 2000;

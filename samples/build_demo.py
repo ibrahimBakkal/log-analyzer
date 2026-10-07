@@ -155,6 +155,8 @@ def build_cases(client: TestClient) -> list[dict[str, Any]]:
     questions: list[tuple[str, dict[str, Any]]] = [
         ("/timeline", {"bucket": "1h", "start": DAY_ONE, "end": DAY_THREE}),
         ("/timeline", {"bucket": "1h"}),
+        ("/timeline", {"bucket": "1d"}),
+        ("/timeline", {"bucket": "1d", "ip": BRUTE}),
         ("/timeline", {"bucket": "5m", "start": "2026-09-09T00:00:00Z", "end": DAY_TWO}),
         ("/timeline", {"bucket": "1m", **burst}),
         ("/timeline", {"bucket": "1m", **burst, "alert_id": brute["id"]}),

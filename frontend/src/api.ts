@@ -7,7 +7,7 @@ export const DEMO: boolean = import.meta.env.MODE === "demo";
 
 export type Severity = "low" | "medium" | "high" | "critical";
 export type Level = "info" | "warning";
-export type BucketWidth = "1m" | "5m" | "1h";
+export type BucketWidth = "1m" | "5m" | "1h" | "1d";
 
 /** Why an event is evidence for an alert; start/end index the message in code points. */
 export interface Highlight {
