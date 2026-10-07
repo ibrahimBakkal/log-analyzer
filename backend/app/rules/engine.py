@@ -11,6 +11,7 @@ import ipaddress
 import threading
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 from sqlalchemy import ColumnElement, Select, and_, delete, func, insert, or_, select
 from sqlalchemy.orm import Session
@@ -18,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.models import Alert, AlertEvent, Event, State
 from app.rules.evaluators import EventRow, Evidence, create_evaluator
 from app.rules.loader import RuleSet
+from app.rules.scan import KeywordScan
 from app.rules.schema import (
     EventFilter,
     KeywordRule,
@@ -25,7 +27,6 @@ from app.rules.schema import (
     RarePortRule,
     Rule,
     SequenceRule,
-    keyword_parts,
 )
 
 
@@ -107,15 +108,22 @@ def evaluate(session: Session, rules: Sequence[Rule], *, since: int | None = Non
     are the ones the stored alerts were made with; :class:`AlertKeeper` sees to that.
     """
     enabled = [rule for rule in rules if rule.enabled]
+    lines = _lines_with_keywords(session, enabled, since)
     created = updated = removed = 0
     for rule in enabled:
-        groups = None if since is None else _groups_with_news(session, rule, since)
-        if groups is not None and not groups:
-            continue
-        if groups is None:
-            events = session.execute(_events_for(rule)).yield_per(2000)
+        if isinstance(rule, KeywordRule):
+            work = _keyword_work(session, rule, lines[rule.id], since)
+            if work is None:
+                continue
+            groups, events = work
         else:
-            events = _events_of_groups(session, rule, groups)
+            groups = None if since is None else _groups_with_news(session, rule, since)
+            if groups is not None and not groups:
+                continue
+            if groups is None:
+                events = session.execute(_events_for(rule)).yield_per(2000)
+            else:
+                events = _events_of_groups(session, rule, groups)
         counts = _reconcile(session, rule, groups, detect(rule, events))
         created, updated, removed = (
             created + counts[0],
@@ -312,14 +320,13 @@ def _groups_with_news(session: Session, rule: Rule, since: int) -> list[str] | N
 
 
 def _selection(rule: Rule) -> list[ColumnElement[bool]]:
-    """What the database can already tell about which events matter to a rule."""
+    """What the database can already tell about which events matter to a rule.
+
+    For a keyword rule that is little: which lines have its keywords is found
+    by reading them (see :func:`_lines_with_keywords`).
+    """
     conditions = _conditions(rule.match)
-    if isinstance(rule, KeywordRule):
-        if rule.regex is None:
-            conditions.extend(_one_of(rule.keywords))
-        for entry in rule.require:
-            conditions.extend(_one_of(entry))
-    elif isinstance(rule, SequenceRule):
+    if isinstance(rule, SequenceRule):
         conditions.append(or_(*(and_(*_conditions(step.match)) for step in rule.steps)))
     elif isinstance(rule, PortScanRule):
         conditions.append(Event.dst_port.is_not(None))
@@ -329,26 +336,118 @@ def _selection(rule: Rule) -> list[ColumnElement[bool]]:
     return conditions
 
 
-def _one_of(keywords: Sequence[str]) -> list[ColumnElement[bool]]:
-    """Lines with one of *keywords*, as far as the database can be trusted to tell.
+# --- keyword rules ----------------------------------------------------------------------------
 
-    Not for non-ASCII keywords: SQLite only folds the case of ASCII letters, the
-    evaluator folds all of them. For those nothing is said, and the evaluator sorts it out.
+# A keyword rule with more candidate lines than this is given every line instead.
+MAX_CANDIDATES = 50_000
+
+Candidates = dict[str, list[int] | None]  # rule id -> event ids, or None for "too many to list"
+
+
+def _lines_with_keywords(session: Session, rules: Sequence[Rule], since: int | None) -> Candidates:
+    """The lines each keyword rule among *rules* may count, of those newer than *since* if given.
+
+    One pass over the lines serves all the rules; see :mod:`app.rules.scan`.
     """
-    if not all(map(str.isascii, keywords)):
-        return []
-    # The line as the evaluator reads it: the program's name, then its message.
-    line = func.coalesce(Event.service, "").concat(": ").concat(Event.message)
-    return [or_(*(line.ilike(_like(word), escape="\\") for word in keywords))]
+    keyword_rules = [rule for rule in rules if isinstance(rule, KeywordRule)]
+    found: Candidates = {rule.id: [] for rule in keyword_rules}
+    if not keyword_rules:
+        return found
+
+    lines = select(Event.id, Event.service, Event.message)
+    if since is not None:
+        lines = lines.where(Event.id > since)
+    # Asked of the connection rather than the session: a million rows pass
+    # through here, and the session spends twice as long on each as reading it takes.
+    connection = session.connection()
+    sample = connection.execute(lines.limit(_SAMPLE)).all()
+    scan = KeywordScan(keyword_rules, sample)
+    rows = connection.execution_options(stream_results=True).execute(lines)
+    for event_id, number in scan.candidates(rows):  # type: ignore[arg-type]
+        ids = found[keyword_rules[number].id]
+        if ids is not None:
+            ids.append(event_id)
+            if len(ids) > MAX_CANDIDATES:
+                found[keyword_rules[number].id] = None
+    return found
 
 
-def _like(keyword: str) -> str:
-    """A LIKE pattern for a keyword: its parts in order, anything before, between and after."""
-    escaped = (
-        part.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-        for part in keyword_parts(keyword)
-    )
-    return "%" + "%".join(escaped) + "%"
+_SAMPLE = 2000  # lines looked at to learn which characters are rare in this log
+
+
+def _keyword_work(
+    session: Session, rule: KeywordRule, candidates: list[int] | None, since: int | None
+) -> tuple[Sequence[str] | None, Iterable[EventRow]] | None:
+    """What a keyword rule has to be run on: (the groups to redo, their events in time order).
+
+    No groups means all of them; ``None`` altogether means there is nothing to do.
+
+    After new lines, the groups to redo are those of the new candidates, and a
+    group's earlier lines need not be searched for again: every line a keyword
+    rule counts is evidence of one of its alerts, so the alerts already name them.
+    """
+    if since is None:
+        if candidates is None:
+            return None, session.execute(_events_for(rule)).yield_per(2000)
+        return None, _events_by_id(session, rule, candidates)
+
+    if candidates is not None and not candidates:
+        return None
+    group = getattr(Event, rule.group_by)
+    groups = None
+    if candidates is not None:
+        groups = _distinct(session, group, candidates, _selection(rule))
+    if groups is not None and not groups:
+        return None
+    earlier = None
+    if groups is not None:
+        earlier = session.scalars(
+            select(AlertEvent.event_id)
+            .join(Alert, Alert.id == AlertEvent.alert_id)
+            .where(Alert.rule_id == rule.id, Alert.group_key.in_(groups))
+            .limit(MAX_CANDIDATES + 1)
+        ).all()
+    if candidates is None or groups is None or earlier is None or len(earlier) > MAX_CANDIDATES:
+        # Too much to pick apart: the rule starts over, on all lines.
+        everything = _lines_with_keywords(session, [rule], None)[rule.id]
+        return _keyword_work(session, rule, everything, None)
+    wanted = sorted({*candidates, *earlier})
+    return groups, _events_by_id(session, rule, wanted, group.in_(groups))
+
+
+def _events_by_id(
+    session: Session, rule: Rule, ids: Sequence[int], *more: ColumnElement[bool]
+) -> list[EventRow]:
+    """The events with these *ids* that pass the rule's filter, oldest first."""
+    found: list[EventRow] = []
+    for start in range(0, len(ids), _IDS_PER_QUERY):
+        chunk = ids[start : start + _IDS_PER_QUERY]
+        found += session.execute(
+            select(*_COLUMNS).where(Event.id.in_(chunk), *_selection(rule), *more)
+        ).all()  # type: ignore[arg-type]
+    return sorted(found, key=lambda event: (event.ts, event.id))
+
+
+def _distinct(
+    session: Session, column: Any, ids: Sequence[int], conditions: Sequence[ColumnElement[bool]]
+) -> list[str] | None:
+    """The values *column* has among the events with these *ids*; ``None`` beyond MAX_GROUPS."""
+    values: set[str] = set()
+    for start in range(0, len(ids), _IDS_PER_QUERY):
+        chunk = ids[start : start + _IDS_PER_QUERY]
+        values.update(
+            session.scalars(
+                select(column)
+                .where(Event.id.in_(chunk), column.is_not(None), *conditions)
+                .distinct()
+            )
+        )
+        if len(values) > MAX_GROUPS:
+            return None
+    return sorted(values)
+
+
+_IDS_PER_QUERY = 5000  # well below the number of values SQLite accepts in one statement
 
 
 def _conditions(wanted: EventFilter) -> list[ColumnElement[bool]]:

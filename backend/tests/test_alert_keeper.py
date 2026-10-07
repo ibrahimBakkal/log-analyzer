@@ -59,6 +59,16 @@ EXTRA = [
         "cooldown_seconds": 60,
     },
     {
+        "id": "T-WORDS",
+        "name": "Texts, per machine",
+        "type": "keyword",
+        "severity": "low",
+        "keywords": ["invalid user", "session opened*root", "UFW BLOCK"],
+        "require": [["port ", "DPT="]],
+        "exclude": ["DPT=443 "],
+        "cooldown_seconds": 120,
+    },
+    {
         "id": "T-ALLOW",
         "name": "Port off the list",
         "type": "rare_port",
@@ -125,17 +135,22 @@ def appends(seed: int) -> list[tuple[str, int, int]]:
     return [queues[name].pop(0) for name in order]
 
 
-# The limits as shipped; then so low that listing the groups is given up on, and
-# so low that their events are left to the database to sort.
+# The limits as shipped; then each so low that the way around it is taken.
 @pytest.mark.parametrize("seed", range(6))
 @pytest.mark.parametrize(
-    ("max_groups", "max_sorted_here"), [(200, 100_000), (2, 100_000), (200, 3)]
+    "limits",
+    [
+        {},
+        {"MAX_GROUPS": 2},
+        {"MAX_SORTED_HERE": 3},
+        {"MAX_CANDIDATES": 3},  # keyword rules: too many lines to list
+        {"_IDS_PER_QUERY": 2, "_SAMPLE": 5},  # ... and listed lines fetched a few at a time
+    ],
+    ids=lambda limits: ",".join(f"{name}={value}" for name, value in limits.items()) or "shipped",
 )
-def test_group_by_group_gives_what_starting_over_gives(
-    session, monkeypatch, seed, max_groups, max_sorted_here
-):
-    monkeypatch.setattr(rule_engine, "MAX_GROUPS", max_groups)
-    monkeypatch.setattr(rule_engine, "MAX_SORTED_HERE", max_sorted_here)
+def test_group_by_group_gives_what_starting_over_gives(session, monkeypatch, seed, limits):
+    for name, value in limits.items():
+        monkeypatch.setattr(rule_engine, name, value)
     ingestors = {
         name: Ingestor(session, name=name, parser=create_parser("auto", year=YEAR))
         for name in FILES

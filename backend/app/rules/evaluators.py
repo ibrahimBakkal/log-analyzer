@@ -91,10 +91,10 @@ class KeywordEvaluator(Evaluator[KeywordRule]):
 
     def __init__(self, rule: KeywordRule) -> None:
         super().__init__(rule)
-        self._keywords = _one_of(rule.keywords) if rule.keywords else None
+        self._keywords = any_keyword(rule.keywords) if rule.keywords else None
         self._regex = re.compile(rule.regex) if rule.regex is not None else None
-        self._required = [_one_of(entry) for entry in rule.require]
-        self._excluded = _one_of(rule.exclude) if rule.exclude else None
+        self._required = [any_keyword(entry) for entry in rule.require]
+        self._excluded = any_keyword(rule.exclude) if rule.exclude else None
 
     def spans(self, event: EventRow, key: str) -> tuple[Span, ...] | None:
         # Keywords are looked for in the line as its reader sees it: the
@@ -124,7 +124,7 @@ class KeywordEvaluator(Evaluator[KeywordRule]):
         return [evidence]
 
 
-def _one_of(keywords: list[str]) -> re.Pattern[str]:
+def any_keyword(keywords: list[str]) -> re.Pattern[str]:
     """Matches any of *keywords*, whatever the case; ``*`` in a keyword is any text."""
     # Longest first, so that "shadow" does not win over "/etc/shadow".
     words = sorted(keywords, key=len, reverse=True)
