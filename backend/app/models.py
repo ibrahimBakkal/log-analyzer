@@ -18,6 +18,10 @@ class Event(Base):
         Index(None, "src_ip", "ts"),
         Index(None, "action", "ts"),
         Index(None, "dst_port", "ts"),
+        # For the dashboard on a large table: these let /timeline and /stats count
+        # from the index alone, without reading a single row.
+        Index(None, "level", "ts"),
+        Index(None, "action", "src_ip", "ts"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)

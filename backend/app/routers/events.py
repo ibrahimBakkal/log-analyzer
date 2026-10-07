@@ -1,15 +1,16 @@
 """GET /events: stored log lines in time order, filtered and paginated."""
 
 import base64
+from dataclasses import replace
 from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import and_, or_, select
+from sqlalchemy import select, tuple_
 
 from app.models import Event
 from app.routers import SessionDep
-from app.routers._filters import EventFilters
+from app.routers._filters import EventFilters, as_utc
 from app.routers._present import present_events
 from app.schemas import EventPage
 
@@ -53,18 +54,29 @@ def list_events(
     An event that is evidence for an alert carries `highlights`: the alert, its
     rule and the part of the message that made it count.
     """
+    position = tuple_(Event.ts, Event.id)
+    after = None
+    if cursor is not None:
+        ts, event_id = _decode_cursor(cursor)
+        # The cursor is a tighter bound than the time filter on the same side.
+        # Left in, that filter can make the database start its search at the
+        # beginning of the range instead of at the cursor.
+        if order == "asc":
+            after = position > (ts, event_id)
+            if filters.start is None or ts >= as_utc(filters.start):
+                filters = replace(filters, start=None)
+        else:
+            after = position < (ts, event_id)
+            if filters.end is None or ts < as_utc(filters.end):
+                filters = replace(filters, end=None)
+
     query = filters.apply(select(Event))
     if order == "asc":
         query = query.order_by(Event.ts, Event.id)
     else:
         query = query.order_by(Event.ts.desc(), Event.id.desc())
-    if cursor is not None:
-        ts, event_id = _decode_cursor(cursor)
-        if order == "asc":
-            beyond = or_(Event.ts > ts, and_(Event.ts == ts, Event.id > event_id))
-        else:
-            beyond = or_(Event.ts < ts, and_(Event.ts == ts, Event.id < event_id))
-        query = query.where(beyond)
+    if after is not None:
+        query = query.where(after)
 
     # One extra row tells us whether another page follows.
     events = session.scalars(query.limit(limit + 1)).all()

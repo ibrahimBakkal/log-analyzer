@@ -54,6 +54,8 @@ def test_migrations_build_exactly_the_schema_the_models_describe(tmp_path):
         "ix_events_src_ip_ts": ["src_ip", "ts"],
         "ix_events_action_ts": ["action", "ts"],
         "ix_events_dst_port_ts": ["dst_port", "ts"],
+        "ix_events_level_ts": ["level", "ts"],
+        "ix_events_action_src_ip_ts": ["action", "src_ip", "ts"],
     }
     engine.dispose()
 

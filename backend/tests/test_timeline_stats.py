@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 import generate  # samples/generate.py
+from app.routers import timeline as timeline_router
 
 YEAR = generate.DEFAULT_START.year
 ENTRIES = generate.build_entries()
@@ -35,7 +36,9 @@ def floor(moment: datetime, seconds: int) -> str:
 # --- /timeline -------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(("bucket", "seconds"), [("1m", 60), ("5m", 300), ("1h", 3600)])
+@pytest.mark.parametrize(
+    ("bucket", "seconds"), [("1m", 60), ("5m", 300), ("1h", 3600), ("1d", 86400)]
+)
 def test_timeline_counts_every_event_in_the_bucket_it_falls_into(loaded, bucket, seconds):
     expected: dict[str, int] = {}
     for moment, _ in ENTRIES:
@@ -75,6 +78,59 @@ def test_timeline_takes_the_same_filters_as_events(loaded):
     late = buckets(loaded, **params, start="2026-09-10T00:00:00Z")
     assert [item["count"] for item in late] == [32]
     assert sum(item["count"] for item in buckets(loaded, rule_id="KW-001")) == 1
+
+
+TIME_RANGES = [
+    {},
+    {"start": "2026-09-10T00:00:00Z"},
+    {"end": "2026-09-10T00:00:00Z"},
+    # Edges in the middle of a bucket: the first and last bucket are counted in part.
+    {"start": "2026-09-09T03:12:40Z", "end": "2026-09-09T03:13:10Z"},
+    {"start": "2026-09-09T03:12:41+03:00", "end": "2026-09-10T15:40:50Z"},
+    {"start": "2026-09-09T10:17:00", "end": "2026-09-09T21:03:30"},
+    {"start": "2027-01-01T00:00:00Z"},
+    {"end": "2020-01-01T00:00:00Z"},
+]
+
+
+@pytest.mark.parametrize("bucket", ["1m", "5m", "1h", "1d"])
+@pytest.mark.parametrize("time_range", TIME_RANGES)
+def test_counting_from_the_index_gives_what_grouping_gives(loaded, monkeypatch, bucket, time_range):
+    quick = buckets(loaded, bucket=bucket, **time_range)
+    monkeypatch.setattr("app.routers.timeline._only_by_time", lambda filters: False)
+    grouped = buckets(loaded, bucket=bucket, **time_range)
+
+    assert quick == grouped
+    if not time_range:
+        assert sum(item["count"] for item in quick) == TOTAL
+
+
+def test_quick_count_is_used_exactly_when_only_time_is_filtered(loaded, monkeypatch):
+    calls = []
+    original = timeline_router._count_by_range
+    monkeypatch.setattr(
+        timeline_router,
+        "_count_by_range",
+        lambda *arguments: calls.append(1) or original(*arguments),
+    )
+    buckets(loaded, bucket="1h")
+    buckets(loaded, bucket="1h", start="2026-09-10T00:00:00Z")
+    assert len(calls) == 2
+    for narrowed in ({"ip": generate.BRUTE_IP}, {"level": "warning"}, {"rule_id": "SSH-001"}):
+        buckets(loaded, bucket="1h", **narrowed)
+    assert len(calls) == 2
+
+
+def test_very_long_range_is_grouped_instead_of_probed_bucket_by_bucket(loaded, monkeypatch):
+    expected = buckets(loaded, bucket="1m")
+    monkeypatch.setattr(timeline_router, "MAX_PROBES", 100)  # the sample spans 2,880 minutes
+    assert buckets(loaded, bucket="1m") == expected
+
+
+def test_day_buckets_start_at_midnight_utc(loaded):
+    days = buckets(loaded, bucket="1d")
+    assert [item["ts"] for item in days] == ["2026-09-09T00:00:00Z", "2026-09-10T00:00:00Z"]
+    assert sum(item["count"] for item in days) == TOTAL
 
 
 def test_timeline_of_an_empty_database_is_empty(client):
