@@ -2,7 +2,7 @@
 
 Sunucu loglarını (SSH `auth.log` ve güvenlik duvarı `ufw.log`) yapılandırılmış olaylara çevirip zaman çizelgesinde gösteren ve kural tabanlı uyarılar üreten bir log analiz aracı. Arka uç Python/FastAPI, arayüz React.
 
-> **Durum:** Aşama 4 tamam — loglar ayrıştırılıp veritabanına yükleniyor; eşik, sıralı olay ve port taraması kuralları uyarı üretiyor; web arayüzü zaman çizelgesini, log satırlarını, uyarıları ve bir adresin denediği portları birlikte gösteriyor. Sıradaki adımlar için [Yol haritası](#yol-haritası) bölümüne bak.
+> **Durum:** Aşama 5 tamam — loglar yüklenerek ya da dosya canlı izlenerek veritabanına alınıyor; eşik, sıralı olay ve port taraması kuralları uyarı üretiyor; web arayüzü zaman çizelgesini, log satırlarını, uyarıları ve bir adresin denediği portları birlikte gösteriyor ve yeni satırlar geldikçe kendiliğinden yenileniyor. Sıradaki adımlar için [Yol haritası](#yol-haritası) bölümüne bak.
 
 ## Amaç
 
@@ -24,10 +24,12 @@ flowchart LR
 
     subgraph be["Backend · FastAPI"]
         ingest["Yükleme<br/>POST /ingest"]
+        follower["Dosya takibi<br/>(tail -F gibi)"]
         parsers["Parser'lar<br/>satır → Event"]
         db[("Veritabanı<br/>events · alerts")]
         engine["Kural motoru"]
         api["REST API"]
+        stream["Olay akışı<br/>GET /stream"]
     end
 
     rules["rules/*.yaml"]
@@ -41,18 +43,23 @@ flowchart LR
 
     auth --> ingest
     ufw --> ingest
+    auth -.->|büyüdükçe| follower
+    ufw -.-> follower
     ingest --> parsers --> db
+    follower --> parsers
     rules --> engine
     db -->|olaylar| engine
     engine -->|uyarılar| db
     db --> api
     api --> timeline & logtable & alertpanel & portview
+    engine -.->|değişti| stream -.->|yenile| fe
 ```
 
-1. Log dosyası `POST /ingest` ile yüklenir; uygun parser her satırı bir `Event` kaydına çevirir.
-2. Olaylar SQLAlchemy üzerinden veritabanına (başlangıçta SQLite) yazılır. Aynı dosya tekrar yüklenirse kopya oluşmaz (`source_file` + `line_no` benzersizdir).
+1. Log dosyası `POST /ingest` ile yüklenir ya da sunucu dosyayı büyüdükçe kendisi okur; parser her satırı bir `Event` kaydına çevirir.
+2. Olaylar SQLAlchemy üzerinden veritabanına (SQLite) yazılır. Bir dosya ilk satırından tanınır; aynı dosya tekrar ya da rotasyon sonrası başka bir adla gelirse kopya oluşmaz.
 3. Kural motoru `rules/` altındaki YAML kurallarıyla olayları tarar; eşleşmeleri kanıt satırlarıyla birlikte `Alert` olarak kaydeder.
 4. React arayüzü REST API (`/events`, `/timeline`, `/alerts`, `/stats`, `/ports`) üzerinden zaman çizelgesini, log tablosunu, uyarıları ve port görünümünü gösterir.
+5. Veri değişince sunucu bunu `GET /stream` üzerinden duyurur; açık sayfalar gösterdiklerini yeniden ister.
 
 ## Depo yapısı
 
@@ -64,8 +71,10 @@ log-analyzer/
 │   ├── app/
 │   │   ├── parsers/      # syslog başlığı, auth.log kalıpları, UFW paket logu, parser kayıt defteri
 │   │   ├── rules/        # kural şeması, YAML yükleyici, değerlendiriciler, uyarı motoru
-│   │   ├── routers/      # /health, /ingest, /events, /alerts, /rules, /timeline, /stats, /ports
-│   │   ├── ingest.py     # satır satır okuma, toplu yazım
+│   │   ├── routers/      # /health, /ingest, /events, /alerts, /rules, /timeline, /stats, /ports, /stream, /follow
+│   │   ├── ingest.py     # satır satır okuma, sıkıştırılmış dosyalar, toplu yazım
+│   │   ├── follow.py     # büyüyen dosyaları izleme, rotasyon
+│   │   ├── live.py       # değişiklikleri dinleyenlere duyurma
 │   │   ├── models.py     # Event, Alert ve AlertEvent tabloları
 │   │   └── main.py       # FastAPI uygulaması
 │   ├── migrations/       # Alembic migration'ları
@@ -158,12 +167,41 @@ Arayüz API'yi `http://127.0.0.1:8000` adresinde arar; başka bir adres için `V
 
 Etkileşimli API dokümanı `http://127.0.0.1:8000/docs` adresindedir. Veritabanı adresi `LOG_ANALYZER_DATABASE_URL`, kural klasörü `LOG_ANALYZER_RULES_DIR` ortam değişkeniyle değiştirilebilir.
 
+### Canlı takip
+
+Sunucu, verilen log dosyalarını `tail -F` gibi izleyebilir: dosyaya eklenen satırlar bir iki saniye içinde olay olur, kurallar yeniden çalışır ve açık sayfalar kendiliğinden yenilenir.
+
+```bash
+cd backend
+LOG_ANALYZER_FOLLOW=/var/log/auth.log,/var/log/ufw.log uvicorn app.main:app
+# Windows PowerShell:  $env:LOG_ANALYZER_FOLLOW = "C:\loglar\auth.log"; uvicorn app.main:app
+```
+
+Denemek için boş bir dosyayı izlet ve örnek logdan satır ekle:
+
+```bash
+LOG_ANALYZER_FOLLOW=/tmp/deneme.log uvicorn app.main:app      # bir terminalde
+head -n 300 ../samples/auth.log >> /tmp/deneme.log             # başka bir terminalde
+```
+
+| Ortam değişkeni | Anlamı | Varsayılan |
+|---|---|---|
+| `LOG_ANALYZER_FOLLOW` | İzlenecek dosyalar, virgülle ayrılmış. Henüz var olmayan bir dosya beklenir | yok |
+| `LOG_ANALYZER_FOLLOW_TZ` | Dosyalardaki zaman damgalarının saat dilimi, ör. `Europe/Istanbul` | `UTC` |
+| `LOG_ANALYZER_FOLLOW_INTERVAL` | İki bakış arasındaki süre, saniye | `1` |
+
+- **Rotasyon:** Dosya yeniden adlandırılıp yerine yenisi açılırsa (`logrotate`), eski dosya sonuna kadar okunur, sonra yenisine geçilir. Dosya boşaltılıp baştan yazılırsa (`copytruncate`) o da fark edilir. Yeni dosyanın satırları, ilk satırının tarihini taşıyan ayrı bir adla saklanır: `auth.log (2026-09-14)`.
+- **Yeniden başlatma:** Sunucu yeniden başlayınca kaldığı satırdan devam eder; sunucu kapalıyken yazılan satırlar kaybolmaz, hiçbir satır iki kez saklanmaz.
+- **Yıl:** İzlenen dosyalarda yıl, satırı geleceğe düşürmeyen en yakın yıl olarak alınır.
+- **Windows:** İzlenen dosya açık tutulur; Windows'ta bu, başka bir programın dosyayı yeniden adlandırmasını engelleyebilir. Satır eklemek sorun çıkarmaz.
+
 ## Arayüz
 
 Arayüzün fikri, üzeri işaretlenmiş bir log çıktısıdır: her şey log satırlarına geri döner, kanıt olan satırlar fosforlu kalemle çizilmiş gibi vurgulanır.
 
 - **Özet:** Yüklenen logun sayıları, tüm dönemin zaman çizelgesi, uyarılar, en çok başarısız giriş denemesi yapan adresler ve log yükleme formu.
 - **İnceleme:** Filtreler, zaman çizelgesi, log satırları ve uyarılar tek sayfada. Bir uyarıya tıklayınca çizelge o uyarının aralığına gider; tablo o aralıktaki tüm satırları gösterir, kanıt satırları kenar çizgisi ve vurgulu metinle ayrılır. Çizelgede sürükleyerek zaman aralığı seçilir. Filtreler sayfa adresinde tutulur, yani bir görünüm yer imine eklenebilir ve geri tuşu çalışır.
+- **Canlı gösterge:** Sunucu dosya izliyorsa üst çubukta "Canlı" yazar; yeni satırlar geldiğinde yanında kaç tane geldiği belirir. Tıklayınca izlenen dosyalar ve durumları listelenir. Bağlantı koparsa gösterge bunu söyler, geri gelince sayfa kendini yeniler. İnceleme sayfasındaki "En yeni satırlar üstte" seçeneğiyle yeni gelen satırlar tablonun başında görünür.
 - **Port görünümü:** İnceleme sayfasında bir adres öne çıktığında (IP filtresi ya da o adresle ilgili bir uyarı) ve güvenlik duvarı o adresi kaydetmişse, zaman çizelgesinin altında aynı zaman ekseniyle bir port grafiği belirir: her paket bir işaret, düşey eksen hedef port. Tarama, kısa sürede dikey dağılan bir işaret yığını olarak görünür; tek porta ısrar, yatay bir sıra olarak. Altında en çok paket alan portlar ve güvenlik duvarının geçirdiği portlar listelenir.
 - **Kurallar:** Yüklü kurallar (ne aradıkları cümleyle yazılır), yüklenemeyen kural dosyaları ve kuralları yeniden yükleme düğmesi.
 
@@ -191,19 +229,21 @@ Log tablosu yalnızca görünen satırları çizer (react-window) ve kaydırdık
 | Uç nokta | Ne yapar |
 |---|---|
 | `GET /health` | Veritabanı hazırsa `{"status": "ok"}` döner |
-| `POST /ingest` | Log dosyası yükler (multipart form) ve kuralları yeniden çalıştırır. Alanlar: `file`, `parser` (`auto`, `auth`, `ufw`; varsayılan `auto`), `year`, `tz`, `source` |
-| `GET /events` | Olayları zaman sırasıyla listeler. Filtreler: `start`, `end`, `host`, `service`, `ip`, `level`, `action`, `parsed`, `alert_id`, `rule_id`. Sayfalama: `limit` (1–500), `cursor` |
+| `POST /ingest` | Log dosyası yükler (multipart form) ve kuralları yeniden çalıştırır. Dosya gzip, bzip2 ya da xz ile sıkıştırılmış olabilir. Alanlar: `file`, `parser` (`auto`, `auth`, `ufw`; varsayılan `auto`), `year`, `tz`, `source` |
+| `GET /events` | Olayları zaman sırasıyla listeler; `order=desc` ile en yeniden eskiye. Filtreler: `start`, `end`, `host`, `service`, `ip`, `level`, `action`, `parsed`, `alert_id`, `rule_id`. Sayfalama: `limit` (1–500), `cursor` |
 | `GET /alerts` | Uyarıları yeniden eskiye listeler. Filtreler: `rule_id`, `severity`, `group_key`, `start`, `end`. `include_events=true` her uyarının ilk 100 kanıt satırını ekler |
 | `GET /timeline` | Seçilen olayları zaman kovalarına göre sayar (`bucket`: `1m`, `5m`, `1h`). `/events` ile aynı filtreleri alır |
 | `GET /stats` | Özet sayıları döner: olay, ayrıştırılan, eylem dağılımı, önem derecesine göre uyarı, en çok başarısız giriş yapan adresler |
 | `GET /ports` | Bir kaynak adresin (`ip`) denediği hedef portlar: port başına engellenen ve geçirilen paket sayısı, zaman sırasıyla tek tek paketler. `start` ve `end` ile aralık seçilir |
 | `GET /rules` | Yüklü kuralları ve yüklenemeyen kural dosyalarını (nedeniyle) döner |
 | `POST /rules/reload` | Kural dosyalarını yeniden okur ve kuralları saklanan tüm olaylar üzerinde baştan çalıştırır |
+| `GET /stream` | Sunucudan gönderilen olaylar (SSE): veri her değiştiğinde bir `update`, izlenen dosyaların durumu değiştiğinde bir `status` olayı. Veri taşımaz; "yeniden sor" demektir |
+| `GET /follow` | İzlenen dosyalar: durum, kaç satır okunduğu, satırların hangi adla saklandığı |
 
 - **Zaman:** Syslog satırlarında yıl ve saat dilimi yoktur. `year` dosyanın ilk satırının yılıdır; verilmezse o satırı geleceğe düşürmeyen en yakın yıl kullanılır ve Aralık'tan Ocak'a geçişte yıl kendiliğinden ilerler. `tz` logu yazan makinenin saat dilimidir (ör. `Europe/Istanbul`, varsayılan `UTC`). Tüm zamanlar UTC olarak saklanır ve döner.
 - **Parser:** `auto` bilinen bütün biçimlerin satırlarını tanır, yani aynı dosyada `sshd` ve çekirdek satırları bir arada olabilir (`/var/log/syslog` gibi). `auth` yalnızca `sshd` ve `sudo` satırlarını, `ufw` yalnızca çekirdeğin paket loglarını (`[UFW BLOCK]`, `[UFW ALLOW]`, `iptables` önekleri) tanır.
 - **Her satır saklanır:** Tanınan satırlar alanlarıyla birlikte (`action`: `auth_fail`, `auth_ok`, `invalid_user`, `disconnect`, `sudo_exec`, `sudo_denied`, `conn_block`, `conn_allow`), tanınmayanlar `parsed=false` olarak. Yükleme yanıtında `lines = parsed + unparsed + duplicates + conflicts`.
-- **Tekrar yükleme:** Satırlar dosya adı ve satır numarasıyla tanınır. Aynı dosya tekrar yüklenirse kopya oluşmaz (`duplicates`); büyümüş bir dosyada yalnızca yeni satırlar eklenir. Aynı satır numarasında farklı bir metin varsa (`conflicts`) saklanan satıra dokunulmaz: rotasyon sonrası aynı adı taşıyan başka bir dosyayı `source` alanıyla farklı bir adla yükle.
+- **Tekrar yükleme ve rotasyon:** Bir dosya adından değil ilk satırından, satırları da satır numarasından tanınır. Aynı dosya tekrar yüklenirse kopya oluşmaz (`duplicates`); büyümüş bir dosyada yalnızca yeni satırlar eklenir; rotasyonla adı `auth.log.1` ya da `auth.log.2.gz` olmuş bir dosya, eskiden olduğu dosya olarak tanınır. Daha önce kullanılmış bir adla gelen yeni bir dosya, ilk satırının tarihi eklenmiş adla saklanır (`auth.log (2026-09-14)`); yanıttaki `source_file` satırların hangi adla saklandığını söyler. `conflicts`, aynı dosyada aynı satır numarasının farklı bir metinle kayıtlı olduğu satırları sayar (dosya sonradan düzenlenmiş); saklanan satıra dokunulmaz.
 - **Sayfalama:** Yanıttaki `next_cursor` değeri sonraki isteğe `cursor` olarak verilir; son sayfada `null` olur.
 - **Vurgular:** Bir uyarının kanıtı olan olaylar `highlights` alanında hangi uyarıya ve kurala ait olduklarını, `start`/`end` ile de `message` içinde işaretlenecek kısmı taşır. Bir uyarının bütün kanıtları `GET /events?alert_id=…` ile sayfalanır.
 - **Zaman filtreleri:** `start` dahil, `end` hariçtir. Ofsetsiz zamanlar UTC sayılır. URL'de `+03:00` yazarken `+` işaretini `%2B` olarak kodla.
@@ -343,8 +383,8 @@ Gerçek loglar yanlışlıkla depoya girmesin diye `.gitignore` tüm `*.log` dos
 | 2 | Anahtar kelime ve eşik kuralları, `/alerts` | ✅ |
 | 3 | React arayüzü: zaman çizelgesi, log tablosu, uyarı paneli | ✅ |
 | 4 | Davranış kuralları: sıralı olay, port taraması, nadir port; UFW parser'ı ve port görünümü | ✅ |
-| 5 | Sıkıştırılmış ve rotasyonlu dosyalar, canlı takip | Sırada |
-| 6 | Yayına hazırlama: Docker, CI, dokümantasyon | |
+| 5 | Sıkıştırılmış ve rotasyonlu dosyalar, canlı takip | ✅ |
+| 6 | Yayına hazırlama: Docker, CI, dokümantasyon | Sırada |
 
 ## Lisans
 
