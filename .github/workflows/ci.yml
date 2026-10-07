@@ -70,7 +70,7 @@ jobs:
         run: npm run build:demo
 
   docker:
-    name: "Docker: derle, başlat, dene"
+    name: "Docker: derle, başlat, tarayıcıda dene"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -80,6 +80,28 @@ jobs:
 
       - name: Örnek verilerle dene
         run: python3 scripts/smoke.py http://localhost:8080
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Tarayıcıyı kur (Playwright, Chromium)
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Arayüzü tarayıcıda dene
+        working-directory: frontend
+        run: npm run e2e
+
+      - name: Sunucusuz demoyu tarayıcıda dene
+        working-directory: frontend
+        run: |
+          npm run build:demo
+          DEMO=1 WEB="file://$PWD/dist-demo/index.html" npm run e2e
 
       - name: Yeniden başlat; veri yerinde, kopya yok
         run: |

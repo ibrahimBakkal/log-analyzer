@@ -110,6 +110,7 @@ log-analyzer/
 │   ├── alembic.ini
 │   └── pyproject.toml    # bağımlılıklar ve pytest ayarı
 ├── frontend/             # React arayüzü (Vite, TypeScript, Tailwind)
+│   ├── e2e/              # arayüzü gerçek tarayıcıda baştan sona deneyen betik (Playwright)
 │   └── src/
 │       ├── pages/        # Özet, İnceleme, Kurallar
 │       ├── components/   # Timeline, LogTable, AlertPanel, PortView, FilterBar, ...
@@ -163,9 +164,12 @@ npm run typecheck        # TypeScript tip denetimi
 npm test                 # Vitest
 npm run build            # üretim derlemesi
 npm run build:demo       # sunucusuz demo derlemesi
+npm run e2e              # arayüzü gerçek bir tarayıcıda dener; çalışan bir kurulum ister (aşağıya bak)
 ```
 
-Aynı kontroller her push ve pull request'te GitHub Actions ile de çalışır (`.github/workflows/ci.yml`); orada ayrıca Docker kurulumu derlenir, başlatılır ve `scripts/smoke.py` ile denenir.
+`npm run e2e`, örnek logların yüklü olduğu çalışan bir kurulumda (varsayılan: `docker compose up` ile açılan `http://localhost:8080`) arayüzü baştan sona dolaşır: uyarıya tıklayınca zaman çizelgesinin o aralığa gitmesi, kanıt satırlarının vurgulanması, filtreler, sayfalama, port görünümü, kurallar sayfası, tema, telefon genişliği. İlk kullanımda tarayıcıyı kurmak gerekir: `npx playwright install chromium`. Geliştirme sunucularına karşı çalıştırmak için `WEB=http://localhost:5173 API=http://127.0.0.1:8000 npm run e2e`.
+
+Aynı kontroller her push ve pull request'te GitHub Actions ile de çalışır (`.github/workflows/ci.yml`); orada ayrıca Docker kurulumu derlenir, başlatılır, `scripts/smoke.py` ile ve tarayıcıda (`npm run e2e`) denenir; sunucusuz demo da aynı tarayıcı testinden geçer.
 
 ## Çalıştırma
 
