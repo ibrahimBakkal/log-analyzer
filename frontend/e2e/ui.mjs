@@ -164,6 +164,14 @@ await page.getByRole("button", { name: "Filtreleri temizle" }).click();
 await page.getByText(/200 satır yüklendi/).waitFor();
 check("clearing filters empties the address", query(page.url()).toString() === "");
 
+// Filter by what a line says happened
+const logins = (await api("/events?action=auth_ok&limit=500")).items.length;
+await page.getByLabel("Eylem").selectOption("auth_ok");
+await page.getByText(`${logins} satır`, { exact: true }).waitFor();
+check("action filter lists the successful logins", query(page.url()).get("action") === "auth_ok" && logins === 13, `${logins} rows`);
+await page.getByRole("button", { name: "Filtreleri temizle" }).click();
+await page.getByText(/200 satır yüklendi/).waitFor();
+
 // 5. Brush
 const plot2 = await timelineSvg().locator("rect.cursor-crosshair").boundingBox();
 await page.mouse.move(plot2.x + plot2.width * 0.25, plot2.y + 40);

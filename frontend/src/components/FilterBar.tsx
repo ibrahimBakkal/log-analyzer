@@ -9,6 +9,18 @@ interface Props {
   onClear: () => void;
 }
 
+// What a line says happened, as the table's "Eylem" column names it, and what that means.
+const ACTIONS = [
+  ["auth_fail", "başarısız giriş"],
+  ["auth_ok", "başarılı giriş"],
+  ["invalid_user", "var olmayan kullanıcı"],
+  ["disconnect", "bağlantı kapandı"],
+  ["sudo_exec", "sudo komutu"],
+  ["sudo_denied", "reddedilen sudo"],
+  ["conn_block", "engellenen paket"],
+  ["conn_allow", "geçirilen bağlantı"],
+] as const;
+
 /** "2026-09-10T02:31:00Z" <-> the value of a datetime-local input, read as UTC. */
 function toInput(iso: string | undefined): string {
   return iso ? iso.slice(0, 19) : "";
@@ -20,14 +32,14 @@ function fromInput(value: string): string | undefined {
 }
 
 /** A text field that applies its value on Enter or when it loses focus, not on every key. */
-function TextFilter({ label, value, placeholder, onCommit }: { label: string; value: string; placeholder: string; onCommit: (value: string) => void }) {
+function TextFilter({ label, value, placeholder, width, onCommit }: { label: string; value: string; placeholder: string; width: string; onCommit: (value: string) => void }) {
   const [draft, setDraft] = useState(value);
   useEffect(() => setDraft(value), [value]);
   return (
     <label className="flex flex-col gap-0.5 text-[12px] font-semibold text-ink-2">
       {label}
       <input
-        className="field w-40 font-mono text-[12.5px] font-normal"
+        className={`field ${width} font-mono text-[12.5px] font-normal`}
         value={draft}
         placeholder={placeholder}
         onChange={(event) => setDraft(event.target.value)}
@@ -63,8 +75,19 @@ export function FilterBar({ filters, rules, onChange, onClear }: Props) {
           onChange={(event) => onChange({ end: fromInput(event.target.value), alert: undefined, evidence: undefined })}
         />
       </label>
-      <TextFilter label="IP adresi" value={filters.ip ?? ""} placeholder="203.0.113.45" onCommit={(ip) => onChange({ ip: ip || undefined })} />
-      <TextFilter label="Program" value={filters.service ?? ""} placeholder="sshd" onCommit={(service) => onChange({ service: service || undefined })} />
+      <TextFilter label="IP adresi" value={filters.ip ?? ""} placeholder="203.0.113.45" width="w-36" onCommit={(ip) => onChange({ ip: ip || undefined })} />
+      <TextFilter label="Program" value={filters.service ?? ""} placeholder="sshd" width="w-24" onCommit={(service) => onChange({ service: service || undefined })} />
+      <label className="flex flex-col gap-0.5 text-[12px] font-semibold text-ink-2">
+        Eylem
+        <select className="field w-48 font-normal" value={filters.action ?? ""} onChange={(event) => onChange({ action: event.target.value || undefined })}>
+          <option value="">Hepsi</option>
+          {ACTIONS.map(([action, meaning]) => (
+            <option key={action} value={action}>
+              {action} ({meaning})
+            </option>
+          ))}
+        </select>
+      </label>
       <label className="flex flex-col gap-0.5 text-[12px] font-semibold text-ink-2">
         Kural
         <select className="field font-normal" value={filters.rule ?? ""} onChange={(event) => onChange({ rule: event.target.value || undefined })}>
