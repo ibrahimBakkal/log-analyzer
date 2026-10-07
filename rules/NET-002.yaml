@@ -1,0 +1,16 @@
+# Güvenlik duvarının geçirdiği bağlantılar arasında, dışarıya açık olmaması
+# gereken bir servisin portu var (telnet, SMB, RDP, VNC, veritabanları).
+#
+# "mode: allowlist" ile tersi de yazılabilir: listedekiler beklenen portlardır,
+# geri kalan her porta gelen bağlantı uyarı üretir.
+id: NET-002
+name: Açık olmaması gereken porta bağlantı
+type: rare_port
+severity: medium
+match:
+  action: conn_allow
+mode: watchlist
+ports: [23, 135, 139, 445, 1433, 3306, 3389, 5432, 5900, 6379]
+group_by: src_ip
+cooldown_seconds: 300
+summary: "{key} adresinden açık olmaması gereken porta {count} bağlantı"

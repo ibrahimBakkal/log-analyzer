@@ -1,0 +1,13 @@
+# Tek bir adres kısa sürede çok sayıda farklı porta bağlanmayı deniyor: port
+# taraması. Engellenen ve geçirilen bağlantılar birlikte sayılır.
+id: NET-001
+name: Port taraması
+type: port_scan
+severity: high
+match:
+  action: [conn_block, conn_allow]
+group_by: src_ip
+min_ports: 15
+window_seconds: 60
+cooldown_seconds: 300
+summary: "{key} adresi {seconds} sn içinde {ports} farklı portu denedi"

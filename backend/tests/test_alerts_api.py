@@ -109,7 +109,7 @@ def test_log_without_the_attacks_produces_no_alerts(client):
 
 def test_uploading_again_neither_duplicates_alerts_nor_renumbers_them(loaded):
     before = alerts(loaded)
-    assert upload(loaded)["alerts"] == 5
+    assert upload(loaded)["alerts"] == 6
     assert alerts(loaded) == before
 
 
@@ -130,7 +130,7 @@ def test_alert_grows_as_more_of_its_burst_is_uploaded(client):
 
 def test_alerts_are_listed_newest_first_with_their_total(loaded):
     body = loaded.get("/alerts", params={"limit": 2}).json()
-    assert body["total"] == 5
+    assert body["total"] == 6
     assert [alert["first_seen"] for alert in body["items"]] == [
         "2026-09-10T15:40:42Z",
         "2026-09-10T02:34:08Z",
@@ -140,16 +140,17 @@ def test_alerts_are_listed_newest_first_with_their_total(loaded):
 @pytest.mark.parametrize(
     ("params", "count"),
     [
-        ({}, 5),
+        ({}, 6),
         ({"rule_id": "SSH-001"}, 4),
         ({"rule_id": "KW-001"}, 1),
         ({"rule_id": "NOPE-1"}, 0),
         ({"severity": "high"}, 4),
         ({"severity": "medium"}, 1),
-        ({"severity": "critical"}, 0),
+        ({"severity": "critical"}, 1),
+        ({"severity": "low"}, 0),
         ({"group_key": generate.BRUTE_IP}, 2),
         ({"group_key": "bob"}, 1),
-        ({"start": "2026-09-10T00:00:00Z"}, 3),
+        ({"start": "2026-09-10T00:00:00Z"}, 4),
         ({"end": "2026-09-09T03:00:00Z"}, 1),
         # An alert that began before the window but was still active in it counts.
         ({"start": "2026-09-09T03:13:00Z", "end": "2026-09-09T03:13:30Z"}, 1),
@@ -221,9 +222,16 @@ def test_keyword_evidence_marks_the_keyword(loaded):
 
 
 def test_events_that_are_no_evidence_have_no_highlights(loaded):
-    accepted = events(loaded, action="auth_ok")
-    assert len(accepted) == 13
-    assert all(event["highlights"] == [] for event in accepted)
+    closed = events(loaded, action="disconnect")
+    assert len(closed) > 200
+    assert all(event["highlights"] == [] for event in closed)
+
+
+def test_event_can_be_evidence_for_two_alerts(loaded):
+    """The intruder's failed logins count for the brute-force rule and for the sequence rule."""
+    failed = events(loaded, action="auth_fail", ip=generate.INTRUDER_IP)[0]
+    assert sorted(mark["rule_id"] for mark in failed["highlights"]) == ["SSH-001", "SSH-002"]
+    assert {mark["severity"] for mark in failed["highlights"]} == {"high", "critical"}
 
 
 def test_events_can_be_filtered_by_alert_and_by_rule(loaded):
@@ -231,9 +239,9 @@ def test_events_can_be_filtered_by_alert_and_by_rule(loaded):
     for alert in found:
         evidence = events(loaded, alert_id=alert["id"])
         assert len(evidence) == alert["count"]
-        assert {mark["alert_id"] for event in evidence for mark in event["highlights"]} == {
-            alert["id"]
-        }
+        assert all(
+            alert["id"] in {mark["alert_id"] for mark in event["highlights"]} for event in evidence
+        )
 
     by_rule = events(loaded, rule_id="SSH-001")
     assert len(by_rule) == sum(a["count"] for a in found if a["rule_id"] == "SSH-001") == 157
@@ -254,9 +262,12 @@ def test_rules_endpoint_lists_the_loaded_rules(client):
     assert body["errors"] == []
     assert [(rule["id"], rule["type"], rule["severity"]) for rule in body["rules"]] == [
         ("KW-001", "keyword", "medium"),
+        ("NET-001", "port_scan", "high"),
+        ("NET-002", "rare_port", "medium"),
         ("SSH-001", "threshold", "high"),
+        ("SSH-002", "sequence", "critical"),
     ]
-    ssh = body["rules"][1]
+    ssh = body["rules"][3]
     assert (ssh["threshold"], ssh["window_seconds"], ssh["group_by"]) == (5, 60, "src_ip")
     assert ssh["match"]["action"] == ["auth_fail"]
     assert body["rules"][0]["keywords"] == ["/etc/shadow", "/etc/sudoers", "authorized_keys"]
@@ -270,22 +281,26 @@ def test_reload_applies_an_edited_rule_to_the_stored_events(rules_dir, loaded):
 
     # 33 failures within a minute: only the first brute-force wave (71) still qualifies.
     assert body["errors"] == []
-    assert body["alerts"] == {"total": 2, "created": 0, "updated": 0, "removed": 3}
-    assert [alert["group_key"] for alert in alerts(loaded)] == [generate.BRUTE_IP, "bob"]
-    assert loaded.get("/rules").json()["rules"][1]["threshold"] == 33
+    assert body["alerts"] == {"total": 3, "created": 0, "updated": 0, "removed": 3}
+    assert [(alert["rule_id"], alert["group_key"]) for alert in alerts(loaded)] == [
+        ("SSH-001", generate.BRUTE_IP),
+        ("SSH-002", generate.INTRUDER_IP),
+        ("KW-001", "bob"),
+    ]
+    assert loaded.get("/rules").json()["rules"][3]["threshold"] == 33
 
 
 def test_reload_picks_up_a_new_rule(rules_dir, loaded):
-    (rules_dir / "SSH-002.yaml").write_text(
-        "id: SSH-002\nname: User name sweep\ntype: threshold\nseverity: low\n"
+    (rules_dir / "SSH-003.yaml").write_text(
+        "id: SSH-003\nname: User name sweep\ntype: threshold\nseverity: low\n"
         "match: {action: invalid_user}\nthreshold: 10\nwindow_seconds: 120\n"
     )
 
     body = loaded.post("/rules/reload").json()
 
-    assert [rule["id"] for rule in body["rules"]] == ["KW-001", "SSH-001", "SSH-002"]
-    assert body["alerts"] == {"total": 6, "created": 1, "updated": 0, "removed": 0}
-    [sweep] = alerts(loaded, rule_id="SSH-002")
+    assert [rule["id"] for rule in body["rules"]][-2:] == ["SSH-002", "SSH-003"]
+    assert body["alerts"] == {"total": 7, "created": 1, "updated": 0, "removed": 0}
+    [sweep] = alerts(loaded, rule_id="SSH-003")
     assert (sweep["group_key"], sweep["count"], sweep["severity"]) == (
         generate.SCANNER_IP,
         30,
@@ -298,14 +313,14 @@ def test_reload_reports_a_broken_file_and_keeps_the_other_rules_working(rules_di
 
     body = loaded.post("/rules/reload").json()
 
-    assert [rule["id"] for rule in body["rules"]] == ["KW-001", "SSH-001"]
+    assert len(body["rules"]) == 5
     assert body["errors"] == [
         {
             "file": "broken.yaml",
             "message": "threshold: Field required; window_seconds: Field required",
         }
     ]
-    assert body["alerts"] == {"total": 5, "created": 0, "updated": 0, "removed": 0}
+    assert body["alerts"] == {"total": 6, "created": 0, "updated": 0, "removed": 0}
     assert loaded.get("/rules").json()["errors"] == body["errors"]
 
 
@@ -315,7 +330,7 @@ def test_reload_without_rules_removes_all_alerts(rules_dir, loaded):
 
     body = loaded.post("/rules/reload").json()
 
-    assert (body["rules"], body["alerts"]["removed"]) == ([], 5)
+    assert (body["rules"], body["alerts"]["removed"]) == ([], 6)
     assert loaded.get("/alerts").json() == {"items": [], "total": 0}
     assert all(event["highlights"] == [] for event in events(loaded, action="auth_fail"))
 
@@ -326,5 +341,5 @@ def test_application_starts_even_if_a_rule_file_is_broken(rules_dir):
     with TestClient(app) as client:
         body = client.get("/rules").json()
 
-    assert [rule["id"] for rule in body["rules"]] == ["KW-001", "SSH-001"]
+    assert len(body["rules"]) == 5
     assert [error["file"] for error in body["errors"]] == ["broken.yaml"]

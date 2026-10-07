@@ -10,12 +10,19 @@ import ipaddress
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 
-from sqlalchemy import Select, delete, insert, or_, select
+from sqlalchemy import ColumnElement, Select, and_, delete, insert, or_, select
 from sqlalchemy.orm import Session
 
 from app.models import Alert, AlertEvent, Event
 from app.rules.evaluators import EventRow, Evidence, create_evaluator
-from app.rules.schema import KeywordRule, Rule, ThresholdRule
+from app.rules.schema import (
+    EventFilter,
+    KeywordRule,
+    PortScanRule,
+    RarePortRule,
+    Rule,
+    SequenceRule,
+)
 
 
 @dataclass
@@ -67,7 +74,7 @@ def detect(rule: Rule, events: Iterable[EventRow]) -> list[Detection]:
         spans = evaluator.spans(event, key)
         if spans is None:
             continue
-        evidence = Evidence(event.id, event.ts, spans)
+        evidence = Evidence(event.id, event.ts, spans, event.dst_port)
 
         current = open_detections.get(key)
         if current is not None:
@@ -75,7 +82,7 @@ def detect(rule: Rule, events: Iterable[EventRow]) -> list[Detection]:
                 current.evidence.append(evidence)
                 continue
             finished.append(open_detections.pop(key))
-        opening = evaluator.trigger(key, evidence)
+        opening = evaluator.trigger(key, evidence, event)
         if opening is not None:
             open_detections[key] = Detection(rule, key, opening)
 
@@ -131,15 +138,19 @@ def evaluate(session: Session, rules: Sequence[Rule]) -> Evaluation:
 def _alert_fields(detection: Detection) -> dict[str, object]:
     rule = detection.rule
     count = len(detection.evidence)
+    # The rule's own settings (threshold, window_seconds, ...) first, then what was
+    # observed, which wins where a name means both ("ports").
     placeholders = {
+        name: getattr(rule, name) for name in rule.summary_fields if hasattr(rule, name)
+    }
+    placeholders |= {
         "key": detection.key,
         "count": count,
         "seconds": int((detection.last.ts - detection.first.ts).total_seconds()),
+        "ports": len({item.port for item in detection.evidence if item.port is not None}),
         "rule_id": rule.id,
         "rule_name": rule.name,
     }
-    if isinstance(rule, ThresholdRule):
-        placeholders |= {"threshold": rule.threshold, "window_seconds": rule.window_seconds}
     return {
         "rule_id": rule.id,
         "rule_name": rule.name,
@@ -154,24 +165,41 @@ def _alert_fields(detection: Detection) -> dict[str, object]:
 
 
 def _events_for(rule: Rule) -> Select:
-    """The events a rule has to look at, oldest first."""
+    """The events a rule has to look at, oldest first. The database discards the rest."""
     query = select(
-        Event.id, Event.ts, Event.host, Event.service, Event.user, Event.src_ip, Event.message
+        Event.id,
+        Event.ts,
+        Event.host,
+        Event.service,
+        Event.level,
+        Event.action,
+        Event.user,
+        Event.src_ip,
+        Event.dst_port,
+        Event.message,
     ).order_by(Event.ts, Event.id)
-    for name, accepted in rule.match:
-        if accepted:
-            query = query.where(getattr(Event, name).in_(accepted))
-    if (
-        isinstance(rule, KeywordRule)
-        and rule.regex is None
-        and all(map(str.isascii, rule.keywords))
-    ):
-        # Let the database discard most lines. (Not for non-ASCII keywords: SQLite
-        # only folds the case of ASCII letters, the evaluator folds all of them.)
+    query = query.where(*_conditions(rule.match))
+
+    if isinstance(rule, KeywordRule):
+        # Not for non-ASCII keywords: SQLite only folds the case of ASCII letters,
+        # the evaluator folds all of them.
+        if rule.regex is None and all(map(str.isascii, rule.keywords)):
+            contains = (Event.message.icontains(word, autoescape=True) for word in rule.keywords)
+            query = query.where(or_(*contains))
+    elif isinstance(rule, SequenceRule):
+        query = query.where(or_(*(and_(*_conditions(step.match)) for step in rule.steps)))
+    elif isinstance(rule, PortScanRule):
+        query = query.where(Event.dst_port.is_not(None))
+    elif isinstance(rule, RarePortRule):
+        listed = Event.dst_port.in_(rule.ports)
         query = query.where(
-            or_(*(Event.message.icontains(word, autoescape=True) for word in rule.keywords))
+            listed if rule.mode == "watchlist" else Event.dst_port.not_in(rule.ports)
         )
     return query
+
+
+def _conditions(wanted: EventFilter) -> list[ColumnElement[bool]]:
+    return [getattr(Event, name).in_(accepted) for name, accepted in wanted if accepted]
 
 
 class _Allowlist:

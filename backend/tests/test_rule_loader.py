@@ -6,6 +6,7 @@ import pytest
 
 from app.enums import Action, Severity
 from app.rules import KeywordRule, ThresholdRule, load_rules
+from app.rules.schema import PortScanRule, RarePortRule, SequenceRule
 
 SHIPPED_RULES = Path(__file__).resolve().parents[2] / "rules"
 
@@ -26,6 +27,36 @@ name: Shadow file
 type: keyword
 severity: low
 keywords: [/etc/shadow]
+"""
+
+SEQUENCE = """\
+id: SSH-901
+name: Break-in
+type: sequence
+severity: critical
+steps:
+  - match: {action: auth_fail}
+    count: 5
+  - match: {action: auth_ok}
+within_seconds: 600
+"""
+
+PORT_SCAN = """\
+id: NET-900
+name: Port scan
+type: port_scan
+severity: high
+min_ports: 15
+window_seconds: 60
+"""
+
+RARE_PORT = """\
+id: NET-901
+name: Unexpected port
+type: rare_port
+severity: medium
+mode: watchlist
+ports: [23, 3389]
 """
 
 
@@ -49,7 +80,13 @@ def load_one(tmp_path: Path, text: str):
 def test_shipped_rules_load_without_errors():
     rules = load_rules(SHIPPED_RULES)
     assert rules.errors == ()
-    assert [rule.id for rule in rules.rules] == ["KW-001", "SSH-001"]
+    assert [rule.id for rule in rules.rules] == [
+        "KW-001",
+        "NET-001",
+        "NET-002",
+        "SSH-001",
+        "SSH-002",
+    ]
 
 
 def test_threshold_rule_with_defaults(tmp_path):
@@ -67,6 +104,55 @@ def test_keyword_rule_with_defaults(tmp_path):
     assert error is None
     assert isinstance(rule, KeywordRule)
     assert (rule.keywords, rule.regex, rule.group_by) == (["/etc/shadow"], None, "host")
+
+
+def test_sequence_rule_with_defaults(tmp_path):
+    rule, error = load_one(tmp_path, SEQUENCE)
+    assert error is None
+    assert isinstance(rule, SequenceRule)
+    assert [(step.match.action, step.count) for step in rule.steps] == [
+        ([Action.AUTH_FAIL], 5),
+        ([Action.AUTH_OK], 1),
+    ]
+    assert (rule.within_seconds, rule.group_by, rule.cooldown_seconds) == (600, "src_ip", 300)
+
+
+def test_port_scan_rule_with_defaults(tmp_path):
+    rule, error = load_one(tmp_path, PORT_SCAN)
+    assert error is None
+    assert isinstance(rule, PortScanRule)
+    assert (rule.min_ports, rule.window_seconds, rule.group_by) == (15, 60, "src_ip")
+    assert not rule.match.restricts
+
+
+def test_rare_port_rule_with_defaults(tmp_path):
+    rule, error = load_one(tmp_path, RARE_PORT)
+    assert error is None
+    assert isinstance(rule, RarePortRule)
+    assert (rule.mode, rule.ports, rule.group_by) == ("watchlist", [23, 3389], "src_ip")
+
+
+def test_match_can_name_destination_ports(tmp_path):
+    rule, error = load_one(
+        tmp_path, THRESHOLD.replace("action: auth_fail", "action: conn_block\n  dst_port: 22")
+    )
+    assert error is None
+    assert (rule.match.action, rule.match.dst_port) == ([Action.CONN_BLOCK], [22])
+    assert rule.match.restricts
+
+
+@pytest.mark.parametrize(
+    ("text", "placeholder"),
+    [
+        (SEQUENCE, "{within_seconds}"),
+        (PORT_SCAN, "{ports} of at least {min_ports} in {window_seconds}"),
+        (RARE_PORT, "{ports}"),
+    ],
+)
+def test_each_rule_type_offers_its_own_summary_placeholders(tmp_path, text, placeholder):
+    rule, error = load_one(tmp_path, text + f"summary: '{{key}}: {placeholder}'\n")
+    assert error is None
+    assert placeholder in rule.summary
 
 
 def test_match_takes_one_value_or_a_list(tmp_path):
@@ -131,7 +217,8 @@ def test_disabled_rules_are_loaded_but_not_enabled(tmp_path):
         ),
         (
             THRESHOLD.replace("type: threshold", "type: treshold"),
-            "does not match any of the expected tags: 'keyword', 'threshold'",
+            "does not match any of the expected tags: 'keyword', 'threshold', 'sequence', "
+            "'port_scan', 'rare_port'",
         ),
         (
             THRESHOLD.replace("type: threshold\n", ""),
@@ -164,6 +251,53 @@ def test_disabled_rules_are_loaded_but_not_enabled(tmp_path):
             "keywords.0: String should have at least 1 character",
         ),
         (KEYWORD.replace("id: KW-900", "id: 'has spaces'"), "id: String should match pattern"),
+        (
+            THRESHOLD.replace("action: auth_fail", "dst_port: 70000"),
+            "match.dst_port.0: Input should be less than or equal to 65535",
+        ),
+        (THRESHOLD + "summary: '{ports} ports'\n", "summary: unknown placeholder {ports}"),
+        (
+            SEQUENCE.replace("  - match: {action: auth_ok}\n", ""),
+            "steps: List should have at least 2 items",
+        ),
+        (
+            SEQUENCE.replace("match: {action: auth_ok}", "match: {}"),
+            "steps.1: match: a step must say which events it waits for",
+        ),
+        (SEQUENCE.replace("  - match: {action: auth_ok}", "  - count: 2"), "steps.1.match"),
+        (
+            SEQUENCE.replace("count: 5", "count: 0"),
+            "steps.0.count: Input should be greater than or equal to 1",
+        ),
+        (
+            SEQUENCE.replace("count: 5", "times: 5"),
+            "steps.0.times: Extra inputs are not permitted",
+        ),
+        (SEQUENCE.replace("within_seconds: 600\n", ""), "within_seconds: Field required"),
+        (SEQUENCE + "summary: '{threshold}'\n", "summary: unknown placeholder {threshold}"),
+        (
+            PORT_SCAN.replace("min_ports: 15", "min_ports: 1"),
+            "min_ports: Input should be greater than or equal to 2",
+        ),
+        (PORT_SCAN.replace("window_seconds: 60\n", ""), "window_seconds: Field required"),
+        (PORT_SCAN + "ports: [22]\n", "ports: Extra inputs are not permitted"),
+        (
+            RARE_PORT.replace("mode: watchlist", "mode: blocklist"),
+            "mode: Input should be 'watchlist' or 'allowlist'",
+        ),
+        (RARE_PORT.replace("mode: watchlist\n", ""), "mode: Field required"),
+        (
+            RARE_PORT.replace("ports: [23, 3389]", "ports: []"),
+            "ports: List should have at least 1 item",
+        ),
+        (
+            RARE_PORT.replace("ports: [23, 3389]", "ports: [23, 65536]"),
+            "ports.1: Input should be less than or equal to 65535",
+        ),
+        (
+            RARE_PORT.replace("ports: [23, 3389]", "ports: [ssh]"),
+            "ports.0: Input should be a valid integer",
+        ),
         ("id: [unclosed\n", "not valid YAML (line 2)"),
         ("- id: A-1\n- id: A-2\n", "expected the fields of one rule"),
         ("", "expected the fields of one rule"),

@@ -30,6 +30,16 @@
     "summary": "203.0.113.99 adresinden 53 sn içinde 24 başarısız giriş"
   },
   {
+    "rule_id": "SSH-002",
+    "severity": "critical",
+    "group_by": "src_ip",
+    "group_key": "203.0.113.99",
+    "first_seen": "2026-09-10T02:31:40Z",
+    "last_seen": "2026-09-10T02:32:44Z",
+    "count": 25,
+    "summary": "203.0.113.99 adresi başarısız denemelerin ardından giriş yaptı (64 sn, 25 satır)"
+  },
+  {
     "rule_id": "KW-001",
     "severity": "medium",
     "group_by": "user",

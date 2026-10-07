@@ -1,0 +1,17 @@
+# Aynı adresten art arda başarısız girişlerin ardından başarılı bir giriş: parola
+# tahmin edilmiş olabilir. Parolasını bir iki kez yanlış yazıp giren kullanıcıyı
+# yakalamaz; ilk adım en az beş başarısız giriş ister.
+id: SSH-002
+name: Başarısız denemelerden sonra başarılı giriş
+type: sequence
+severity: critical
+group_by: src_ip
+within_seconds: 600
+steps:
+  - match:
+      action: auth_fail
+    count: 5
+  - match:
+      action: auth_ok
+cooldown_seconds: 300
+summary: "{key} adresi başarısız denemelerin ardından giriş yaptı ({seconds} sn, {count} satır)"

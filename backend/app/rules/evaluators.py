@@ -10,16 +10,24 @@ example one source address, in time order. An evaluator answers two questions:
 
 import re
 from abc import ABC, abstractmethod
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Generic, Protocol, TypeVar
 
-from app.rules.schema import KeywordRule, Rule, ThresholdRule
+from app.enums import Action, Level
+from app.rules.schema import (
+    KeywordRule,
+    PortScanRule,
+    RarePortRule,
+    Rule,
+    SequenceRule,
+    ThresholdRule,
+)
 
 Span = tuple[int, int]  # [start, end) character positions in an event's message
 
-R = TypeVar("R", KeywordRule, ThresholdRule)
+R = TypeVar("R", KeywordRule, ThresholdRule, SequenceRule, PortScanRule, RarePortRule)
 
 
 class EventRow(Protocol):
@@ -29,8 +37,11 @@ class EventRow(Protocol):
     ts: datetime
     host: str | None
     service: str | None
+    level: Level
+    action: Action | None
     user: str | None
     src_ip: str | None
+    dst_port: int | None
     message: str
 
 
@@ -41,6 +52,7 @@ class Evidence:
     event_id: int
     ts: datetime
     spans: tuple[Span, ...]
+    port: int | None = None  # the event's destination port, for rules about ports
 
 
 class Evaluator(ABC, Generic[R]):
@@ -52,7 +64,7 @@ class Evaluator(ABC, Generic[R]):
         """Return what to highlight if *event* counts for the rule, else ``None``."""
 
     @abstractmethod
-    def trigger(self, key: str, evidence: Evidence) -> list[Evidence] | None:
+    def trigger(self, key: str, evidence: Evidence, event: EventRow) -> list[Evidence] | None:
         """Take note of a counting event; return the evidence for a new alert once
         the rule's condition is met for the group *key*, else ``None``."""
 
@@ -90,7 +102,7 @@ class KeywordEvaluator(Evaluator[KeywordRule]):
         ]
         return merge_spans(found) or None
 
-    def trigger(self, key: str, evidence: Evidence) -> list[Evidence] | None:
+    def trigger(self, key: str, evidence: Evidence, event: EventRow) -> list[Evidence] | None:
         return [evidence]
 
 
@@ -107,10 +119,9 @@ class ThresholdEvaluator(Evaluator[ThresholdRule]):
 
     def spans(self, event: EventRow, key: str) -> tuple[Span, ...] | None:
         # Every event the rule's filter let through counts; point at the group's value.
-        start = event.message.find(key)
-        return ((start, start + len(key)),) if start >= 0 else ()
+        return _span_of(event.message, key)
 
-    def trigger(self, key: str, evidence: Evidence) -> list[Evidence] | None:
+    def trigger(self, key: str, evidence: Evidence, event: EventRow) -> list[Evidence] | None:
         window = self._recent[key]
         window.append(evidence)
         while (evidence.ts - window[0].ts).total_seconds() >= self.rule.window_seconds:
@@ -121,9 +132,135 @@ class ThresholdEvaluator(Evaluator[ThresholdRule]):
         return list(window)
 
 
+class SequenceEvaluator(Evaluator[SequenceRule]):
+    """The rule's steps, in order, within ``within_seconds``.
+
+    Per group, the events of the last ``within_seconds`` that match any step are
+    kept. When one arrives that matches the last step, the kept events are read
+    as a small state machine: stay on a step until it has seen its ``count``,
+    then move on. If that walks through every step, the sequence is complete.
+    An event serves one step only, even if it would match several.
+
+    Anchoring the time limit at the final event rather than the first one means
+    a long run-up (ten minutes of failed logins, then a success) is still caught
+    by its last stretch. As with thresholds, two events exactly
+    ``within_seconds`` apart are *not* within the limit.
+    """
+
+    def __init__(self, rule: SequenceRule) -> None:
+        super().__init__(rule)
+        self._recent: defaultdict[str, deque[tuple[Evidence, frozenset[int]]]] = defaultdict(deque)
+
+    def _steps(self, event: EventRow) -> frozenset[int]:
+        return frozenset(
+            index for index, step in enumerate(self.rule.steps) if step.match.matches(event)
+        )
+
+    def spans(self, event: EventRow, key: str) -> tuple[Span, ...] | None:
+        return _span_of(event.message, key) if self._steps(event) else None
+
+    def trigger(self, key: str, evidence: Evidence, event: EventRow) -> list[Evidence] | None:
+        steps = self._steps(event)
+        recent = self._recent[key]
+        recent.append((evidence, steps))
+        while (evidence.ts - recent[0][0].ts).total_seconds() >= self.rule.within_seconds:
+            recent.popleft()
+        last = len(self.rule.steps) - 1
+        if last not in steps:  # only an event of the last step can complete the sequence
+            return None
+
+        stage = seen = 0
+        for _, item_steps in recent:
+            if stage in item_steps:
+                seen += 1
+                if seen >= self.rule.steps[stage].count:
+                    stage, seen = stage + 1, 0
+                    if stage > last:
+                        break
+        if stage <= last:
+            return None
+        del self._recent[key]
+        return [item for item, _ in recent]
+
+
+class PortScanEvaluator(Evaluator[PortScanRule]):
+    """``min_ports`` different destination ports from one group within ``window_seconds``.
+
+    The same sliding window as a threshold's, but what is counted is the number
+    of different ports in it, so hammering one port never looks like a scan.
+    """
+
+    def __init__(self, rule: PortScanRule) -> None:
+        super().__init__(rule)
+        self._recent: defaultdict[str, deque[Evidence]] = defaultdict(deque)
+        # Packets per port in each group's window, so that a flood does not have
+        # to be recounted on every packet.
+        self._ports: defaultdict[str, Counter[int | None]] = defaultdict(Counter)
+
+    def spans(self, event: EventRow, key: str) -> tuple[Span, ...] | None:
+        if event.dst_port is None:
+            return None
+        return merge_spans(
+            [*_span_of(event.message, key), *_port_span(event.message, event.dst_port)]
+        )
+
+    def trigger(self, key: str, evidence: Evidence, event: EventRow) -> list[Evidence] | None:
+        window, ports = self._recent[key], self._ports[key]
+        window.append(evidence)
+        ports[evidence.port] += 1
+        while (evidence.ts - window[0].ts).total_seconds() >= self.rule.window_seconds:
+            gone = window.popleft().port
+            ports[gone] -= 1
+            if not ports[gone]:
+                del ports[gone]
+        if len(ports) < self.rule.min_ports:
+            return None
+        del self._recent[key], self._ports[key]
+        return list(window)
+
+
+class RarePortEvaluator(Evaluator[RarePortRule]):
+    """Every connection to a port on the watchlist, or to one that is not on the allowlist."""
+
+    def __init__(self, rule: RarePortRule) -> None:
+        super().__init__(rule)
+        self._listed = frozenset(rule.ports)
+        self._listed_is_suspicious = rule.mode == "watchlist"
+
+    def spans(self, event: EventRow, key: str) -> tuple[Span, ...] | None:
+        if event.dst_port is None:
+            return None
+        if (event.dst_port in self._listed) != self._listed_is_suspicious:
+            return None
+        return _port_span(event.message, event.dst_port)
+
+    def trigger(self, key: str, evidence: Evidence, event: EventRow) -> list[Evidence] | None:
+        return [evidence]
+
+
+def _span_of(message: str, text: str) -> tuple[Span, ...]:
+    """Where *text* first occurs in *message*, or nothing."""
+    start = message.find(text)
+    return ((start, start + len(text)),) if start >= 0 else ()
+
+
+def _port_span(message: str, port: int) -> tuple[Span, ...]:
+    """The destination port in a packet log line (``DPT=23``)."""
+    match = re.search(rf"\bDPT=({port})\b", message)
+    return (match.span(1),) if match else ()
+
+
+_EVALUATORS: dict[type, type[Evaluator]] = {
+    KeywordRule: KeywordEvaluator,
+    ThresholdRule: ThresholdEvaluator,
+    SequenceRule: SequenceEvaluator,
+    PortScanRule: PortScanEvaluator,
+    RarePortRule: RarePortEvaluator,
+}
+
+
 def create_evaluator(rule: Rule) -> Evaluator:
-    if isinstance(rule, KeywordRule):
-        return KeywordEvaluator(rule)
-    if isinstance(rule, ThresholdRule):
-        return ThresholdEvaluator(rule)
-    raise TypeError(f"no evaluator for rule type {type(rule).__name__}")
+    try:
+        return _EVALUATORS[type(rule)](rule)
+    except KeyError:
+        raise TypeError(f"no evaluator for rule type {type(rule).__name__}") from None

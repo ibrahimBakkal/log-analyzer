@@ -49,8 +49,11 @@ def failures(*seconds: float, ip: str = ATTACKER, user: str = "root", first_id: 
             ts=T0 + timedelta(seconds=offset),
             host="web-01",
             service="sshd",
+            level="warning",
+            action="auth_fail",
             user=user,
             src_ip=ip,
+            dst_port=None,
             message=f"Failed password for {user} from {ip} port 4242 ssh2",
         )
         for index, offset in enumerate(seconds)
@@ -58,7 +61,14 @@ def failures(*seconds: float, ip: str = ATTACKER, user: str = "root", first_id: 
 
 
 def line(message: str, seconds: float = 0, *, event_id: int = 1, host: str = "web-01", **fields):
-    values = {"service": "sudo", "user": "bob", "src_ip": None} | fields
+    values = {
+        "service": "sudo",
+        "level": "info",
+        "action": None,
+        "user": "bob",
+        "src_ip": None,
+        "dst_port": None,
+    } | fields
     return SimpleNamespace(
         id=event_id, ts=T0 + timedelta(seconds=seconds), host=host, message=message, **values
     )
@@ -325,10 +335,11 @@ def store(session, *events) -> None:
                 ts=event.ts,
                 host=event.host,
                 service=event.service,
-                level="warning",
+                level=event.level,
                 src_ip=event.src_ip,
+                dst_port=event.dst_port,
                 user=event.user,
-                action=getattr(event, "action", "auth_fail"),
+                action=event.action,
                 message=event.message,
                 raw=event.message,
                 source_file="test.log",

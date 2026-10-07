@@ -120,7 +120,8 @@ def test_stats_of_the_sample(loaded):
     assert body["actions"]["auth_fail"] == count("]: Failed password for ")
     assert body["actions"]["auth_ok"] == count("]: Accepted ") == 13
     assert sum(body["actions"].values()) == body["parsed"]
-    assert (body["alerts"], body["alerts_by_severity"]) == (5, {"high": 4, "medium": 1})
+    assert body["alerts"] == 6
+    assert body["alerts_by_severity"] == {"critical": 1, "high": 4, "medium": 1}
     assert body["sources"] == 3 + 4 + 56  # known users, the four stories, background noise
 
 
@@ -143,7 +144,7 @@ def test_stats_can_be_limited_to_a_time_range(loaded):
 
     assert day_one["events"] + day_two["events"] == TOTAL
     assert day_one["events"] == sum(line.startswith("Sep  9") for line in LINES)
-    assert (day_one["alerts"], day_two["alerts"]) == (2, 3)
+    assert (day_one["alerts"], day_two["alerts"]) == (2, 4)
     assert day_two["first_event"] >= "2026-09-10T00:00:00Z" > day_one["last_event"]
     assert day_two["top_sources"][0]["src_ip"] == generate.BRUTE_IP
     assert day_two["top_sources"][0]["failures"] == 32

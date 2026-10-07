@@ -38,11 +38,20 @@ class EventFilter(BaseModel):
     host: list[str] = []
     user: list[str] = []
     level: list[Level] = []
+    dst_port: list[Annotated[int, Field(ge=0, le=65535)]] = []
 
     @field_validator("*", mode="before")
     @classmethod
     def _one_or_many(cls, value: Any) -> Any:
         return value if isinstance(value, list) else [value]
+
+    def matches(self, event: Any) -> bool:
+        """True if *event* (anything with these fields as attributes) passes the filter."""
+        return all(not accepted or getattr(event, name) in accepted for name, accepted in self)
+
+    @property
+    def restricts(self) -> bool:
+        return any(accepted for _, accepted in self)
 
 
 class RuleBase(BaseModel):
@@ -132,5 +141,63 @@ class ThresholdRule(RuleBase):
     group_by: GroupField = "src_ip"
 
 
-Rule = Annotated[KeywordRule | ThresholdRule, Field(discriminator="type")]
+class SequenceStep(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    match: EventFilter
+    count: int = Field(default=1, ge=1, description="How many matching events the step needs.")
+
+    @model_validator(mode="after")
+    def _matches_something_specific(self) -> "SequenceStep":
+        if not self.match.restricts:
+            raise ValueError("match: a step must say which events it waits for")
+        return self
+
+
+class SequenceRule(RuleBase):
+    """Alerts when one source goes through a series of steps in order, quickly enough."""
+
+    summary_fields: ClassVar[frozenset[str]] = frozenset({"within_seconds"})
+    default_summary: ClassVar[str] = "{rule_name}: {key}, {seconds} sn içinde {count} olay"
+
+    type: Literal["sequence"]
+    steps: list[SequenceStep] = Field(min_length=2)
+    within_seconds: int = Field(
+        ge=1, description="All steps must fit in less than this many seconds."
+    )
+    group_by: GroupField = "src_ip"
+
+
+class PortScanRule(RuleBase):
+    """Alerts when one source tries many different destination ports in a short time."""
+
+    summary_fields: ClassVar[frozenset[str]] = frozenset({"ports", "min_ports", "window_seconds"})
+    default_summary: ClassVar[str] = "{rule_name}: {key}, {seconds} sn içinde {ports} farklı port"
+
+    type: Literal["port_scan"]
+    min_ports: int = Field(ge=2, description="This many different destination ports ...")
+    window_seconds: int = Field(ge=1, description="... within this many seconds.")
+    group_by: GroupField = "src_ip"
+
+
+class RarePortRule(RuleBase):
+    """Alerts on connections to ports that should not be in use.
+
+    ``watchlist``: the listed ports are the suspicious ones.
+    ``allowlist``: the listed ports are the expected ones; every other port is suspicious.
+    """
+
+    summary_fields: ClassVar[frozenset[str]] = frozenset({"ports"})
+    default_summary: ClassVar[str] = "{rule_name}: {key}, {ports} beklenmeyen port"
+
+    type: Literal["rare_port"]
+    mode: Literal["watchlist", "allowlist"]
+    ports: list[Annotated[int, Field(ge=0, le=65535)]] = Field(min_length=1)
+    group_by: GroupField = "src_ip"
+
+
+Rule = Annotated[
+    KeywordRule | ThresholdRule | SequenceRule | PortScanRule | RarePortRule,
+    Field(discriminator="type"),
+]
 RULE = TypeAdapter(Rule)
