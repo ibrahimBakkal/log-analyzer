@@ -1,3 +1,4 @@
+import { DEMO } from "../api";
 import { Notice, Panel } from "../components/Layout";
 import { SeverityBadge } from "../components/Severity";
 import { describeCondition, describeMatch } from "../lib/rules";
@@ -13,14 +14,18 @@ export function Rules() {
       <Panel
         title="Kurallar"
         aside={
-          <button type="button" className="button" onClick={() => reload.mutate()} disabled={reload.isPending}>
-            {reload.isPending ? "Yükleniyor…" : "Kuralları yeniden yükle"}
-          </button>
+          !DEMO && (
+            <button type="button" className="button" onClick={() => reload.mutate()} disabled={reload.isPending}>
+              {reload.isPending ? "Yükleniyor…" : "Kuralları yeniden yükle"}
+            </button>
+          )
         }
       >
         <p className="m-0 max-w-[80ch] px-3 pt-3 text-ink-2">
-          Kurallar sunucudaki <code className="font-mono">rules/</code> klasöründe duran YAML dosyalarıdır. Bir dosyayı
-          değiştirdikten sonra yeniden yükle: kurallar saklanan tüm olaylar üzerinde baştan çalışır ve uyarılar güncellenir.
+          Kurallar sunucudaki <code className="font-mono">rules/</code> klasöründe duran YAML dosyalarıdır.{" "}
+          {DEMO
+            ? "Demoda değiştirilemezler; örnek loglardaki uyarıları bu beş kural üretti."
+            : "Bir dosyayı değiştirdikten sonra yeniden yükle: kurallar saklanan tüm olaylar üzerinde baştan çalışır ve uyarılar güncellenir."}
         </p>
         {reload.isError && <Notice tone="error">Yeniden yüklenemedi: {reload.error.message}</Notice>}
         {reload.data && (

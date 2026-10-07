@@ -13,6 +13,7 @@ htmlcov/
 
 # Node (frontend)
 node_modules/
+dist-demo/
 
 # Yerel ayarlar ve veritabanı
 .env

@@ -59,3 +59,6 @@ jobs:
 
       - name: Derleme (vite build)
         run: npm run build
+
+      - name: Demo derlemesi (tek dosya)
+        run: npm run build:demo

@@ -2,12 +2,14 @@
 @import "@fontsource-variable/atkinson-hyperlegible-next";
 @import "@fontsource-variable/atkinson-hyperlegible-mono";
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
 /*
  * The interface is a marked-up log printout: cool paper, blue-black ink, and
  * highlighter pens for the lines that matter. Chart and severity colours were
  * checked for colour-blind separation and contrast against both surfaces.
+ *
+ * Light is the default. Dark applies when the system asks for it and the
+ * visitor has not chosen light, or when the visitor has chosen dark; the choice
+ * is the data-theme attribute on the root element.
  */
 :root {
   color-scheme: light;
@@ -35,7 +37,31 @@
   --mark-critical: rgb(208 59 59 / 0.32);
 }
 
-[data-theme="dark"] {
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #131a22;
+    --surface: #1b2430;
+    --ink: #e8edf2;
+    --ink-2: #b4bfca;
+    --ink-3: #8f9caa;
+    --rule: #2c3846;
+    --rule-strong: #3a4757;
+    --accent: #8dbaf2;
+    --accent-soft: #223347;
+
+    --series-events: #3987e5;
+    --series-suspicious: #d95926;
+
+    --mark-low: rgb(143 156 170 / 0.25);
+    --mark-medium: rgb(250 178 25 / 0.36);
+    --mark-high: rgb(236 131 90 / 0.38);
+    --mark-critical: rgb(208 59 59 / 0.42);
+  }
+}
+
+/* The same dark values again, for a visitor who chose dark on a light system. */
+:root[data-theme="dark"] {
   color-scheme: dark;
   --paper: #131a22;
   --surface: #1b2430;
@@ -81,6 +107,10 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  /* Stated here too: a page that embeds this one may have set a font on body. */
+  font: inherit;
 }
 
 :focus-visible {

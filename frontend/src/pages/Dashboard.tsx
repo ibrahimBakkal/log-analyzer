@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import type { Alert, Stats } from "../api";
+import { type Alert, DEMO, type Stats } from "../api";
 import { AlertPanel } from "../components/AlertPanel";
 import { Notice, Panel } from "../components/Layout";
 import { StatStrip } from "../components/StatStrip";
@@ -114,9 +114,11 @@ export function Dashboard() {
             </table>
           </Panel>
 
-          <Panel title="Log yükle">
-            <UploadForm />
-          </Panel>
+          {!DEMO && (
+            <Panel title="Log yükle">
+              <UploadForm />
+            </Panel>
+          )}
         </div>
 
         <Panel title={`Uyarılar${alerts.data ? ` (${formatCount(alerts.data.total)})` : ""}`} className="self-start">

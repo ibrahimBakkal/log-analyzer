@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, HashRouter, MemoryRouter, Route, Routes } from "react-router";
+import { DEMO } from "./api";
 import { Layout, Notice, Panel } from "./components/Layout";
 import "./index.css";
 import { Dashboard } from "./pages/Dashboard";
@@ -14,6 +15,22 @@ const queryClient = new QueryClient({
   },
 });
 
+/**
+ * Where the page keeps its place. A server can answer /inceleme with the app;
+ * the demo is a single file, so it keeps the place after the # instead, and
+ * where the address cannot be changed at all (some embedding frames) in memory.
+ */
+function pickRouter() {
+  if (!DEMO) return BrowserRouter;
+  try {
+    window.history.replaceState(window.history.state, "", window.location.hash || "#/");
+    return HashRouter;
+  } catch {
+    return MemoryRouter;
+  }
+}
+const Router = pickRouter();
+
 function NotFound() {
   return (
     <Panel>
@@ -25,7 +42,7 @@ function NotFound() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <Router>
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Dashboard />} />
@@ -34,7 +51,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+      </Router>
     </QueryClientProvider>
   </StrictMode>,
 );

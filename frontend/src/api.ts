@@ -2,6 +2,9 @@
 
 export const API_URL: string = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
 
+/** The demo build: no server, the sample logs come with the page (see src/demo/backend.ts). */
+export const DEMO: boolean = import.meta.env.MODE === "demo";
+
 export type Severity = "low" | "medium" | "high" | "critical";
 export type Level = "info" | "warning";
 export type BucketWidth = "1m" | "5m" | "1h";
@@ -193,15 +196,26 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export const api = {
-  events: (params: QueryParams) => request<EventPage>(`/events${toQuery(params)}`),
-  alerts: (params: QueryParams = {}) => request<AlertList>(`/alerts${toQuery(params)}`),
-  timeline: (params: QueryParams) => request<TimelineData>(`/timeline${toQuery(params)}`),
-  stats: (params: QueryParams = {}) => request<Stats>(`/stats${toQuery(params)}`),
-  ports: (params: QueryParams) => request<PortReport>(`/ports${toQuery(params)}`),
+export interface Api {
+  events(params: QueryParams): Promise<EventPage>;
+  alerts(params?: QueryParams): Promise<AlertList>;
+  timeline(params: QueryParams): Promise<TimelineData>;
+  stats(params?: QueryParams): Promise<Stats>;
+  ports(params: QueryParams): Promise<PortReport>;
+  rules(): Promise<RuleList>;
+  reloadRules(): Promise<RuleReload>;
+  ingest(file: File, options: { year?: string; tz?: string }): Promise<IngestReport>;
+}
+
+const server: Api = {
+  events: (params) => request<EventPage>(`/events${toQuery(params)}`),
+  alerts: (params = {}) => request<AlertList>(`/alerts${toQuery(params)}`),
+  timeline: (params) => request<TimelineData>(`/timeline${toQuery(params)}`),
+  stats: (params = {}) => request<Stats>(`/stats${toQuery(params)}`),
+  ports: (params) => request<PortReport>(`/ports${toQuery(params)}`),
   rules: () => request<RuleList>("/rules"),
   reloadRules: () => request<RuleReload>("/rules/reload", { method: "POST" }),
-  ingest: (file: File, options: { year?: string; tz?: string }) => {
+  ingest: (file, options) => {
     const form = new FormData();
     form.set("file", file);
     if (options.year) form.set("year", options.year);
@@ -209,3 +223,24 @@ export const api = {
     return request<IngestReport>("/ingest", { method: "POST", body: form });
   },
 };
+
+/** The demo's stand-in for the server. Loaded on first use; no other build contains it. */
+function demo(): Promise<Api> {
+  return import("./demo/backend").then((module) => module.demoApi);
+}
+
+// Written out with the literal comparison, so that a regular build can tell at
+// compile time that it never needs the demo and leaves it (and its data) out.
+export const api: Api =
+  import.meta.env.MODE === "demo"
+    ? {
+        events: (params) => demo().then((backend) => backend.events(params)),
+        alerts: (params) => demo().then((backend) => backend.alerts(params)),
+        timeline: (params) => demo().then((backend) => backend.timeline(params)),
+        stats: (params) => demo().then((backend) => backend.stats(params)),
+        ports: (params) => demo().then((backend) => backend.ports(params)),
+        rules: () => demo().then((backend) => backend.rules()),
+        reloadRules: () => demo().then((backend) => backend.reloadRules()),
+        ingest: (file, options) => demo().then((backend) => backend.ingest(file, options)),
+      }
+    : server;

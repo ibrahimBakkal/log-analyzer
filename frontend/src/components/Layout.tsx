@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router";
+import { DEMO } from "../api";
 
 const PAGES = [
   { to: "/", label: "Özet" },
@@ -7,8 +8,15 @@ const PAGES = [
   { to: "/kurallar", label: "Kurallar" },
 ];
 
+/** The theme in effect: the visitor's choice if there is one, otherwise the system's. */
+function currentTheme(): "light" | "dark" {
+  const chosen = document.documentElement.dataset.theme;
+  if (chosen === "light" || chosen === "dark") return chosen;
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 function ThemeToggle() {
-  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme ?? "light");
+  const [theme, setTheme] = useState(currentTheme);
   const next = theme === "dark" ? "light" : "dark";
 
   function toggle() {
@@ -38,7 +46,7 @@ function ThemeToggle() {
 export function Layout() {
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b border-rule bg-surface">
+      <header className="sticky top-[env(safe-area-inset-top,0px)] z-20 border-b border-rule bg-surface">
         <div className="mx-auto flex h-12 max-w-[1680px] items-center gap-2 px-4 sm:gap-6">
           <span className="hidden font-mono text-[15px] font-bold tracking-tight min-[480px]:inline">log-analyzer</span>
           <nav className="flex h-full items-stretch gap-1" aria-label="Sayfalar">
@@ -62,6 +70,15 @@ export function Layout() {
           </div>
         </div>
       </header>
+      {DEMO && (
+        <p className="m-0 border-b border-rule bg-accent-soft px-4 py-1.5 text-center text-[13px]">
+          Bu bir demodur: sunucu yok, iki örnek log sayfanın içine gömülü. Log yükleme ve canlı takip yalnızca{" "}
+          <a className="font-semibold text-accent underline" href="https://github.com/ibrahimBakkal/log-analyzer">
+            kurulu sürümde
+          </a>{" "}
+          çalışır.
+        </p>
+      )}
       <main className="mx-auto max-w-[1680px] px-4 py-4">
         <Outlet />
       </main>
