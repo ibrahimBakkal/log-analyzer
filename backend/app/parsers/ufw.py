@@ -10,6 +10,10 @@ firewall rule, then ``KEY=value`` fields describing the packet. The prefix is
 the only thing that says whether the packet was let through: UFW writes
 ``[UFW BLOCK]`` or ``[UFW ALLOW]``, hand-written iptables rules use prefixes
 such as ``iptables-dropped:``.
+
+The uptime stamp is dropped from the message of every kernel line, like the
+rest of the line's header: it says how long the machine has been running,
+nothing about the packet.
 """
 
 import re
@@ -20,7 +24,8 @@ from app.parsers.base import ParsedLine
 from app.parsers.registry import register
 from app.parsers.syslog import SyslogParser
 
-_PACKET = re.compile(r"(?:\[\s*\d+\.\d+\]\s*)?(?P<prefix>.*?)\s*(?P<fields>IN=\S*\s.*)")
+_UPTIME = re.compile(r"\[\s*\d+\.\d+\]\s*")
+_PACKET = re.compile(r"(?P<prefix>.*?)\s*(?P<fields>IN=\S*\s.*)")
 _BLOCKED = ("block", "drop", "reject", "deny")
 _ALLOWED = ("allow", "accept")
 
@@ -54,6 +59,8 @@ class UfwParser(SyslogParser):
     def recognize(self, entry: ParsedLine) -> ParsedLine:
         if entry.service != "kernel":
             return entry
+        if stamp := _UPTIME.match(entry.message):
+            entry = replace(entry, message=entry.message[stamp.end() :])
         packet = _PACKET.fullmatch(entry.message)
         if packet is None:
             return entry

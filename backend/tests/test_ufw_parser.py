@@ -132,6 +132,27 @@ def test_blocked_packets_are_warnings_and_allowed_ones_are_not():
     assert parse(ACCEPTED[Action.CONN_ALLOW][0][0]).level == Level.INFO
 
 
+def test_uptime_stamp_is_not_part_of_the_message():
+    blocked = parse(packet("[UFW BLOCK]", "198.51.100.150", "192.0.2.5", 43210, 23))
+    padded = parse(
+        packet("[UFW BLOCK]", "198.51.100.150", "192.0.2.5", 43210, 23, stamp="[    7.001] ")
+    )
+    bare = parse(packet("[UFW BLOCK]", "198.51.100.150", "192.0.2.5", 43210, 23, stamp=""))
+    assert blocked.message == padded.message == bare.message
+    assert blocked.message.startswith("[UFW BLOCK] IN=eth0 OUT= MAC=")
+
+    boot = parse("kernel: [    0.000000] Linux version 6.8.0-45-generic (buildd@lcy02-amd64-115)")
+    assert (boot.message, boot.parsed) == (
+        "Linux version 6.8.0-45-generic (buildd@lcy02-amd64-115)",
+        False,
+    )
+
+
+def test_only_the_kernel_writes_uptime_stamps():
+    entry = parse("myapp[77]: [19201.482913] cache rebuilt")
+    assert entry.message == "[19201.482913] cache rebuilt"
+
+
 def test_packet_with_unknown_verdict_keeps_its_addresses_but_is_not_parsed():
     entry = parse(packet("[UFW AUDIT]", "198.51.100.150", "192.0.2.5", 43210, 8080))
     assert (entry.action, entry.parsed, entry.level) == (None, False, Level.INFO)
