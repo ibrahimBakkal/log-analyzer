@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router";
 import { DEMO } from "../api";
+import { LiveIndicator } from "./LiveIndicator";
 
 const PAGES = [
   { to: "/", label: "Özet" },
@@ -65,7 +66,8 @@ export function Layout() {
               </NavLink>
             ))}
           </nav>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <LiveIndicator />
             <ThemeToggle />
           </div>
         </div>

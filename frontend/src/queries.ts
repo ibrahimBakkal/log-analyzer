@@ -44,6 +44,11 @@ export function useEvents(params: QueryParams) {
   });
 }
 
+/** The followed files in detail. The event stream only says when their state changes. */
+export function useFollow(enabled: boolean) {
+  return useQuery({ queryKey: ["follow"], queryFn: api.follow, enabled });
+}
+
 export function useRules() {
   return useQuery({ queryKey: ["rules"], queryFn: api.rules });
 }

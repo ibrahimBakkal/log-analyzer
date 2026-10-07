@@ -5,6 +5,7 @@ import { BrowserRouter, HashRouter, MemoryRouter, Route, Routes } from "react-ro
 import { DEMO } from "./api";
 import { Layout, Notice, Panel } from "./components/Layout";
 import "./index.css";
+import { LiveProvider } from "./live";
 import { Dashboard } from "./pages/Dashboard";
 import { Investigate } from "./pages/Investigate";
 import { Rules } from "./pages/Rules";
@@ -42,7 +43,8 @@ function NotFound() {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Router>
+      <LiveProvider>
+        <Router>
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Dashboard />} />
@@ -51,7 +53,8 @@ createRoot(document.getElementById("root")!).render(
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
-      </Router>
+        </Router>
+      </LiveProvider>
     </QueryClientProvider>
   </StrictMode>,
 );

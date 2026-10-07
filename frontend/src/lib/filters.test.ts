@@ -11,6 +11,7 @@ const FULL: Filters = {
   action: "auth_fail",
   alert: 4,
   evidence: true,
+  newestFirst: true,
 };
 
 function parse(query: string): Filters {
@@ -93,5 +94,20 @@ describe("hasFieldFilters", () => {
     expect(hasFieldFilters({ start: FULL.start, end: FULL.end, alert: 4 })).toBe(false);
     expect(hasFieldFilters({ ip: "203.0.113.99" })).toBe(true);
     expect(hasFieldFilters({ rule: "KW-001" })).toBe(true);
+  });
+});
+
+describe("the order of the log table", () => {
+  it("is part of the address only when it is not the usual one", () => {
+    expect(filtersToSearch({ newestFirst: true }).toString()).toBe("order=desc");
+    expect(filtersToSearch({ newestFirst: false }).toString()).toBe("");
+    expect(parse("order=desc")).toEqual({ newestFirst: true });
+    expect(parse("order=asc")).toEqual({});
+    expect(parse("order=sideways")).toEqual({});
+  });
+
+  it("is not a filter: it neither selects events nor counts as narrowing the view", () => {
+    expect(eventParams({ newestFirst: true })).not.toHaveProperty("order");
+    expect(hasFieldFilters({ newestFirst: true })).toBe(false);
   });
 });

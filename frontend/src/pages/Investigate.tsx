@@ -55,7 +55,8 @@ export function Investigate() {
   return (
     <div className="flex flex-col gap-4">
       <Panel>
-        <FilterBar filters={filters} rules={rules.data?.rules ?? []} onChange={update} onClear={() => setSearch({})} />
+        <FilterBar filters={filters} rules={rules.data?.rules ?? []} onChange={update} onClear={() => setSearch(filtersToSearch({ newestFirst: filters.newestFirst }))}
+        />
       </Panel>
 
       <Panel
@@ -90,7 +91,20 @@ export function Investigate() {
       {ready && focusIp && <PortView ip={focusIp} startMs={startMs} endMs={endMs} />}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <Panel title="Log satırları" className="min-w-0">
+        <Panel
+          title="Log satırları"
+          className="min-w-0"
+          aside={
+            <label className="flex cursor-pointer items-center gap-1.5 text-[13px]">
+              <input
+                type="checkbox"
+                checked={Boolean(filters.newestFirst)}
+                onChange={(event) => update({ newestFirst: event.target.checked || undefined })}
+              />
+              En yeni satırlar üstte
+            </label>
+          }
+        >
           {selected && (
             <div
               data-severity-edge={selected.severity}
@@ -112,7 +126,10 @@ export function Investigate() {
             </div>
           )}
           {ready && (
-            <LogTable params={{ ...params, start: toIso(startMs), end: toIso(endMs) }} onFilterIp={(ip) => update({ ip })} />
+            <LogTable
+              params={{ ...params, start: toIso(startMs), end: toIso(endMs), order: filters.newestFirst ? "desc" : undefined }}
+              onFilterIp={(ip) => update({ ip })}
+            />
           )}
         </Panel>
 

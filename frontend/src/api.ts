@@ -160,6 +160,22 @@ export interface PortReport {
   truncated: boolean;
 }
 
+/** A log file the server reads as it grows. */
+export interface FollowedFile {
+  path: string;
+  /** "following", "waiting" (the file does not exist yet) or "error". */
+  state: string;
+  detail: string | null;
+  /** The name the file's lines are stored under, once the first one has been read. */
+  source: string | null;
+  lines: number;
+  read_at: string | null;
+}
+
+export interface FollowStatus {
+  following: FollowedFile[];
+}
+
 export type QueryParams = Record<string, string | number | boolean | null | undefined>;
 
 export class ApiError extends Error {
@@ -204,6 +220,7 @@ export interface Api {
   ports(params: QueryParams): Promise<PortReport>;
   rules(): Promise<RuleList>;
   reloadRules(): Promise<RuleReload>;
+  follow(): Promise<FollowStatus>;
   ingest(file: File, options: { year?: string; tz?: string }): Promise<IngestReport>;
 }
 
@@ -215,6 +232,7 @@ const server: Api = {
   ports: (params) => request<PortReport>(`/ports${toQuery(params)}`),
   rules: () => request<RuleList>("/rules"),
   reloadRules: () => request<RuleReload>("/rules/reload", { method: "POST" }),
+  follow: () => request<FollowStatus>("/follow"),
   ingest: (file, options) => {
     const form = new FormData();
     form.set("file", file);
@@ -241,6 +259,7 @@ export const api: Api =
         ports: (params) => demo().then((backend) => backend.ports(params)),
         rules: () => demo().then((backend) => backend.rules()),
         reloadRules: () => demo().then((backend) => backend.reloadRules()),
+        follow: () => demo().then((backend) => backend.follow()),
         ingest: (file, options) => demo().then((backend) => backend.ingest(file, options)),
       }
     : server;

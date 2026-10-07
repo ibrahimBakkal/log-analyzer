@@ -19,6 +19,8 @@ export interface Filters {
   alert?: number;
   /** With `alert`: show only that alert's evidence instead of everything in the range. */
   evidence?: boolean;
+  /** List the newest lines first: for watching a log that is being followed. */
+  newestFirst?: boolean;
 }
 
 // The order in which filters appear in the address.
@@ -48,6 +50,7 @@ export function filtersFromSearch(search: URLSearchParams): Filters {
     filters.alert = alert;
     if (search.get("evidence") === "1") filters.evidence = true;
   }
+  if (search.get("order") === "desc") filters.newestFirst = true;
   return filters;
 }
 
@@ -62,6 +65,7 @@ export function filtersToSearch(filters: Filters): URLSearchParams {
     search.set("alert", String(filters.alert));
     if (filters.evidence) search.set("evidence", "1");
   }
+  if (filters.newestFirst) search.set("order", "desc");
   return search;
 }
 
