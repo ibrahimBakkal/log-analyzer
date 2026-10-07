@@ -73,13 +73,18 @@ export function timeTicks(startMs: number, endMs: number, maxTicks: number): num
   return ticks;
 }
 
-/** A round number at or above `value` for the top of a count axis: 1, 2, 5, 10, 20, 50, ... */
+const NICE_STEPS = [1, 2, 3, 4, 5, 6, 8, 10];
+
+/**
+ * A round number at or above `value` for the top of a count axis: 1, 2, 3, 4,
+ * 5, 6 or 8 times a power of ten. Fine enough steps that the tallest bar always
+ * fills more than half of the chart.
+ */
 export function niceCeiling(value: number): number {
   if (value <= 1) return 1;
   const magnitude = 10 ** Math.floor(Math.log10(value));
   const leading = value / magnitude;
-  const nice = leading <= 1 ? 1 : leading <= 2 ? 2 : leading <= 5 ? 5 : 10;
-  return nice * magnitude;
+  return (NICE_STEPS.find((step) => leading <= step) ?? 10) * magnitude;
 }
 
 const NUMBER = new Intl.NumberFormat("tr-TR");

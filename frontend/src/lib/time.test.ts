@@ -62,10 +62,18 @@ describe("timeTicks", () => {
 });
 
 describe("niceCeiling", () => {
-  it("rounds up to 1, 2 or 5 times a power of ten", () => {
-    expect([0, 1, 2, 3, 5, 7, 12, 48, 173, 1000, 1001].map(niceCeiling)).toEqual([
-      1, 1, 2, 5, 5, 10, 20, 50, 200, 1000, 2000,
+  it("rounds up to a round number", () => {
+    expect([0, 1, 2, 3, 5, 7, 12, 48, 173, 210, 1000, 1001].map(niceCeiling)).toEqual([
+      1, 1, 2, 3, 5, 8, 20, 50, 200, 300, 1000, 2000,
     ]);
+  });
+
+  it("never leaves the tallest bar below half of the chart", () => {
+    for (let value = 1; value <= 5000; value++) {
+      const top = niceCeiling(value);
+      expect(top).toBeGreaterThanOrEqual(value);
+      expect(value / top).toBeGreaterThan(0.5);
+    }
   });
 });
 
