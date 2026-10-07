@@ -304,63 +304,21 @@ cooldown_seconds: 300
 summary: "{key} adresinden {seconds} sn içinde {count} başarısız giriş"
 ```
 
-| Alan | Açıklama |
-|---|---|
-| `id`, `name`, `severity` | Kimlik, ad ve önem derecesi (`low`, `medium`, `high`, `critical`) |
-| `type` | Kuralın türü; aşağıdaki tabloya bak |
-| `match` | Kuralın baktığı olaylar: `action`, `service`, `host`, `user`, `level`, `dst_port`. Her biri tek değer ya da liste alır |
-| `group_by` | Olayların gruplandığı alan: `src_ip`, `user`, `host` veya `service` |
-| `cooldown_seconds` | Bir uyarının son olayından sonra bu süre içinde gelen eşleşmeler yeni uyarı açmaz, aynı uyarıya eklenir (varsayılan 300) |
-| `allowlist` | Kuralın yok saydığı kaynak adresler ya da ağlar, ör. `192.0.2.0/24` |
-| `summary` | Uyarı metni. `{key}`, `{count}`, `{seconds}`, `{rule_id}`, `{rule_name}` ve kural türünün kendi alanları (ör. `{threshold}`, `{ports}`) kullanılabilir |
-| `enabled` | `false` ise kural yüklenir ama çalıştırılmaz |
-
-Kural türleri ve kendi alanları:
-
-| `type` | Ne zaman uyarır | Alanları |
+| `type` | Ne zaman uyarır | Depodaki örneği |
 |---|---|---|
-| `keyword` | Aranan metin geçen her satırda. Satır, onu yazan programın adı ve mesajıdır: `sudo: bob : TTY=pts/0 ; …` | `keywords` (biri yeter; büyük/küçük harf ayrımı yok; `*` araya giren herhangi bir metin), `require` (ayrıca geçmesi gerekenler), `exclude` (geçiyorsa satırı eleyenler), `regex` (yalnızca mesajda aranır) |
-| `threshold` | Bir gruptan kısa sürede çok sayıda eşleşen olay gelince | `threshold`, `window_seconds` |
-| `sequence` | Bir grup, adımları sırayla ve süre dolmadan tamamlayınca | `steps` (her adımda `match` ve `count`), `within_seconds` |
-| `port_scan` | Bir grup kısa sürede çok sayıda farklı hedef porta paket gönderince | `min_ports`, `window_seconds` |
-| `rare_port` | Beklenmeyen bir porta bağlantı görülünce | `mode` (`watchlist`: listedeki portlar şüpheli; `allowlist`: listedekiler dışındaki her port şüpheli), `ports` |
+| `keyword` | Aranan metin geçen her satırda | `KW-001`: sudo komutunda `/etc/shadow`, `/etc/sudoers`, `authorized_keys` |
+| `threshold` | Bir gruptan kısa sürede çok sayıda eşleşen olay gelince | `SSH-001`: bir dakikada beş başarısız giriş |
+| `sequence` | Bir grup, adımları sırayla ve süre dolmadan tamamlayınca | `SSH-002`: beş başarısız denemenin ardından başarılı giriş |
+| `port_scan` | Bir grup kısa sürede çok sayıda farklı hedef porta paket gönderince | `NET-001`: bir dakikada 15 farklı port |
+| `rare_port` | Beklenmeyen bir porta bağlantı görülünce | `NET-002`: güvenlik duvarından geçen telnet, SMB, RDP, VNC, veritabanı bağlantıları |
 
-```yaml
-# rules/SSH-002.yaml
-id: SSH-002
-name: Başarısız denemelerden sonra başarılı giriş
-type: sequence
-severity: critical
-group_by: src_ip
-within_seconds: 600
-steps:
-  - match:
-      action: auth_fail
-    count: 5
-  - match:
-      action: auth_ok
-summary: "{key} adresi başarısız denemelerin ardından giriş yaptı ({seconds} sn, {count} satır)"
-```
+Kendi kuralını yazmak için gereken her şey (alanlar, türlerin ayarları, zamanın nasıl sayıldığı, kuralı deneme yolları, Sigma ile karşılaştırma) ayrı bir belgede: **[Kural nasıl yazılır](docs/kural-yazma.md)**.
 
-```yaml
-# rules/NET-001.yaml
-id: NET-001
-name: Port taraması
-type: port_scan
-severity: high
-match:
-  action: [conn_block, conn_allow]
-group_by: src_ip
-min_ports: 15
-window_seconds: 60
-summary: "{key} adresi {seconds} sn içinde {ports} farklı portu denedi"
-```
-
-Süreler hep aynı biçimde sayılır: ilk ve son olay arasındaki fark verilen saniyeden **küçük** olmalıdır; tam 60 saniyeye yayılan beş olay `window_seconds: 60` içinde sayılmaz. Bir sıralı kuralda süre son adımdan geriye doğru ölçülür, yani uzun süren bir deneme dizisi son bölümüyle yakalanır.
-
-Uyarılar olaylardan ve kurallardan türetilir: her yüklemeden ve her `reload` çağrısından sonra yeniden hesaplanır. Aynı olay kümesinin uyarısı kimliğini korur; yeni olaylar geldikçe büyür.
+Uyarılar olaylardan ve kurallardan türetilir: her yüklemeden ve her `reload` çağrısından sonra güncellenir. Aynı olay kümesinin uyarısı kimliğini korur; yeni olaylar geldikçe büyür.
 
 Örnek `auth.log` yüklendiğinde altı uyarı oluşur. `SSH-001` üç saldırganı yakalar (`203.0.113.45` için iki dalga, iki ayrı uyarı), `SSH-002` parolayı bulup içeri giren saldırganı, `KW-001` onun `sudo cat /etc/shadow` denemesini. 29 kez deneyen yavaş saldırgan, tek tük denemeler ve parolasını bir kez yanlış yazan `bob` uyarı üretmez. `ufw.log` da yüklenince iki uyarı eklenir: `NET-001` port taramasını, `NET-002` açık kalmış uzak masaüstü portuna gelen bağlantıları yakalar; olağan trafik ve yavaş tarama uyarı üretmez.
+
+Kuralların sınırı, yani neyi kaçırdıkları ve neye yanlış alarm verdikleri ayrıca ölçüldü: **[Tespit ölçümü](docs/tespit-olcumu.md)**.
 
 ### Sigma'dan alınan kurallar
 
