@@ -1,0 +1,15 @@
+# Depodaki tüm Python kodu (backend/ ve samples/) için ortak ayar.
+# Depo kökünde çalıştır: ruff check .   |   ruff format .
+target-version = "py311"
+line-length = 100
+src = ["backend", "samples"]
+
+[lint]
+select = [
+    "E",  # pycodestyle hataları
+    "W",  # pycodestyle uyarıları
+    "F",  # pyflakes
+    "I",  # import sıralaması
+    "UP", # güncel Python sözdizimi
+    "B",  # yaygın hata kalıpları (bugbear)
+]
