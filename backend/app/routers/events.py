@@ -1,8 +1,8 @@
-"""GET /events: stored log lines, oldest first, filtered and paginated."""
+"""GET /events: stored log lines in time order, filtered and paginated."""
 
 import base64
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, or_, select
@@ -40,8 +40,12 @@ def list_events(
     filters: Annotated[EventFilters, Depends()],
     limit: Annotated[int, Query(ge=1, le=MAX_LIMIT)] = 100,
     cursor: Annotated[str | None, Query(description="`next_cursor` of the previous page.")] = None,
+    order: Annotated[
+        Literal["asc", "desc"],
+        Query(description="`asc`: oldest first. `desc`: newest first, for watching a log grow."),
+    ] = "asc",
 ) -> EventPage:
-    """List events in chronological order.
+    """List events in chronological order, or newest first.
 
     Pages are fetched with a cursor rather than an offset, so paging stays fast
     on large tables and no event is skipped or repeated while new ones arrive.
@@ -49,10 +53,18 @@ def list_events(
     An event that is evidence for an alert carries `highlights`: the alert, its
     rule and the part of the message that made it count.
     """
-    query = filters.apply(select(Event)).order_by(Event.ts, Event.id)
+    query = filters.apply(select(Event))
+    if order == "asc":
+        query = query.order_by(Event.ts, Event.id)
+    else:
+        query = query.order_by(Event.ts.desc(), Event.id.desc())
     if cursor is not None:
         ts, event_id = _decode_cursor(cursor)
-        query = query.where(or_(Event.ts > ts, and_(Event.ts == ts, Event.id > event_id)))
+        if order == "asc":
+            beyond = or_(Event.ts > ts, and_(Event.ts == ts, Event.id > event_id))
+        else:
+            beyond = or_(Event.ts < ts, and_(Event.ts == ts, Event.id < event_id))
+        query = query.where(beyond)
 
     # One extra row tells us whether another page follows.
     events = session.scalars(query.limit(limit + 1)).all()

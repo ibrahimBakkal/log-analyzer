@@ -82,7 +82,7 @@ function select(params: QueryParams): LogEvent[] {
 
 function events(params: QueryParams): EventPage {
   const limit = Math.min(MAX_PAGE, Math.max(1, Number(params.limit ?? 100)));
-  const selected = select(params);
+  const selected = text(params.order) === "desc" ? select(params).reverse() : select(params);
   // The cursor is the id of the last event of the page before.
   const cursor = text(params.cursor);
   const from = cursor === undefined ? 0 : selected.findIndex((event) => String(event.id) === cursor) + 1;
@@ -232,5 +232,6 @@ export const demoApi: Api = {
   // The rules cannot change here, so running them again finds the same alerts.
   reloadRules: () =>
     answer(() => ({ ...snapshot.rules, alerts: { total: snapshot.alerts.length, created: 0, updated: 0, removed: 0 } })),
+  follow: () => answer(() => ({ following: [] })),
   ingest: () => Promise.reject(new ApiError("Demoda log yüklenemez: örnek loglar sayfanın içine gömülüdür.")),
 };

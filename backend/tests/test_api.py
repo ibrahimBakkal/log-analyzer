@@ -329,3 +329,28 @@ def test_filters_apply_across_pages(loaded):
 )
 def test_unknown_filter_values_are_rejected(loaded, params):
     assert loaded.get("/events", params=params).status_code == 422
+
+
+# --- /events: newest first -------------------------------------------------------------------
+
+
+def test_events_can_be_listed_newest_first(loaded):
+    oldest_first = all_events(loaded, limit=500)
+    newest_first = all_events(loaded, limit=500, order="desc")
+    assert [event["id"] for event in newest_first] == [event["id"] for event in oldest_first][::-1]
+
+
+def test_newest_first_pages_neither_skip_nor_repeat(loaded):
+    in_small_pages = all_events(loaded, limit=37, order="desc", ip="203.0.113.45")
+    at_once = all_events(loaded, limit=500, order="desc", ip="203.0.113.45")
+    assert in_small_pages == at_once
+    assert len({event["id"] for event in in_small_pages}) == len(in_small_pages) > 100
+
+
+def test_newest_first_starts_with_the_last_line_of_the_log(loaded):
+    [newest] = loaded.get("/events", params={"order": "desc", "limit": 1}).json()["items"]
+    assert newest["ts"] == loaded.get("/stats").json()["last_event"]
+
+
+def test_unknown_order_is_rejected(loaded):
+    assert loaded.get("/events", params={"order": "sideways"}).status_code == 422

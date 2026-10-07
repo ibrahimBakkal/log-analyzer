@@ -37,7 +37,8 @@ def timeline(
     """Count the selected events per time bucket, for a density chart.
 
     Only buckets that contain events are returned. `warnings` is the part of
-    `count` that is suspicious on its own: failed logins, invalid users, denied sudo.
+    `count` that is suspicious on its own: failed logins, invalid users, denied
+    sudo, packets the firewall blocked.
     """
     if session.get_bind().dialect.name == "sqlite":
         epoch = cast(func.strftime("%s", Event.ts), Integer)

@@ -136,6 +136,9 @@ def build_cases(client: TestClient) -> list[dict[str, Any]]:
         {"alert_id": scan["id"], "ip": SCANNER},
         {"ip": "192.0.2.250"},
         {"rule_id": "NO-SUCH-RULE"},
+        {"order": "desc"},
+        {"order": "desc", "ip": INTRUDER, "level": "warning"},
+        {"order": "desc", "start": DAY_TWO, "service": "kernel"},
     ]
     cases: list[dict[str, Any]] = []
     for params in event_filters:
