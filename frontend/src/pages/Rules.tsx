@@ -1,25 +1,8 @@
-import type { Rule } from "../api";
 import { Notice, Panel } from "../components/Layout";
 import { SeverityBadge } from "../components/Severity";
+import { describeCondition, describeMatch } from "../lib/rules";
 import { formatCount } from "../lib/time";
 import { useReloadRules, useRules } from "../queries";
-
-const GROUP_LABEL: Record<string, string> = {
-  src_ip: "kaynak adres",
-  user: "kullanıcı",
-  host: "makine",
-  service: "program",
-};
-
-/** What a rule looks for, in a sentence. */
-function condition(rule: Rule): string {
-  const group = GROUP_LABEL[rule.group_by] ?? rule.group_by;
-  if (rule.type === "threshold") {
-    return `Aynı ${group} için ${rule.window_seconds} sn içinde ${rule.threshold} eşleşen olay`;
-  }
-  const texts = [...(rule.keywords ?? []), ...(rule.regex ? [`/${rule.regex}/`] : [])];
-  return `Mesajında şunlardan biri geçen satır: ${texts.join(", ")}`;
-}
 
 export function Rules() {
   const rules = useRules();
@@ -74,7 +57,12 @@ export function Rules() {
                     <td className="px-3 py-2 text-[13px]">
                       <SeverityBadge severity={rule.severity} />
                     </td>
-                    <td className="px-3 py-2">{condition(rule)}</td>
+                    <td className="px-3 py-2">
+                      <div>{describeCondition(rule)}</div>
+                      {describeMatch(rule.match) && (
+                        <div className="text-[12px] text-ink-2">Bakılan olaylar: {describeMatch(rule.match)}</div>
+                      )}
+                    </td>
                     <td className="px-3 py-2">{rule.enabled ? "Etkin" : "Kapalı"}</td>
                   </tr>
                 ))}

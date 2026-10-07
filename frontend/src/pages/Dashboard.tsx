@@ -54,9 +54,10 @@ export function Dashboard() {
     return (
       <Panel title="Henüz log yüklenmedi">
         <p className="m-0 max-w-[70ch] px-3 pt-3 text-ink-2">
-          Bir sunucunun <code className="font-mono">auth.log</code> dosyasını yükle. Satırlar olaylara ayrılır, kurallar
-          çalışır; zaman çizelgesi ve uyarılar bu sayfada belirir. Denemek için depodaki{" "}
-          <code className="font-mono">samples/auth.log</code> dosyasını yıl olarak 2026 vererek yükleyebilirsin.
+          Bir sunucunun <code className="font-mono">auth.log</code> ya da <code className="font-mono">ufw.log</code>{" "}
+          dosyasını yükle. Satırlar olaylara ayrılır, kurallar çalışır; zaman çizelgesi ve uyarılar bu sayfada belirir.
+          Denemek için depodaki <code className="font-mono">samples/auth.log</code> ve{" "}
+          <code className="font-mono">samples/ufw.log</code> dosyalarını yıl olarak 2026 vererek yükleyebilirsin.
         </p>
         <UploadForm />
       </Panel>

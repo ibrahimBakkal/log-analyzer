@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { Alert, TimelineData } from "../api";
-import { formatCount, formatDateTime, formatDay, formatShortTime, niceCeiling, timeTicks, toIso } from "../lib/time";
+import { formatCount, formatDateTime, formatShortTime, niceCeiling, toIso } from "../lib/time";
+import { useWidth } from "../lib/useWidth";
 import { SEVERITY_LABEL } from "./Severity";
+import { TimeAxis } from "./TimeAxis";
 
 const HEIGHT = 176;
 const MARGIN = { top: 22, right: 12, bottom: 34, left: 44 };
@@ -18,19 +20,6 @@ interface Props {
   /** Called with an ISO range when a stretch of the chart is dragged over. */
   onSelectRange: (start: string, end: string) => void;
   onSelectAlert: (alert: Alert) => void;
-}
-
-function useWidth(): [React.RefObject<HTMLDivElement | null>, number] {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [width, setWidth] = useState(0);
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    const observer = new ResizeObserver(([entry]) => setWidth(Math.floor(entry.contentRect.width)));
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-  return [ref, width];
 }
 
 /** A column segment with a rounded top (the data end) and a square bottom. */
@@ -83,7 +72,6 @@ export function Timeline({ data, startMs, endMs, alerts, selectedAlertId, onSele
     setDrag(null);
   }
 
-  const ticks = timeTicks(startMs, endMs, Math.max(2, Math.floor(plotWidth / 110)));
   const total = buckets.reduce((sum, bucket) => sum + bucket.count, 0);
 
   return (
@@ -107,25 +95,7 @@ export function Timeline({ data, startMs, endMs, alerts, selectedAlertId, onSele
             ) : null,
           )}
 
-          {/* Time axis. The date is repeated where a new day starts. */}
-          {ticks.map((tick, index) => {
-            const newDay = index === 0 || new Date(tick).getUTCHours() + new Date(tick).getUTCMinutes() === 0;
-            // A label at the right edge is set flush right so that it is not cut off.
-            const anchor = x(tick) > MARGIN.left + plotWidth - 28 ? "end" : "middle";
-            return (
-              <g key={tick} transform={`translate(${x(tick)},${baseline})`}>
-                <line y2={4} stroke="var(--rule-strong)" />
-                <text y={15} textAnchor={anchor} className="figures fill-ink-3 text-[11px]">
-                  {formatShortTime(tick)}
-                </text>
-                {newDay && (
-                  <text y={28} textAnchor={anchor} className="fill-ink-3 text-[11px]">
-                    {formatDay(tick)}
-                  </text>
-                )}
-              </g>
-            );
-          })}
+          <TimeAxis startMs={startMs} endMs={endMs} left={MARGIN.left} plotWidth={plotWidth} baseline={baseline} />
 
           {hovered && !drag && (
             <rect x={x(hovered.ms)} y={MARGIN.top} width={Math.max(slot, 1)} height={plotHeight} fill="var(--ink)" opacity={0.07} />
@@ -244,7 +214,7 @@ export function Timeline({ data, startMs, endMs, alerts, selectedAlertId, onSele
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-3 pb-2 text-[12px] text-ink-2">
         <LegendKey color="var(--series-events)" label="Olaylar" />
-        <LegendKey color="var(--series-suspicious)" label="Şüpheli olaylar (başarısız giriş, geçersiz kullanıcı, reddedilen sudo)" />
+        <LegendKey color="var(--series-suspicious)" label="Şüpheli olaylar (başarısız giriş, geçersiz kullanıcı, reddedilen sudo, engellenen paket)" />
         <span>Üst kenardaki işaretler: uyarılar. Aralık seçmek için çizelgede sürükle.</span>
       </div>
     </div>

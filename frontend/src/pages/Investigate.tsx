@@ -5,6 +5,7 @@ import { AlertPanel } from "../components/AlertPanel";
 import { FilterBar } from "../components/FilterBar";
 import { Notice, Panel } from "../components/Layout";
 import { LogTable } from "../components/LogTable";
+import { PortView } from "../components/PortView";
 import { SeverityBadge } from "../components/Severity";
 import { Timeline } from "../components/Timeline";
 import { type Filters, eventParams, filtersFromSearch, filtersToSearch } from "../lib/filters";
@@ -31,6 +32,8 @@ export function Investigate() {
     ready,
   );
   const selected = alerts.data?.items.find((alert) => alert.id === filters.alert);
+  // The address whose ports are worth a look: the one filtered by, or the one the chosen alert is about.
+  const focusIp = filters.ip ?? (selected?.group_by === "src_ip" ? selected.group_key : undefined);
   const selectAlert = (alert: Alert) =>
     update({ alert: alert.id, evidence: undefined, ...rangeAround(alert.first_seen, alert.last_seen) });
 
@@ -84,6 +87,8 @@ export function Investigate() {
         )}
       </Panel>
 
+      {ready && focusIp && <PortView ip={focusIp} startMs={startMs} endMs={endMs} />}
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Panel title="Log satırları" className="min-w-0">
           {selected && (
@@ -106,7 +111,9 @@ export function Investigate() {
               </label>
             </div>
           )}
-          {ready && <LogTable params={{ ...params, start: toIso(startMs), end: toIso(endMs) }} />}
+          {ready && (
+            <LogTable params={{ ...params, start: toIso(startMs), end: toIso(endMs) }} onFilterIp={(ip) => update({ ip })} />
+          )}
         </Panel>
 
         <Panel title={`Uyarılar${alerts.data ? ` (${formatCount(alerts.data.total)})` : ""}`} className="self-start">

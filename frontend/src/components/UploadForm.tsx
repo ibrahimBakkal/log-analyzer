@@ -21,7 +21,7 @@ export function UploadForm() {
       }}
     >
       <label className="flex flex-col gap-0.5 text-[12px] font-semibold text-ink-2">
-        Log dosyası (auth.log)
+        Log dosyası (auth.log, ufw.log, syslog)
         <input
           type="file"
           className="field w-72 py-1 font-normal"

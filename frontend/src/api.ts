@@ -83,20 +83,33 @@ export interface Stats {
   top_sources: { src_ip: string; events: number; failures: number }[];
 }
 
-export interface Rule {
+/** Field values an event must have for a rule to look at it. An empty list accepts anything. */
+export interface EventFilter {
+  action: string[];
+  service: string[];
+  host: string[];
+  user: string[];
+  level: Level[];
+  dst_port: number[];
+}
+
+interface RuleCommon {
   id: string;
   name: string;
   description: string;
-  type: "keyword" | "threshold";
   severity: Severity;
   enabled: boolean;
   group_by: string;
   cooldown_seconds: number;
-  threshold?: number;
-  window_seconds?: number;
-  keywords?: string[];
-  regex?: string | null;
+  match: EventFilter;
 }
+
+export type Rule =
+  | (RuleCommon & { type: "keyword"; keywords: string[]; regex: string | null })
+  | (RuleCommon & { type: "threshold"; threshold: number; window_seconds: number })
+  | (RuleCommon & { type: "sequence"; steps: { match: EventFilter; count: number }[]; within_seconds: number })
+  | (RuleCommon & { type: "port_scan"; min_ports: number; window_seconds: number })
+  | (RuleCommon & { type: "rare_port"; mode: "watchlist" | "allowlist"; ports: number[] });
 
 export interface RuleList {
   rules: Rule[];
@@ -115,6 +128,33 @@ export interface IngestReport {
   duplicates: number;
   conflicts: number;
   alerts: number;
+}
+
+export interface PortStats {
+  port: number;
+  count: number;
+  blocked: number;
+  allowed: number;
+  first_seen: string;
+  last_seen: string;
+}
+
+export interface PortConnection {
+  ts: string;
+  port: number;
+  action: string | null;
+}
+
+/** The destination ports one source address tried. `ports` and `connections` are capped, the totals are not. */
+export interface PortReport {
+  ip: string;
+  total: number;
+  blocked: number;
+  allowed: number;
+  distinct_ports: number;
+  ports: PortStats[];
+  connections: PortConnection[];
+  truncated: boolean;
 }
 
 export type QueryParams = Record<string, string | number | boolean | null | undefined>;
@@ -158,6 +198,7 @@ export const api = {
   alerts: (params: QueryParams = {}) => request<AlertList>(`/alerts${toQuery(params)}`),
   timeline: (params: QueryParams) => request<TimelineData>(`/timeline${toQuery(params)}`),
   stats: (params: QueryParams = {}) => request<Stats>(`/stats${toQuery(params)}`),
+  ports: (params: QueryParams) => request<PortReport>(`/ports${toQuery(params)}`),
   rules: () => request<RuleList>("/rules"),
   reloadRules: () => request<RuleReload>("/rules/reload", { method: "POST" }),
   ingest: (file: File, options: { year?: string; tz?: string }) => {

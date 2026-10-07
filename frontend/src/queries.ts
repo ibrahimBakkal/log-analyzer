@@ -26,6 +26,15 @@ export function useTimeline(params: QueryParams, enabled = true) {
   });
 }
 
+export function usePorts(params: QueryParams, enabled = true) {
+  return useQuery({
+    queryKey: ["ports", params],
+    queryFn: () => api.ports(params),
+    enabled,
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function useEvents(params: QueryParams) {
   return useInfiniteQuery({
     queryKey: ["events", params],
