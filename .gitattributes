@@ -1,0 +1,7 @@
+# Text files are stored and checked out with LF line endings on every system.
+# The shell script in the Docker image does not run with CRLF, and the tests
+# compare the sample logs and the demo's recorded answers byte for byte.
+* text=auto eol=lf
+*.png binary
+*.gif binary
+*.woff2 binary
